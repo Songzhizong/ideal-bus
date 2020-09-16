@@ -33,14 +33,12 @@ public class SubscriberController {
   @Nonnull
   @PostMapping("/create")
   public Mono<Res<Subscriber>> create(@RequestBody @Nonnull CreateSubscriberArgs args) {
-    args.checkArgs();
     return subscriberService.create(args).map(Res::data);
   }
 
   @Nonnull
   @PostMapping("/update")
   public Mono<Res<Subscriber>> update(@RequestBody @Nonnull UpdateSubscriberArgs args) {
-    args.checkArgs();
     return subscriberService.update(args).map(Res::data);
   }
 

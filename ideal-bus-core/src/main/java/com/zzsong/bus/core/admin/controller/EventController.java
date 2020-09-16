@@ -4,6 +4,7 @@ import com.zzsong.bus.base.domain.Event;
 import com.zzsong.bus.base.transfer.SaveEventArgs;
 import com.zzsong.bus.common.transfer.Res;
 import com.zzsong.bus.core.admin.service.EventService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +30,7 @@ public class EventController {
 
   @Nonnull
   @PostMapping("/save")
-  public Mono<Res<Event>> save(@RequestBody @Nonnull SaveEventArgs args) {
-    args.checkArgs();
+  public Mono<Res<Event>> save(@Validated @RequestBody @Nonnull SaveEventArgs args) {
     return eventService.save(args).map(Res::data);
   }
 }
