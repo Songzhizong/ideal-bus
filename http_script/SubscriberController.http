@@ -1,0 +1,19 @@
+### 新增
+POST http://127.0.0.1:8080/subscriber/create
+Content-Type: application/json
+
+{
+  "title": "挖发送到",
+  "desc": "",
+  "subscriberType": "INTERNAL",
+  "appName": "",
+  "application": "",
+  "receiveUrl": ""
+}
+
+### 删除
+DELETE http://127.0.0.1:8080/subscriber/delete/137454939872952320
+
+
+### 查询
+GET http://127.0.0.1:8080/subscriber/query?subscriberType=INTERNAL

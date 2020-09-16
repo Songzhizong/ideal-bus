@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/image-logo.png" alt="logo" style="zoom:33%;" /></p>
+![image-logo](assets/image-logo.png)
 
 <p align="center"><a href="https://github.com/Songzhizong/ideal-bus/"><strong>-- Home Page --</strong></a></p>
 
@@ -9,6 +9,7 @@
         src="https://img.shields.io/badge/Project%20Reactor-Dysprosium%20SR12-orange.svg?longCache=true&style=flat-square">
     <img src="https://img.shields.io/badge/RSocket-1.0.2-brightgreen.svg?longCache=true&style=flat-square">
 </p>
+
 ## 介绍
 
 

@@ -1,0 +1,15 @@
+server:
+  port: 13256
+spring:
+  application:
+    name: IDEAL-BUS
+  banner:
+    location: banner.txt
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+  profiles:
+    active: local

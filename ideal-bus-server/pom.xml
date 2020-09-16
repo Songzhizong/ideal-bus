@@ -17,11 +17,22 @@
       <artifactId>ideal-bus-core</artifactId>
       <version>${ideal-bus.version}</version>
     </dependency>
-    <!-- discovery -->
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+      <groupId>com.zzsong</groupId>
+      <artifactId>ideal-bus-storage-mongo</artifactId>
+      <version>${ideal-bus.version}</version>
     </dependency>
+    <!-- commons-pool2 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
+      <version>${commons-pool2.version}</version>
+    </dependency>
+    <!-- discovery -->
+<!--    <dependency>-->
+<!--      <groupId>org.springframework.cloud</groupId>-->
+<!--      <artifactId>spring-cloud-starter-consul-discovery</artifactId>-->
+<!--    </dependency>-->
   </dependencies>
 
   <build>
