@@ -1,0 +1,11 @@
+### 新建
+POST http://127.0.0.1:13256/event/save
+Content-Type: application/json
+
+{
+  "topic": "",
+  "moduleId": 0,
+  "eventType": "PUBLISH",
+  "eventName": "",
+  "desc": ""
+}

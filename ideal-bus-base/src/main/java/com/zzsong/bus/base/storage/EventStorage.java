@@ -1,9 +1,13 @@
 package com.zzsong.bus.base.storage;
 
 import com.zzsong.bus.base.domain.Event;
+import com.zzsong.bus.base.transfer.QueryEventArgs;
+import com.zzsong.bus.common.transfer.Paging;
+import com.zzsong.bus.common.transfer.Res;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,11 +19,15 @@ public interface EventStorage {
   Mono<Event> save(@Nonnull Event event);
 
   @Nonnull
-  Mono<Integer> delete(@Nonnull String topic);
+  Mono<Long> delete(@Nonnull String topic);
 
   @Nonnull
   Mono<Optional<Event>> findByTopic(@Nonnull String topic);
 
   @Nonnull
   Mono<List<Event>> findAll();
+
+  @Nonnull
+  Mono<Res<List<Event>>> query(@Nullable QueryEventArgs args,
+                               @Nonnull Paging paging);
 }

@@ -2,7 +2,7 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: mongodb://127.0.0.1:27012/ideal-bus
+      uri: mongodb://127.0.0.1:27017/ideal-bus
   redis:
     host: 127.0.0.1
     port: 6379

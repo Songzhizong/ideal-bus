@@ -7,15 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author 宋志宗 on 2020/9/16
  */
 @Data
-@Document("ideal_bus_subscriber")
 @NoArgsConstructor
 @AllArgsConstructor
+@Document("ideal_bus_subscriber")
 public class SubscriberMongoDo {
   /**
    * 订阅者id
@@ -27,6 +28,7 @@ public class SubscriberMongoDo {
   /**
    * 订阅者名称
    */
+  @Indexed
   @NonNull
   private String title = DBDefaults.STRING_VALUE;
 
@@ -51,6 +53,7 @@ public class SubscriberMongoDo {
   /**
    * 应用编码, 外部应用拥有此属性
    */
+  @Indexed
   @NonNull
   private String application = DBDefaults.STRING_VALUE;
 

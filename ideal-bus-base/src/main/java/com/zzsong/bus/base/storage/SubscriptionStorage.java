@@ -1,6 +1,7 @@
 package com.zzsong.bus.base.storage;
 
 import com.zzsong.bus.base.domain.Subscription;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -14,14 +15,26 @@ public interface SubscriptionStorage {
   Mono<Subscription> save(@Nonnull Subscription subscription);
 
   @Nonnull
-  Mono<Integer> unsubscribe(long subscriberId);
+  Mono<Long> unsubscribe(long subscriberId);
 
   @Nonnull
-  Mono<Integer> unsubscribe(@Nonnull String topic);
+  Mono<Long> unsubscribe(@Nonnull String topic);
 
   @Nonnull
-  Mono<Integer> unsubscribe(long subscriberId, @Nonnull String topic);
+  Mono<Long> unsubscribe(long subscriberId, @Nonnull String topic);
 
   @Nonnull
   Mono<List<Subscription>> findAll();
+
+  @Nonnull
+  Mono<List<Subscription>> findAllByTopic(@Nonnull String topic);
+
+  @Nonnull
+  Mono<List<Subscription>> findAllBySubscriber(long subscriberId);
+
+  @Nonnull
+  Mono<Boolean> existByTopic(@Nonnull String topic);
+
+  @Nonnull
+  Mono<Boolean> existBySubscriber(long subscriberId);
 }

@@ -2,12 +2,12 @@ package com.zzsong.bus.base.transfer;
 
 import com.zzsong.bus.common.constant.DBDefaults;
 import com.zzsong.bus.common.constant.SubscriberTypeEnum;
+import com.zzsong.bus.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -19,13 +19,11 @@ public class UpdateSubscriberArgs {
    * 订阅者id
    */
   @Nonnull
-  @NotNull(message = "订阅者id不能为空")
   private Long subscriberId;
   /**
    * 订阅者名称
    */
   @Nonnull
-  @NotBlank(message = "订阅者名称不能为空")
   private String title;
 
   /**
@@ -57,4 +55,14 @@ public class UpdateSubscriberArgs {
    */
   @Nonnull
   private String receiveUrl = DBDefaults.STRING_VALUE;
+
+  public void checkArgs() {
+    //noinspection ConstantConditions
+    if (this.subscriberId == null || this.subscriberId < 1) {
+      throw new VisibleException("subscriberId不能为空");
+    }
+    if (StringUtils.isBlank(title)) {
+      throw new VisibleException("订阅者名称不能为空");
+    }
+  }
 }

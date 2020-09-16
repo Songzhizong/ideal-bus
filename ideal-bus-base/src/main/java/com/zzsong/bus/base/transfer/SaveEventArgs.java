@@ -1,54 +1,57 @@
-package com.zzsong.bus.base.mongo.document;
+package com.zzsong.bus.base.transfer;
 
 import com.zzsong.bus.common.constant.DBDefaults;
 import com.zzsong.bus.common.constant.EventTypeEnum;
+import com.zzsong.bus.common.exception.VisibleException;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author 宋志宗 on 2020/9/16
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document("ideal_bus_event")
-public class EventMongoDo {
+public class SaveEventArgs {
 
-  @Id
-  private long id;
   /**
    * 主题, 也是事件的唯一id
    */
-  @Indexed(unique = true)
-  @NonNull
+  @Nonnull
   private String topic;
 
   /**
    * 归属模块
    */
-  @Indexed
   private long moduleId = DBDefaults.LONG_VALUE;
 
   /**
    * 事件类型
    */
-  @NonNull
+  @Nonnull
   private EventTypeEnum eventType = EventTypeEnum.UNKNOWN;
 
   /**
    * 事件名称
    */
-  @NonNull
-  private String eventName;
+  @Nonnull
+  private String eventName = DBDefaults.STRING_VALUE;
 
   /**
    * 描述
    */
-  @NonNull
-  private String desc;
+  @Nonnull
+  private String desc = DBDefaults.STRING_VALUE;
+
+  public void checkArgs() {
+    if (StringUtils.isBlank(topic)) {
+      throw new VisibleException("topic不能为空");
+    }
+  }
 }

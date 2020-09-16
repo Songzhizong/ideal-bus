@@ -1,5 +1,5 @@
 ### 新增
-POST http://127.0.0.1:8080/subscriber/create
+POST http://127.0.0.1:13256/subscriber/create
 Content-Type: application/json
 
 {
@@ -12,8 +12,8 @@ Content-Type: application/json
 }
 
 ### 删除
-DELETE http://127.0.0.1:8080/subscriber/delete/137454939872952320
+DELETE http://127.0.0.1:13256/subscriber/delete/137454939872952320
 
 
 ### 查询
-GET http://127.0.0.1:8080/subscriber/query?subscriberType=INTERNAL
+GET http://127.0.0.1:13256/subscriber/query?subscriberType=INTERNAL

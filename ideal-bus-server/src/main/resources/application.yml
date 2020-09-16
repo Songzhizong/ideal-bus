@@ -5,11 +5,16 @@ spring:
     name: IDEAL-BUS
   banner:
     location: banner.txt
-  main:
-    allow-bean-definition-overriding: true
   cloud:
     loadbalancer:
       ribbon:
         enabled: false
+  jackson:
+    locale: zh_CN
+    time-zone: 'GMT+8'
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+  main:
+    allow-bean-definition-overriding: true
   profiles:
     active: local

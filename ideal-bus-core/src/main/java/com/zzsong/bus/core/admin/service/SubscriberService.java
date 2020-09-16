@@ -10,6 +10,7 @@ import com.zzsong.bus.common.exception.VisibleException;
 import com.zzsong.bus.common.transfer.CommonResMsg;
 import com.zzsong.bus.common.transfer.Paging;
 import com.zzsong.bus.common.transfer.Res;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -20,8 +21,11 @@ import java.util.List;
 /**
  * @author 宋志宗 on 2020/9/16
  */
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Service
 public class SubscriberService {
+  @Autowired
+  private SubscriptionService subscriptionService;
   @Nonnull
   private final SubscriberStorage subscriberStorage;
 
@@ -56,7 +60,14 @@ public class SubscriberService {
 
   @Nonnull
   public Mono<Long> delete(long subscriberId) {
-    return subscriberStorage.delete(subscriberId);
+    return subscriptionService.existBySubscriber(subscriberId)
+        .flatMap(exists -> {
+          if (exists) {
+            return Mono.error(new VisibleException("该订阅者存在订阅关系"));
+          } else {
+            return subscriberStorage.delete(subscriberId);
+          }
+        });
   }
 
   public Mono<Res<List<Subscriber>>> query(@Nullable QuerySubscriberArgs args,

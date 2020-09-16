@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -78,9 +77,11 @@ public class MongoSubscriberStorage implements SubscriberStorage {
   public Mono<List<Subscriber>> findAll() {
     return repository.findAll()
         .map(SubscriberMongoDoConverter::toSubscriber)
-        .collectList();
+        .collectList()
+        .defaultIfEmpty(ImmutableList.of());
   }
 
+  @SuppressWarnings("DuplicatedCode")
   @Override
   public Mono<Res<List<Subscriber>>> query(@Nullable QuerySubscriberArgs args,
                                            @Nonnull Paging paging) {
@@ -113,13 +114,9 @@ public class MongoSubscriberStorage implements SubscriberStorage {
             query.with(sort);
           }
           return template.find(query, SubscriberMongoDo.class)
+              .map(SubscriberMongoDoConverter::toSubscriber)
               .collectList()
-              .map(list -> {
-                List<Subscriber> collect = list.stream()
-                    .map(SubscriberMongoDoConverter::toSubscriber)
-                    .collect(Collectors.toList());
-                return Res.ofPaging(paging, Math.toIntExact(count), collect);
-              });
+              .map(list -> Res.ofPaging(paging, Math.toIntExact(count), list));
         });
   }
 }
