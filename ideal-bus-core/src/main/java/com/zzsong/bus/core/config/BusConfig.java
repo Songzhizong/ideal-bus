@@ -27,10 +27,7 @@ public class BusConfig {
   @Bean
   public ReactiveRedisSnowFlakeFactory reactiveRedisSnowFlakeFactory(
       ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
-    ReactiveRedisSnowFlakeFactory snowFlakeFactory
-        = new ReactiveRedisSnowFlakeFactory(applicationName, reactiveStringRedisTemplate);
-    log.debug("Test SnowFlake: {}", snowFlakeFactory.generate());
-    return snowFlakeFactory;
+    return new ReactiveRedisSnowFlakeFactory(applicationName, reactiveStringRedisTemplate);
   }
 
   @Bean

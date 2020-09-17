@@ -14,7 +14,7 @@ import java.util.concurrent.*;
  *
  * @author 宋志宗 on 2020/9/2
  */
-public class ReactiveRedisSnowFlakeFactory implements IDGenerator, IDGeneratorFactory {
+public class ReactiveRedisSnowFlakeFactory implements IDGeneratorFactory {
   private static final Logger log = LoggerFactory
       .getLogger(ReactiveRedisSnowFlakeFactory.class);
   private final ConcurrentMap<String, IDGenerator> generatorMap = new ConcurrentHashMap<>();
@@ -27,7 +27,6 @@ public class ReactiveRedisSnowFlakeFactory implements IDGenerator, IDGeneratorFa
 
   private final long dataCenterId;
   private final long machineId;
-  private final SnowFlake snowFlake;
   private boolean automaticallyRenewal = false;
   private ScheduledExecutorService executorService;
 
@@ -73,7 +72,6 @@ public class ReactiveRedisSnowFlakeFactory implements IDGenerator, IDGeneratorFa
       if (success != null && success) {
         log.info("SnowFlake register success: applicationName = {}, machineId = {}",
             applicationName, machineId);
-        this.snowFlake = new SnowFlake(dataCenterId, machineId);
         break;
       }
       if (machineId >= maxMachineNum) {
@@ -117,11 +115,6 @@ public class ReactiveRedisSnowFlakeFactory implements IDGenerator, IDGeneratorFa
                 }).subscribe(),
         renewalIntervalSeconds, renewalIntervalSeconds, TimeUnit.SECONDS);
     automaticallyRenewal = true;
-  }
-
-  @Override
-  public long generate() {
-    return snowFlake.generate();
   }
 
   @Override
