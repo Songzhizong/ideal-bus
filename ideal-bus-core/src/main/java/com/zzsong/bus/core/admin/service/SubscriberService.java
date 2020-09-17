@@ -1,11 +1,11 @@
 package com.zzsong.bus.core.admin.service;
 
-import com.zzsong.bus.base.converter.SubscriberConverter;
-import com.zzsong.bus.base.domain.Subscriber;
-import com.zzsong.bus.base.storage.SubscriberStorage;
-import com.zzsong.bus.base.transfer.CreateSubscriberArgs;
-import com.zzsong.bus.base.transfer.QuerySubscriberArgs;
-import com.zzsong.bus.base.transfer.UpdateSubscriberArgs;
+import com.zzsong.bus.abs.converter.SubscriberConverter;
+import com.zzsong.bus.abs.domain.Subscriber;
+import com.zzsong.bus.abs.storage.SubscriberStorage;
+import com.zzsong.bus.abs.transfer.CreateSubscriberArgs;
+import com.zzsong.bus.abs.transfer.QuerySubscriberArgs;
+import com.zzsong.bus.abs.transfer.UpdateSubscriberArgs;
 import com.zzsong.bus.common.exception.VisibleException;
 import com.zzsong.bus.common.transfer.CommonResMsg;
 import com.zzsong.bus.common.transfer.Paging;
@@ -73,5 +73,10 @@ public class SubscriberService {
   public Mono<Res<List<Subscriber>>> query(@Nullable QuerySubscriberArgs args,
                                            @Nonnull Paging paging) {
     return subscriberStorage.query(args, paging);
+  }
+
+  @Nonnull
+  public Mono<List<Subscriber>> findAll() {
+    return subscriberStorage.findAll();
   }
 }

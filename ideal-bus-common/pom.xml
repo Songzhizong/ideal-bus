@@ -50,16 +50,6 @@
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-redis</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-commons</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <!-- lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>

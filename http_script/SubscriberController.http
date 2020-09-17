@@ -3,8 +3,8 @@ POST http://127.0.0.1:13256/subscriber/create
 Content-Type: application/json
 
 {
-  "title": "挖发送到",
-  "desc": "",
+  "title": "设备管理模块",
+  "desc": "设备管理模块",
   "subscriberType": "INTERNAL",
   "appName": "",
   "application": "",

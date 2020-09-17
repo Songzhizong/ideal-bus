@@ -1,12 +1,13 @@
 package com.zzsong.bus.core.admin.controller;
 
-import com.zzsong.bus.base.domain.Subscriber;
-import com.zzsong.bus.base.transfer.CreateSubscriberArgs;
-import com.zzsong.bus.base.transfer.QuerySubscriberArgs;
-import com.zzsong.bus.base.transfer.UpdateSubscriberArgs;
+import com.zzsong.bus.abs.domain.Subscriber;
+import com.zzsong.bus.abs.transfer.CreateSubscriberArgs;
+import com.zzsong.bus.abs.transfer.QuerySubscriberArgs;
+import com.zzsong.bus.abs.transfer.UpdateSubscriberArgs;
 import com.zzsong.bus.common.transfer.Paging;
 import com.zzsong.bus.common.transfer.Res;
 import com.zzsong.bus.core.admin.service.SubscriberService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -32,13 +33,15 @@ public class SubscriberController {
 
   @Nonnull
   @PostMapping("/create")
-  public Mono<Res<Subscriber>> create(@RequestBody @Nonnull CreateSubscriberArgs args) {
+  public Mono<Res<Subscriber>> create(@Validated @RequestBody
+                                      @Nonnull CreateSubscriberArgs args) {
     return subscriberService.create(args).map(Res::data);
   }
 
   @Nonnull
   @PostMapping("/update")
-  public Mono<Res<Subscriber>> update(@RequestBody @Nonnull UpdateSubscriberArgs args) {
+  public Mono<Res<Subscriber>> update(@Validated @RequestBody
+                                      @Nonnull UpdateSubscriberArgs args) {
     return subscriberService.update(args).map(Res::data);
   }
 

@@ -8,7 +8,9 @@ import lombok.Setter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * 事件消息体
@@ -21,10 +23,15 @@ import java.util.Collection;
 @AllArgsConstructor
 public class EventMessage<T> {
   /**
+   * 事件唯一id
+   */
+  @Nonnull
+  private String eventId = UUID.randomUUID().toString();
+  /**
    * 业务方唯一id
    */
-  @Nullable
-  private String bizId;
+  @Nonnull
+  private String bizId = "";
   /**
    * 可通过该字段判断event归属哪个应用
    */
@@ -99,18 +106,23 @@ public class EventMessage<T> {
     return this;
   }
 
-  public EventMessage<T> addHeader(@Nonnull String key, @Nonnull String value) {
-    this.headers.add(key, value);
+  public EventMessage<T> addHeader(@Nonnull String name, @Nonnull String value) {
+    this.headers.add(name, value);
     return this;
   }
 
-  public EventMessage<T> addHeader(@Nonnull String key, @Nonnull Collection<String> values) {
-    this.headers.addAll(key, values);
+  public EventMessage<T> addHeader(@Nonnull String name, @Nonnull Collection<String> values) {
+    this.headers.addAll(name, values);
     return this;
   }
 
-  public EventMessage<T> setHeader(@Nonnull String key, @Nonnull String value) {
-    this.headers.set(key, value);
+  public EventMessage<T> addHeader(@Nonnull String name, @Nonnull String... values) {
+    this.headers.addAll(name, Arrays.asList(values));
+    return this;
+  }
+
+  public EventMessage<T> setHeader(@Nonnull String name, @Nonnull String value) {
+    this.headers.set(name, value);
     return this;
   }
 }

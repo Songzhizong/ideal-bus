@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>com.zzsong</groupId>
-      <artifactId>ideal-bus-base</artifactId>
+      <artifactId>ideal-bus-abstract</artifactId>
       <version>${ideal-bus.version}</version>
     </dependency>
     <dependency>
