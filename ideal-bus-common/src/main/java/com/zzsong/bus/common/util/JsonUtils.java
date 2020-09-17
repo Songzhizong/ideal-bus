@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
+import javax.annotation.Nonnull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -54,15 +56,18 @@ public class JsonUtils {
     return javaTimeModule;
   }
 
-  public static <T> String toJsonString(T t) {
+  @Nonnull
+  public static <T> String toJsonString(@Nonnull T t) {
     return toJsonString(t, false, false);
   }
 
-  public static <T> String toJsonStringIgnoreNull(T t) {
+  @Nonnull
+  public static <T> String toJsonStringIgnoreNull(@Nonnull T t) {
     return toJsonString(t, true, false);
   }
 
-  public static <T> String toJsonString(T t, boolean ignoreNull, boolean pretty) {
+  @Nonnull
+  public static <T> String toJsonString(@Nonnull T t, boolean ignoreNull, boolean pretty) {
     ObjectMapper writer = JsonUtils.mapper;
     if (ignoreNull) {
       writer = JsonUtils.ignoreNullMapper;
@@ -78,7 +83,8 @@ public class JsonUtils {
     }
   }
 
-  public static <T> T parseJson(String jsonString, Class<T> clazz) {
+  @Nonnull
+  public static <T> T parseJson(@Nonnull String jsonString, @Nonnull Class<T> clazz) {
     try {
       return ignoreNullMapper.readValue(jsonString, clazz);
     } catch (JsonProcessingException e) {
@@ -86,7 +92,17 @@ public class JsonUtils {
     }
   }
 
-  public static <T> T parseJson(String jsonString, TypeReference<T> type) {
+  @Nonnull
+  public static <T> T parseJson(@Nonnull String jsonString, JavaType javaType) {
+    try {
+      return ignoreNullMapper.readValue(jsonString, javaType);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Nonnull
+  public static <T> T parseJson(@Nonnull String jsonString, @Nonnull TypeReference<T> type) {
     try {
       return ignoreNullMapper.readValue(jsonString, type);
     } catch (JsonProcessingException e) {

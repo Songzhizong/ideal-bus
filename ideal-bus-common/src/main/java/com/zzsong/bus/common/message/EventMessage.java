@@ -13,10 +13,11 @@ import java.util.Collection;
 import java.util.UUID;
 
 /**
- * 事件消息体
+ * 事件信息
  *
  * @author 宋志宗 on 2019-06-03
  */
+@SuppressWarnings("UnusedReturnValue")
 @Getter
 @Setter
 @NoArgsConstructor

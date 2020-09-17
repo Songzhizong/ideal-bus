@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
+ * 事件头
+ *
  * @author 宋志宗 on 2020/5/26
  */
 public class EventHeaders implements Map<String, Set<String>>, Serializable {
