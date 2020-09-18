@@ -1,8 +1,5 @@
 package com.zzsong.bus.abs.share;
 
-import com.zzsong.bus.common.transfer.CommonResMsg;
-import com.zzsong.bus.common.transfer.Paging;
-import com.zzsong.bus.common.transfer.Res;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

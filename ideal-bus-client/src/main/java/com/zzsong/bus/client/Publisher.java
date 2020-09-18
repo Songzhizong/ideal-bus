@@ -1,7 +1,7 @@
 package com.zzsong.bus.client;
 
 import com.zzsong.bus.common.message.EventMessage;
-import com.zzsong.bus.common.transfer.Res;
+import com.zzsong.bus.common.message.PublishResult;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -16,11 +16,11 @@ public interface Publisher {
    * 单条发布
    */
   @Nonnull
-  Mono<Res<Void>> publish(@Nonnull EventMessage<?> message);
+  Mono<PublishResult> publish(@Nonnull EventMessage<?> message);
 
   /**
    * 批量发布
    */
   @Nonnull
-  Flux<Res<Void>> batchPublish(@Nonnull Collection<EventMessage<?>> messages);
+  Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages);
 }

@@ -1,6 +1,5 @@
 package com.zzsong.bus.sample.receiver;
 
-import com.zzsong.bus.common.transfer.Res;
 import com.zzsong.bus.common.util.JsonUtils;
 import com.zzsong.bus.receiver.annotation.BusListenerBean;
 import com.zzsong.bus.receiver.annotation.EventListener;
@@ -21,7 +20,7 @@ public class SampleBusListener {
   private static final Logger log = LoggerFactory.getLogger(SampleBusListener.class);
 
   @EventListener(topic = "test", autoAck = false)
-  public void test(@Nonnull EventContext<Res<List<String>>> context) {
+  public void test(@Nonnull EventContext<List<String>> context) {
     log.info("接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
   }
 }

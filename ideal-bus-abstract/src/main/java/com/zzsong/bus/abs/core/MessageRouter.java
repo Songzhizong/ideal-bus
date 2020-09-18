@@ -1,9 +1,7 @@
 package com.zzsong.bus.abs.core;
 
 import com.zzsong.bus.abs.domain.EventInstance;
-import com.zzsong.bus.abs.pojo.PublishResult;
-import com.zzsong.bus.common.message.EventMessage;
-import com.zzsong.bus.common.transfer.Res;
+import com.zzsong.bus.common.message.PublishResult;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;

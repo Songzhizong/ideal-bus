@@ -2,8 +2,8 @@ package com.zzsong.bus.abs.storage;
 
 import com.zzsong.bus.abs.domain.Event;
 import com.zzsong.bus.abs.transfer.QueryEventArgs;
-import com.zzsong.bus.common.transfer.Paging;
-import com.zzsong.bus.common.transfer.Res;
+import com.zzsong.bus.abs.share.Paging;
+import com.zzsong.bus.abs.share.Res;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;

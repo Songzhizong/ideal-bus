@@ -2,7 +2,8 @@ package com.zzsong.bus.core.admin.controller;
 
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
-import com.zzsong.bus.common.transfer.Res;
+import com.zzsong.bus.abs.share.Res;
+import com.zzsong.bus.common.transfer.AutoSubscribArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,17 @@ public class SubscriptionController {
     return subscriptionService.subscribe(args).map(Res::data);
   }
 
+  /**
+   * 自动订阅
+   *
+   * @param args 订阅参数
+   * @return 订阅结果
+   */
   @Nonnull
   @PostMapping("/subscribe/auto")
-  public Mono<Res<List<Subscription>>> autoSubscription() {
-    return null;
+  public Mono<Res<List<Subscription>>> autoSubscription(@Validated @RequestBody
+                                                        @Nonnull AutoSubscribArgs args) {
+    return subscriptionService.autoSubscription(args).map(Res::data);
   }
 
   /**
@@ -87,6 +95,12 @@ public class SubscriptionController {
     return subscriptionService.unsubscribe(subscriberId).map(Res::data);
   }
 
+  /**
+   * 获取指定订阅者所有订阅关系
+   *
+   * @param subscriberId 订阅者ID
+   * @return 订阅关系列表
+   */
   @Nonnull
   @GetMapping("/subscriber")
   public Mono<Res<List<Subscription>>> getSubscription(@NotNull(message = "订阅者不能为空")
@@ -94,6 +108,12 @@ public class SubscriptionController {
     return subscriptionService.getSubscription(subscriberId).map(Res::data);
   }
 
+  /**
+   * 获取指定主题的所有订阅关系
+   *
+   * @param topic 主题
+   * @return 订阅关系列表
+   */
   @Nonnull
   @GetMapping("/topic")
   public Mono<Res<List<Subscription>>> getSubscription(@NotBlank(message = "主题不能为空")

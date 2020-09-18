@@ -1,0 +1,15 @@
+### autoSubscription
+POST http://127.0.0.1:13256/subscription/subscribe/auto
+Content-Type: application/json
+
+{
+  "subscriberId": 409334475399168,
+  "subscriptionArgsList": [
+    {
+      "topic": "aaa",
+      "condition": "name=a",
+      "broadcast": false,
+      "retryCount": 0
+    }
+  ]
+}

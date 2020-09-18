@@ -15,6 +15,10 @@ public class Subscription {
   public static final int STATUS_DISABLED = 0;
   public static final int STATUS_ENABLED = 1;
   /**
+   * 唯一ID
+   */
+  private Long subscriptionId;
+  /**
    * 订阅者id
    */
   private long subscriberId;

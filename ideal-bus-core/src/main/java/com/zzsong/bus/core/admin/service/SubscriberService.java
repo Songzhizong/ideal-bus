@@ -6,10 +6,10 @@ import com.zzsong.bus.abs.storage.SubscriberStorage;
 import com.zzsong.bus.abs.transfer.CreateSubscriberArgs;
 import com.zzsong.bus.abs.transfer.QuerySubscriberArgs;
 import com.zzsong.bus.abs.transfer.UpdateSubscriberArgs;
-import com.zzsong.bus.common.exception.VisibleException;
-import com.zzsong.bus.common.transfer.CommonResMsg;
-import com.zzsong.bus.common.transfer.Paging;
-import com.zzsong.bus.common.transfer.Res;
+import com.zzsong.bus.abs.share.VisibleException;
+import com.zzsong.bus.abs.share.CommonResMsg;
+import com.zzsong.bus.abs.share.Paging;
+import com.zzsong.bus.abs.share.Res;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -73,6 +74,11 @@ public class SubscriberService {
   public Mono<Res<List<Subscriber>>> query(@Nullable QuerySubscriberArgs args,
                                            @Nonnull Paging paging) {
     return subscriberStorage.query(args, paging);
+  }
+
+  @Nonnull
+  public Mono<Optional<Subscriber>> loadById(long subscriberId) {
+    return subscriberStorage.findById(subscriberId);
   }
 
   @Nonnull

@@ -2,7 +2,7 @@ package com.zzsong.bus.core.processor;
 
 import com.zzsong.bus.abs.core.MessageRouter;
 import com.zzsong.bus.abs.domain.EventInstance;
-import com.zzsong.bus.abs.pojo.PublishResult;
+import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.abs.storage.EventInstanceStorage;
 import org.springframework.stereotype.Component;

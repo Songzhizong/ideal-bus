@@ -4,6 +4,7 @@ import com.zzsong.bus.abs.domain.Subscription;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,13 +15,34 @@ public interface SubscriptionStorage {
   Mono<Subscription> save(@Nonnull Subscription subscription);
 
   @Nonnull
-  Mono<Long> unsubscribe(long subscriberId);
+  Mono<List<Subscription>> saveAll(@Nonnull Collection<Subscription> subscriptions);
 
+  /**
+   * 通过订阅关系ID 解除订阅
+   *
+   * @param subscriptionId 订阅关系ID
+   * @return 解除条数
+   */
   @Nonnull
-  Mono<Long> unsubscribe(@Nonnull String topic);
+  Mono<Long> unsubscribe(long subscriptionId);
 
   @Nonnull
   Mono<Long> unsubscribe(long subscriberId, @Nonnull String topic);
+
+  /**
+   * 通过订阅关系ID列表批量解除订阅
+   *
+   * @param subscriptionIds 订阅关系ID列表
+   * @return 解除条数
+   */
+  @Nonnull
+  Mono<Long> unsubscribeAll(@Nonnull Collection<Long> subscriptionIds);
+
+  @Nonnull
+  Mono<Long> unsubscribeAll(long subscriberId);
+
+  @Nonnull
+  Mono<Long> unsubscribeAll(@Nonnull String topic);
 
   @Nonnull
   Mono<List<Subscription>> findAll();

@@ -1,8 +1,8 @@
 package com.zzsong.bus.core.config;
 
-import com.zzsong.bus.common.exception.VisibleException;
-import com.zzsong.bus.common.transfer.Res;
-import com.zzsong.bus.common.transfer.ResMsg;
+import com.zzsong.bus.abs.share.VisibleException;
+import com.zzsong.bus.abs.share.Res;
+import com.zzsong.bus.abs.share.ResMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
