@@ -1,14 +1,13 @@
-package com.zzsong.bus.client.deliver;
+package com.zzsong.bus.receiver.deliver;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.zzsong.bus.client.EventContext;
-import com.zzsong.bus.client.listener.IEventListener;
-import com.zzsong.bus.client.listener.ListenerFactory;
+import com.zzsong.bus.receiver.listener.IEventListener;
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
 import com.zzsong.bus.common.message.EventHeaders;
 import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.bus.common.util.JsonUtils;
+import com.zzsong.bus.receiver.listener.ListenerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -71,6 +70,11 @@ public class EventDelivererImpl implements EventDeliverer {
         List<Set<String>> conditionsGroup = eventListener.getConditionsGroup();
         // 没有通过条件判断的直接跳过
         if (!ConditionMatcher.match(conditionsGroup, headers)) {
+          if (log.isDebugEnabled()) {
+            String conditions = JsonUtils.toJsonString(conditionsGroup);
+            log.debug("条件不匹配 -> event: {} listener: {} conditions: {}",
+                event.getInstanceId(), eventListener.getListenerName(), conditions);
+          }
           continue;
         }
         invorkListeners.add(eventListener);
@@ -81,34 +85,29 @@ public class EventDelivererImpl implements EventDeliverer {
       return Mono.just(deliveredResult);
     }
     List<Mono<EventContext<Object>>> monoList = invorkListeners.stream()
-        .map(l ->
-            Mono.just(l)
-                .map(listener -> {
-                  String listenerName = listener.getListenerName();
-                  JavaType payloadType = listener.getPayloadType();
-                  Object param = JsonUtils.parseJson(payloadString, payloadType);
-                  EventContext<Object> context = new EventContext<>(listenerName);
-                  context.setPayload(param);
-                  try {
-                    listener.invoke(context);
-                  } catch (Exception e) {
-                    log.info("");
-                    context.setAck(false);
-                  }
-                  //noinspection ConstantConditions
-                  if (context.getAck() == null) {
-                    // 如果开发者没有手动设置ack, 则根据配置来进行ack设置
-                    context.setAck(listener.isAutoAck());
-                  }
-                  return context;
-                }).subscribeOn(scheduler)
+        .map(l -> Mono.just(l)
+            .map(listener -> {
+              String listenerName = listener.getListenerName();
+              JavaType payloadType = listener.getPayloadType();
+              Object param = JsonUtils.parseJson(payloadString, payloadType);
+              EventContext<Object> context = new EventContext<>(param, listenerName);
+              try {
+                listener.invoke(context);
+                if (listener.isAutoAck()) {
+                  context.ack();
+                }
+              } catch (Exception e) {
+                log.info("event处理异常: ", e);
+              }
+              return context;
+            }).subscribeOn(scheduler)
         ).collect(Collectors.toList());
     return Flux.merge(monoList)
         .collectList()
         .map(eventContexts -> {
           for (EventContext<Object> eventContext : eventContexts) {
             String listenerName = eventContext.getListenerName();
-            Boolean ack = eventContext.getAck();
+            boolean ack = eventContext.isAck();
             deliveredResult.markAck(listenerName, ack);
           }
           return deliveredResult;

@@ -1,4 +1,4 @@
-package com.zzsong.bus.client.deliver;
+package com.zzsong.bus.receiver;
 
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
@@ -7,10 +7,11 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗 on 2020/9/17
+ * @author 宋志宗 on 2020/9/18
  */
-public interface EventDeliverer {
+public interface BusReceiver {
+
 
   @Nonnull
-  Mono<DeliveredResult> deliver(@Nonnull DeliveredEvent event);
+  Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event);
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -16,6 +17,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -107,6 +110,23 @@ public class JsonUtils {
       return ignoreNullMapper.readValue(jsonString, type);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  @Nonnull
+  public static JavaType getJavaType(@Nonnull Type type) {
+    if (type instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) type;
+      Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+      Class<?> rowClass = (Class<?>) parameterizedType.getRawType();
+      JavaType[] javaTypes = new JavaType[actualTypeArguments.length];
+      for (int i = 0; i < actualTypeArguments.length; i++) {
+        javaTypes[i] = getJavaType(actualTypeArguments[i]);
+      }
+      return TypeFactory.defaultInstance().constructParametricType(rowClass, javaTypes);
+    } else {
+      Class<?> cla = (Class<?>) type;
+      return TypeFactory.defaultInstance().constructParametricType(cla, new JavaType[0]);
     }
   }
 }

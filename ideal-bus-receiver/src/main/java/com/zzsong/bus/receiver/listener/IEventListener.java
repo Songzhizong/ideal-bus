@@ -1,7 +1,7 @@
-package com.zzsong.bus.client.listener;
+package com.zzsong.bus.receiver.listener;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.zzsong.bus.client.EventContext;
+import com.zzsong.bus.receiver.deliver.EventContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

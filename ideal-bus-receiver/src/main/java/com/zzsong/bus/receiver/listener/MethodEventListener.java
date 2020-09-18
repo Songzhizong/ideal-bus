@@ -1,8 +1,7 @@
-package com.zzsong.bus.client.listener;
+package com.zzsong.bus.receiver.listener;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.zzsong.bus.client.EventContext;
-import lombok.Builder;
+import com.zzsong.bus.receiver.deliver.EventContext;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -14,39 +13,42 @@ import java.util.Set;
 /**
  * @author 宋志宗 on 2020/9/17
  */
-@Getter
-@Builder
 public class MethodEventListener implements IEventListener {
 
+  @Getter
+  private final boolean autoAck;
   @Nonnull
   private final Object target;
   @Nonnull
   private final Method method;
-  private final boolean autoAck;
+  @Getter
   @Nonnull
   private final String listenerName;
+  @Getter
   @Nonnull
   private final JavaType payloadType;
+  @Getter
   @Nonnull
   private final List<Set<String>> conditionsGroup;
 
-  public MethodEventListener(@Nonnull Object target,
+  public MethodEventListener(boolean autoAck,
+                             @Nonnull Object target,
                              @Nonnull Method method,
-                             boolean aotoAck,
-                             @Nonnull String listenerName,
                              @Nonnull JavaType payloadType,
                              @Nonnull List<Set<String>> conditionsGroup) {
+    this.autoAck = autoAck;
     this.target = target;
     this.method = method;
-    this.autoAck = aotoAck;
-    this.listenerName = listenerName;
     this.payloadType = payloadType;
     this.conditionsGroup = conditionsGroup;
+    String className = target.getClass().getName();
+    String methodName = method.getName();
+    this.listenerName = className + "#" + methodName;
   }
 
   @Nullable
   @Override
   public Object invoke(@Nonnull EventContext<Object> eventContext) throws Exception {
-    return this.method.invoke(this.method, eventContext);
+    return this.method.invoke(this.target, eventContext);
   }
 }
