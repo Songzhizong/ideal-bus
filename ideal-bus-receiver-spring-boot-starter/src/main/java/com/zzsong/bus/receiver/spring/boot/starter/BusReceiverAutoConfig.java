@@ -25,7 +25,7 @@ public class BusReceiverAutoConfig {
     int maximumPoolSize = 100;
     return new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-        new ThreadFactoryBuilder().setNameFormat("job-executor-pool-%d").build(),
+        new ThreadFactoryBuilder().setNameFormat("event-pool-%d").build(),
         (r, executor) -> {
           log.error("任务执行线程池资源不足, 请尝试修改线程数配置, 当前核心线程数: {}, 最大线程数: {}, 队列长度: {}",
               corePoolSize, maximumPoolSize, 0);

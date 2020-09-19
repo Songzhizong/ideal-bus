@@ -3,7 +3,7 @@ package com.zzsong.bus.core.admin.controller;
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
 import com.zzsong.bus.abs.share.Res;
-import com.zzsong.bus.common.transfer.AutoSubscribArgs;
+import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -49,24 +49,24 @@ public class SubscriptionController {
   @Nonnull
   @PostMapping("/subscribe/auto")
   public Mono<Res<List<Subscription>>> autoSubscription(@Validated @RequestBody
-                                                        @Nonnull AutoSubscribArgs args) {
-    return subscriptionService.autoSubscription(args).map(Res::data);
+                                                        @Nonnull AutoSubscribeArgs args) {
+    return subscriptionService.autoSubscrib(args).map(Res::data);
   }
 
   /**
    * 解除指定的订阅关系
    *
-   * @param subscriberId 订阅者id
-   * @param topic        主题
+   * @param applicationId 订阅者id
+   * @param topic         主题
    * @return 删除条数
    */
   @Nonnull
   @PostMapping("/unsubscribe")
   public Mono<Res<Long>> unsubscribe(@NotNull(message = "订阅者不能为空")
-                                     @Nonnull Long subscriberId,
+                                     @Nonnull Long applicationId,
                                      @NotBlank(message = "主题不能为空")
                                      @Nonnull String topic) {
-    return subscriptionService.unsubscribe(subscriberId, topic).map(Res::data);
+    return subscriptionService.unsubscribe(applicationId, topic).map(Res::data);
   }
 
   /**
@@ -85,27 +85,27 @@ public class SubscriptionController {
   /**
    * 解除指定订阅者所有的订阅关系
    *
-   * @param subscriberId 订阅者id
+   * @param applicationId 订阅者id
    * @return 删除条数
    */
   @Nonnull
-  @PostMapping("/subscriber/unsubscribe")
+  @PostMapping("/application/unsubscribe")
   public Mono<Res<Long>> unsubscribe(@NotNull(message = "订阅者不能为空")
-                                     @Nonnull Long subscriberId) {
-    return subscriptionService.unsubscribe(subscriberId).map(Res::data);
+                                     @Nonnull Long applicationId) {
+    return subscriptionService.unsubscribe(applicationId).map(Res::data);
   }
 
   /**
    * 获取指定订阅者所有订阅关系
    *
-   * @param subscriberId 订阅者ID
+   * @param applicationId 订阅者ID
    * @return 订阅关系列表
    */
   @Nonnull
-  @GetMapping("/subscriber")
+  @GetMapping("/application")
   public Mono<Res<List<Subscription>>> getSubscription(@NotNull(message = "订阅者不能为空")
-                                                       @Nonnull Long subscriberId) {
-    return subscriptionService.getSubscription(subscriberId).map(Res::data);
+                                                       @Nonnull Long applicationId) {
+    return subscriptionService.getSubscription(applicationId).map(Res::data);
   }
 
   /**

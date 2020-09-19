@@ -48,7 +48,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
         <configuration>
-          <mainClass>SchedulerApplication</mainClass>
+          <mainClass>com.zzsong.bus.sample.receiver.ReceiverApplication</mainClass>
         </configuration>
         <executions>
           <execution>

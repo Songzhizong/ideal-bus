@@ -2,10 +2,10 @@ package com.zzsong.bus.core.processor;
 
 import com.zzsong.bus.abs.converter.SubscriptionConverter;
 import com.zzsong.bus.abs.domain.Event;
-import com.zzsong.bus.abs.domain.Subscriber;
+import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.core.admin.service.EventService;
-import com.zzsong.bus.core.admin.service.SubscriberService;
+import com.zzsong.bus.core.admin.service.ApplicationService;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
@@ -38,17 +38,17 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nonnull
   private final EventService eventService;
   @Nonnull
-  private final SubscriberService subscriberService;
+  private final ApplicationService applicationService;
   @Nonnull
   private final SubscriptionService subscriptionService;
 
   public LocalCache(@Nonnull BusProperties properties,
                     @Nonnull EventService eventService,
-                    @Nonnull SubscriberService subscriberService,
+                    @Nonnull ApplicationService applicationService,
                     @Nonnull SubscriptionService subscriptionService) {
     this.properties = properties;
     this.eventService = eventService;
-    this.subscriberService = subscriberService;
+    this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
   }
 
@@ -58,15 +58,21 @@ public class LocalCache implements InitializingBean, DisposableBean {
 
   // ------------------------------ 缓存相关数据 ~ ~ ~
 
-  private Map<String, Event> eventMapping = new HashMap<>();
-  private Map<Long, Subscriber> subscriberMapping = new HashMap<>();
-  private Map<String, List<SubscriptionDetails>> subscriptionMapping = new HashMap<>();
+  private Map<String, Event> eventMapping = Collections.emptyMap();
+  private Map<Long, Application> applicationMapping = Collections.emptyMap();
+  private Map<Long, SubscriptionDetails> subscriptionMapping = Collections.emptyMap();
+  private Map<String, List<SubscriptionDetails>> topicSubscriptionMapping = Collections.emptyMap();
 
   /**
    * 通知当前节点刷新本地缓存
    */
   public void refreshCache() {
     refreshCacheSignQueue.offer(true);
+  }
+
+  @Nullable
+  public SubscriptionDetails getSubscription(long subscriptionId) {
+    return subscriptionMapping.get(subscriptionId);
   }
 
   /**
@@ -77,7 +83,7 @@ public class LocalCache implements InitializingBean, DisposableBean {
    */
   @Nonnull
   public List<SubscriptionDetails> getTopicSubscription(@Nonnull String topic) {
-    List<SubscriptionDetails> detailsList = subscriptionMapping.get(topic);
+    List<SubscriptionDetails> detailsList = topicSubscriptionMapping.get(topic);
     if (detailsList == null) {
       return Collections.emptyList();
     }
@@ -93,6 +99,11 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nullable
   public Event getEvent(@Nonnull String topic) {
     return eventMapping.get(topic);
+  }
+
+  @Nullable
+  public Application getApplication(long applicationId) {
+    return applicationMapping.get(applicationId);
   }
 
   @Override
@@ -124,28 +135,30 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nonnull
   private Mono<Boolean> refreshLocalCache() {
     Mono<List<Event>> eventListMono = eventService.findAll();
-    Mono<List<Subscriber>> subscriberListMono = subscriberService.findAll();
+    Mono<List<Application>> applicationListMono = applicationService.findAll();
     Mono<List<Subscription>> enabledSubscriptionMono = subscriptionService.findAllEnabled();
-    return Mono.zip(eventListMono, subscriberListMono, enabledSubscriptionMono)
+    return Mono.zip(eventListMono, applicationListMono, enabledSubscriptionMono)
         .map(tuple3 -> {
           List<Event> events = tuple3.getT1();
-          List<Subscriber> subscribers = tuple3.getT2();
+          List<Application> applications = tuple3.getT2();
           List<Subscription> subscriptions = tuple3.getT3();
           this.eventMapping = events.stream()
               .collect(Collectors.toMap(Event::getTopic, e -> e));
-          this.subscriberMapping = subscribers.stream()
-              .collect(Collectors.toMap(Subscriber::getSubscriberId, s -> s));
-          this.subscriptionMapping = subscriptions.stream()
+          this.applicationMapping = applications.stream()
+              .collect(Collectors.toMap(Application::getApplicationId, s -> s));
+          this.subscriptionMapping = new HashMap<>();
+          this.topicSubscriptionMapping = subscriptions.stream()
               .map(s -> {
-                long subscriberId = s.getSubscriberId();
-                Subscriber subscriber = this.subscriberMapping.get(subscriberId);
-                if (subscriber == null) {
+                long applicationId = s.getApplicationId();
+                Application application = this.applicationMapping.get(applicationId);
+                if (application == null) {
                   return null;
                 }
                 SubscriptionDetails details = SubscriptionConverter.toSubscriptionDetails(s);
-                details.setSubscriberType(subscriber.getSubscriberType());
-                details.setApplication(subscriber.getApplication());
-                details.setReceiveUrl(subscriber.getReceiveUrl());
+                details.setApplicationType(application.getApplicationType());
+                details.setExternalId(application.getExternalId());
+                details.setReceiveUrl(application.getReceiveUrl());
+                subscriptionMapping.put(s.getSubscriptionId(), details);
                 return details;
               }).filter(Objects::nonNull)
               .collect(Collectors.groupingBy(SubscriptionDetails::getTopic));

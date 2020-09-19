@@ -17,7 +17,7 @@ public class SubscribeArgs {
   /**
    * 订阅者id
    */
-  private long subscriberId;
+  private long applicationId;
   /**
    * 事件主题, 也是事件的唯一id
    */

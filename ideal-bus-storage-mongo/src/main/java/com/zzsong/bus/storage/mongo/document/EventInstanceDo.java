@@ -32,10 +32,10 @@ public class EventInstanceDo {
   @Nonnull
   private String bizId;
   /**
-   * 可通过该字段判断event归属哪个应用
+   * 可通过该字段判断event归属哪个外部应用
    */
   @Nonnull
-  private String application;
+  private String externalId;
   /**
    * 事件主题
    */

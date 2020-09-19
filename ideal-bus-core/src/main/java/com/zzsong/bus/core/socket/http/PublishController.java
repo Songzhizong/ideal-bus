@@ -1,8 +1,8 @@
 package com.zzsong.bus.core.socket.http;
 
-import com.zzsong.bus.abs.core.MessageRouter;
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.common.message.PublishResult;
+import com.zzsong.bus.core.processor.PublishService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping("/publish")
 public class PublishController {
   @Nonnull
-  private final MessageRouter messageRouter;
+  private final PublishService publishService;
 
-  public PublishController(@Nonnull MessageRouter messageRouter) {
-    this.messageRouter = messageRouter;
+  public PublishController(@Nonnull PublishService publishService) {
+    this.publishService = publishService;
   }
 
   /**
@@ -33,7 +33,7 @@ public class PublishController {
   @PostMapping("/single")
   public Mono<PublishResult> publish(@RequestBody @Nonnull
                                          EventInstance message) {
-    return messageRouter.route(message);
+    return publishService.publish(message);
   }
 
   /**
@@ -43,6 +43,6 @@ public class PublishController {
   @PostMapping("/batch")
   public Flux<PublishResult> batchPublish(@RequestBody @Nonnull
                                               List<EventInstance> messages) {
-    return Flux.fromIterable(messages).flatMap(messageRouter::route);
+    return Flux.fromIterable(messages).flatMap(publishService::publish);
   }
 }

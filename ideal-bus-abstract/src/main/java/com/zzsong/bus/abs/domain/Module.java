@@ -16,7 +16,7 @@ public class Module {
    * 订阅者id
    */
   @Nonnull
-  private Long subscriberId;
+  private Long applicationId;
 
   /**
    * 模块名称

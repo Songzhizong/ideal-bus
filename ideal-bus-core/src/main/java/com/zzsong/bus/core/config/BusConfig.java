@@ -2,6 +2,9 @@ package com.zzsong.bus.core.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
+import com.zzsong.bus.core.processor.pusher.DelivereChannel;
+import com.zzsong.common.loadbalancer.LbFactory;
+import com.zzsong.common.loadbalancer.SimpleLbFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +31,12 @@ public class BusConfig {
   public ReactiveRedisSnowFlakeFactory reactiveRedisSnowFlakeFactory(
       ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
     return new ReactiveRedisSnowFlakeFactory(applicationName, reactiveStringRedisTemplate);
+  }
+
+  @Bean
+  public LbFactory<DelivereChannel> lbFactory() {
+    final SimpleLbFactory<DelivereChannel> lbFactory = new SimpleLbFactory<>();
+    return lbFactory;
   }
 
   @Bean

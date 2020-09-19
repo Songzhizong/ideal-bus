@@ -15,9 +15,10 @@ public final class SubscriptionDoConverter {
   public static Subscription toSubscription(@Nonnull SubscriptionDo mongoDo) {
     Subscription subscription = new Subscription();
     subscription.setSubscriptionId(mongoDo.getSubscriptionId());
-    subscription.setSubscriberId(mongoDo.getSubscriberId());
+    subscription.setApplicationId(mongoDo.getApplicationId());
     subscription.setTopic(mongoDo.getTopic());
     subscription.setCondition(mongoDo.getCondition());
+    subscription.setConsumeType(mongoDo.getConsumeType());
     subscription.setBroadcast(mongoDo.isBroadcast());
     subscription.setRetryCount(mongoDo.getRetryCount());
     subscription.setStatus(mongoDo.getStatus());
@@ -28,9 +29,10 @@ public final class SubscriptionDoConverter {
   public static SubscriptionDo fromSubscription(@Nonnull Subscription subscription) {
     SubscriptionDo subscriptionDo = new SubscriptionDo();
     subscriptionDo.setSubscriptionId(subscription.getSubscriptionId());
-    subscriptionDo.setSubscriberId(subscription.getSubscriberId());
+    subscriptionDo.setApplicationId(subscription.getApplicationId());
     subscriptionDo.setTopic(subscription.getTopic());
     subscriptionDo.setCondition(subscription.getCondition());
+    subscriptionDo.setConsumeType(subscription.getConsumeType());
     subscriptionDo.setBroadcast(subscription.isBroadcast());
     subscriptionDo.setRetryCount(subscription.getRetryCount());
     subscriptionDo.setStatus(subscription.getStatus());

@@ -27,7 +27,7 @@ public interface SubscriptionStorage {
   Mono<Long> unsubscribe(long subscriptionId);
 
   @Nonnull
-  Mono<Long> unsubscribe(long subscriberId, @Nonnull String topic);
+  Mono<Long> unsubscribe(long applicationId, @Nonnull String topic);
 
   /**
    * 通过订阅关系ID列表批量解除订阅
@@ -39,7 +39,7 @@ public interface SubscriptionStorage {
   Mono<Long> unsubscribeAll(@Nonnull Collection<Long> subscriptionIds);
 
   @Nonnull
-  Mono<Long> unsubscribeAll(long subscriberId);
+  Mono<Long> unsubscribeAll(long applicationId);
 
   @Nonnull
   Mono<Long> unsubscribeAll(@Nonnull String topic);
@@ -54,11 +54,11 @@ public interface SubscriptionStorage {
   Mono<List<Subscription>> findAllByTopic(@Nonnull String topic);
 
   @Nonnull
-  Mono<List<Subscription>> findAllBySubscriber(long subscriberId);
+  Mono<List<Subscription>> findAllByApplication(long applicationId);
 
   @Nonnull
   Mono<Boolean> existByTopic(@Nonnull String topic);
 
   @Nonnull
-  Mono<Boolean> existBySubscriber(long subscriberId);
+  Mono<Boolean> existByApplication(long applicationId);
 }

@@ -11,8 +11,12 @@
 
   <artifactId>ideal-bus-client-spring-boot-starter</artifactId>
 
-  <dependencies>
-    <!-- web -->
+  <dependencies><!-- web -->
+    <dependency>
+      <groupId>com.zzsong</groupId>
+      <artifactId>ideal-bus-client</artifactId>
+      <version>${ideal-bus.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>

@@ -2,7 +2,7 @@ package com.zzsong.bus.receiver;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.zzsong.bus.common.util.ConditionMatcher;
-import com.zzsong.bus.common.util.JsonUtils;
+import com.zzsong.common.utils.JsonUtils;
 import com.zzsong.bus.receiver.annotation.BusListenerBean;
 import com.zzsong.bus.receiver.annotation.EventListener;
 import com.zzsong.bus.receiver.deliver.EventContext;

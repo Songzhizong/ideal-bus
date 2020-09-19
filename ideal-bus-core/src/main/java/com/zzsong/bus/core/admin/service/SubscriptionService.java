@@ -5,10 +5,10 @@ import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
-import com.zzsong.bus.common.transfer.AutoSubscribArgs;
+import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.common.transfer.SubscriptionArgs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.zzsong.common.utils.JsonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
  *
  * @author 宋志宗 on 2020/9/16
  */
+@Slf4j
 @Service
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class SubscriptionService {
-  private static final Logger log = LoggerFactory.getLogger(SubscriptionService.class);
   @Autowired
-  private SubscriberService subscriberService;
+  private ApplicationService applicationService;
   @Nonnull
   private final SubscriptionStorage storage;
 
@@ -44,8 +44,8 @@ public class SubscriptionService {
   }
 
   @Nonnull
-  Mono<Boolean> existBySubscriber(long subscriberId) {
-    return storage.existBySubscriber(subscriberId);
+  Mono<Boolean> existByApplication(long applicationId) {
+    return storage.existByApplication(applicationId);
   }
 
   @Nonnull
@@ -55,20 +55,20 @@ public class SubscriptionService {
   }
 
   @Nonnull
-  public Mono<List<Subscription>> autoSubscription(@Nonnull AutoSubscribArgs autoSubscribArgs) {
-    long subscriberId = autoSubscribArgs.getSubscriberId();
-    return subscriberService.loadById(subscriberId)
+  public Mono<List<Subscription>> autoSubscrib(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
+    long applicationId = autoSubscribeArgs.getApplicationId();
+    return applicationService.loadById(applicationId)
         .flatMap(opt -> {
           if (!opt.isPresent()) {
             return Mono.error(new VisibleException("订阅者不存在"));
           }
-          return getSubscription(subscriberId).flatMap(subscriptions -> {
+          return getSubscription(applicationId).flatMap(subscriptions -> {
             // 存储新的订阅, topic -> SubscriptionArgs
             Set<String> newTopics = new HashSet<>();
             // 存储现有的订阅关系, topic -> Subscription
             Map<String, Subscription> currentSubMap = subscriptions.stream()
                 .collect(Collectors.toMap(Subscription::getTopic, s -> s));
-            List<SubscriptionArgs> argsList = autoSubscribArgs.getSubscriptionArgsList();
+            List<SubscriptionArgs> argsList = autoSubscribeArgs.getSubscriptionArgsList();
             // 计算出变更列表
             List<Subscription> changeList = new ArrayList<>();
             for (SubscriptionArgs args : argsList) {
@@ -81,7 +81,7 @@ public class SubscriptionService {
               if (subscription == null) {
                 // 之前没有这个主题的订阅关系 -> 新增
                 Subscription newSubs = SubscriptionConverter.fromSubscriptionArgs(args);
-                newSubs.setSubscriberId(subscriberId);
+                newSubs.setApplicationId(applicationId);
                 changeList.add(newSubs);
               } else {
                 // 之前有这个主题的订阅关系并且发生了变更 -> 更新
@@ -104,8 +104,13 @@ public class SubscriptionService {
             Mono<List<Subscription>> saveAll = storage.saveAll(changeList);
             Mono<Long> unsubscribeAll = storage.unsubscribeAll(unsubscribeList);
             return Mono.zip(saveAll, unsubscribeAll)
-                .flatMap(t -> storage.findAllBySubscriber(subscriberId));
+                .flatMap(t -> storage.findAllByApplication(applicationId));
           });
+        })
+        .doOnNext(res -> {
+          if (log.isDebugEnabled()) {
+            log.debug("自动订阅结果: {}", JsonUtils.toJsonString(res));
+          }
         });
   }
 
@@ -149,8 +154,8 @@ public class SubscriptionService {
   }
 
   @Nonnull
-  public Mono<Long> unsubscribe(long subscriberId, @Nonnull String topic) {
-    return storage.unsubscribe(subscriberId, topic);
+  public Mono<Long> unsubscribe(long applicationId, @Nonnull String topic) {
+    return storage.unsubscribe(applicationId, topic);
   }
 
   @Nonnull
@@ -159,13 +164,13 @@ public class SubscriptionService {
   }
 
   @Nonnull
-  public Mono<Long> unsubscribe(long subscriberId) {
-    return storage.unsubscribeAll(subscriberId);
+  public Mono<Long> unsubscribe(long applicationId) {
+    return storage.unsubscribeAll(applicationId);
   }
 
   @Nonnull
-  public Mono<List<Subscription>> getSubscription(long subscriberId) {
-    return storage.findAllBySubscriber(subscriberId);
+  public Mono<List<Subscription>> getSubscription(long applicationId) {
+    return storage.findAllByApplication(applicationId);
   }
 
   @Nonnull

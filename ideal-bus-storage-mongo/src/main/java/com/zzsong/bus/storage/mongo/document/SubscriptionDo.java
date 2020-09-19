@@ -19,7 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document("ideal_bus_subscription")
 @CompoundIndexes({
-    @CompoundIndex(name = "sub_topic", def = "{'subscriberId' : 1, 'topic': 1}", unique = true)
+    @CompoundIndex(name = "sub_topic", def = "{'applicationId' : 1, 'topic': 1}", unique = true)
 })
 public class SubscriptionDo {
   @Id
@@ -27,7 +27,7 @@ public class SubscriptionDo {
   /**
    * 订阅者id
    */
-  private long subscriberId;
+  private long applicationId;
   /**
    * 事件主题, 也是事件的唯一id
    */
@@ -38,6 +38,10 @@ public class SubscriptionDo {
    */
   @NonNull
   private String condition = DBDefaults.STRING_VALUE;
+  /**
+   * 消费模式
+   */
+  private int consumeType;
   /**
    * 是否广播
    */

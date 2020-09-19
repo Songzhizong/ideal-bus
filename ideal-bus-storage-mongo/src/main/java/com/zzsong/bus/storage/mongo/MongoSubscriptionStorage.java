@@ -69,8 +69,8 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
 
   @Nonnull
   @Override
-  public Mono<Long> unsubscribe(long subscriberId, @Nonnull String topic) {
-    return repository.deleteBySubscriberIdAndTopic(subscriberId, topic);
+  public Mono<Long> unsubscribe(long applicationId, @Nonnull String topic) {
+    return repository.deleteByApplicationIdAndTopic(applicationId, topic);
   }
 
   @Nonnull
@@ -84,8 +84,8 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
 
   @Nonnull
   @Override
-  public Mono<Long> unsubscribeAll(long subscriberId) {
-    return repository.deleteAllBySubscriberId(subscriberId);
+  public Mono<Long> unsubscribeAll(long applicationId) {
+    return repository.deleteAllByApplicationId(applicationId);
   }
 
   @Nonnull
@@ -120,8 +120,8 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
 
   @Nonnull
   @Override
-  public Mono<List<Subscription>> findAllBySubscriber(long subscriberId) {
-    return repository.findAllBySubscriberId(subscriberId)
+  public Mono<List<Subscription>> findAllByApplication(long applicationId) {
+    return repository.findAllByApplicationId(applicationId)
         .map(SubscriptionDoConverter::toSubscription)
         .collectList();
   }
@@ -135,8 +135,8 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
 
   @Nonnull
   @Override
-  public Mono<Boolean> existBySubscriber(long subscriberId) {
-    return repository.findFirstBySubscriberId(subscriberId)
+  public Mono<Boolean> existByApplication(long applicationId) {
+    return repository.findFirstByApplicationId(applicationId)
         .map(s -> true).defaultIfEmpty(false);
   }
 }

@@ -1,0 +1,19 @@
+### 新增
+POST http://127.0.0.1:13256/application/create
+Content-Type: application/json
+
+{
+  "title": "设备管理模块",
+  "desc": "设备管理模块",
+  "applicationType": "INTERNAL",
+  "appName": "",
+  "application": "",
+  "receiveUrl": ""
+}
+
+### 删除
+DELETE http://127.0.0.1:13256/application/delete/137454939872952320
+
+
+### 查询
+GET http://127.0.0.1:13256/application/query?applicationType=INTERNAL

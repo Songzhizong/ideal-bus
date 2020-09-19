@@ -3,7 +3,7 @@ package com.zzsong.bus.sample.receiver;
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
 import com.zzsong.bus.common.message.EventHeaders;
-import com.zzsong.bus.common.util.JsonUtils;
+import com.zzsong.common.utils.JsonUtils;
 import com.zzsong.bus.receiver.BusReceiver;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

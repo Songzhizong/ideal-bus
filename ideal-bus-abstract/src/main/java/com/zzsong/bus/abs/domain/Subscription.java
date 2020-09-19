@@ -15,13 +15,21 @@ public class Subscription {
   public static final int STATUS_DISABLED = 0;
   public static final int STATUS_ENABLED = 1;
   /**
+   * 消费模式: 并行
+   */
+  public static final int CONSUME_TYPE_PARALLEL = 0;
+  /**
+   * 消费模式: 串行
+   */
+  public static final int CONSUME_TYPE_SERIAL = 1;
+  /**
    * 唯一ID
    */
   private Long subscriptionId;
   /**
    * 订阅者id
    */
-  private long subscriberId;
+  private long applicationId;
   /**
    * 事件主题, 也是事件的唯一id
    */
@@ -32,6 +40,10 @@ public class Subscription {
    */
   @Nonnull
   private String condition = DBDefaults.STRING_VALUE;
+  /**
+   * 消费模式, 默认并行
+   */
+  private int consumeType = CONSUME_TYPE_PARALLEL;
   /**
    * 是否广播
    */

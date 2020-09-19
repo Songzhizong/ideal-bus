@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
  */
 public interface BusReceiver {
 
-
   @Nonnull
   Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event);
 }

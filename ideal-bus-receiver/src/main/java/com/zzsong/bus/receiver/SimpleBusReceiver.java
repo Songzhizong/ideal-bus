@@ -27,7 +27,7 @@ public class SimpleBusReceiver implements BusReceiver {
   public Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event) {
     return eventDeliverer.deliver(event);
   }
-  
+
   public void startReceiver() {
     initEventListeners();
   }

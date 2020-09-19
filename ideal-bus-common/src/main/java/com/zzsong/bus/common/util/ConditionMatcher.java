@@ -9,8 +9,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
- * @author 宋志宗
- * @date 2020/5/27
+ * @author 宋志宗 on 2020/5/27
  */
 public class ConditionMatcher {
   private static final Logger log = LoggerFactory.getLogger(ConditionMatcher.class);
@@ -20,8 +19,7 @@ public class ConditionMatcher {
    *
    * @param conditionExpression 条件表达式
    * @return 条件组
-   * @author 宋志宗
-   * @date 2020/7/11 3:46 下午
+   * @author 宋志宗 on 2020/7/11 3:46 下午
    */
   public static List<Set<String>> parseConditionString(@Nonnull String conditionExpression) {
     if (StringUtils.isBlank(conditionExpression)) {
@@ -44,8 +42,7 @@ public class ConditionMatcher {
    * @param conditionsGroup 条件组
    * @param headers         事件头
    * @return 事件头是否符合条件
-   * @author 宋志宗
-   * @date 2020/7/13 10:59 上午
+   * @author 宋志宗 on 2020/7/13 10:59 上午
    */
   public static boolean match(@Nonnull List<Set<String>> conditionsGroup, @Nonnull EventHeaders headers) {
     if (conditionsGroup.size() == 0) {
@@ -69,8 +66,7 @@ public class ConditionMatcher {
    * @param conditionExpression 条件表达式
    * @param headers             事件头
    * @return 是否符合条件
-   * @author 宋志宗
-   * @date 2020/7/13 10:59 上午
+   * @author 宋志宗 on 2020/7/13 10:59 上午
    */
   public static boolean match(@Nonnull String conditionExpression, @Nonnull EventHeaders headers) {
     List<Set<String>> conditionsGroup = parseConditionString(conditionExpression);
@@ -83,8 +79,7 @@ public class ConditionMatcher {
    * @param conditions 组内条件列表
    * @param headers    事件头
    * @return 整组是否符合条件
-   * @author 宋志宗
-   * @date 2020/7/13 10:58 上午
+   * @author 宋志宗 on 2020/7/13 10:58 上午
    */
   private static boolean matchConditions(@Nonnull Set<String> conditions, @Nonnull EventHeaders headers) {
     if (conditions.size() == 0) {

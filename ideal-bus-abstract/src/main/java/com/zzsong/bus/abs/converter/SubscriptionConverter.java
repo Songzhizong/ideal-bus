@@ -16,7 +16,7 @@ public final class SubscriptionConverter {
   @Nonnull
   public static Subscription fromSubscribeArgs(@Nonnull SubscribeArgs subscribeArgs) {
     Subscription subscription = new Subscription();
-    subscription.setSubscriberId(subscribeArgs.getSubscriberId());
+    subscription.setApplicationId(subscribeArgs.getApplicationId());
     subscription.setTopic(subscribeArgs.getTopic());
     subscription.setCondition(subscribeArgs.getCondition());
     subscription.setBroadcast(subscribeArgs.isBroadcast());
@@ -29,7 +29,7 @@ public final class SubscriptionConverter {
   public static Subscription fromSubscriptionArgs(@Nonnull SubscriptionArgs args) {
     Subscription subscription = new Subscription();
 //    subscription.setSubscriptionId();
-//    subscription.setSubscriberId();
+//    subscription.setApplicationId();
     subscription.setTopic(args.getTopic());
     String condition = args.getCondition();
     if (condition != null) {
@@ -50,11 +50,11 @@ public final class SubscriptionConverter {
   @Nonnull
   public static SubscriptionDetails toSubscriptionDetails(@Nonnull Subscription subscription) {
     SubscriptionDetails subscriptionDetails = new SubscriptionDetails();
-//    subscriptionDetails.setSubscriberType();
+//    subscriptionDetails.setApplicationType();
 //    subscriptionDetails.setApplication();
 //    subscriptionDetails.setReceiveUrl();
     subscriptionDetails.setSubscriptionId(subscription.getSubscriptionId());
-    subscriptionDetails.setSubscriberId(subscription.getSubscriberId());
+    subscriptionDetails.setApplicationId(subscription.getApplicationId());
     subscriptionDetails.setTopic(subscription.getTopic());
     subscriptionDetails.setCondition(subscription.getCondition());
     subscriptionDetails.setBroadcast(subscription.isBroadcast());

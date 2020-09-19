@@ -14,6 +14,10 @@ public class ListenerFactory {
    */
   private static final Map<String, Map<String, IEventListener>> LISTENER_MAPPING = new HashMap<>();
 
+  public static Map<String, Map<String, IEventListener>> getAll() {
+    return LISTENER_MAPPING;
+  }
+
   /**
    * 注册监听器
    *

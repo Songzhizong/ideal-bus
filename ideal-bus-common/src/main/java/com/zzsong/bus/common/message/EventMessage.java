@@ -33,11 +33,14 @@ public class EventMessage<T> {
    */
   @Nonnull
   private String bizId = "";
+
+  @Nullable
+  private String key;
   /**
    * 可通过该字段判断event归属哪个应用
    */
   @Nonnull
-  private String application = "";
+  private String externalId = "";
   /**
    * 事件主题
    */
@@ -80,15 +83,23 @@ public class EventMessage<T> {
 
 
   @Nonnull
-  public static <T> EventMessage<T> create(@Nonnull String topic,
-                                           @Nonnull T payload) {
+  public static <T> EventMessage<T> of(@Nonnull String topic,
+                                       @Nonnull T payload) {
     return new EventMessage<>(topic, payload);
   }
 
+
   @Nonnull
-  public static <T> EventMessage<T> create(@Nonnull String topic,
-                                           @Nonnull T payload,
-                                           @Nonnull EventHeaders headers) {
+  public static <T> EventMessage<T> of(@Nonnull String topic,
+                                       @Nonnull T payload,
+                                       @Nonnull String key) {
+    return new EventMessage<T>(topic, payload).key(key);
+  }
+
+  @Nonnull
+  public static <T> EventMessage<T> of(@Nonnull String topic,
+                                       @Nonnull T payload,
+                                       @Nonnull EventHeaders headers) {
     return new EventMessage<>(topic, payload, headers);
   }
 
@@ -97,8 +108,13 @@ public class EventMessage<T> {
     return this;
   }
 
+  public EventMessage<T> key(@Nonnull String key) {
+    this.key = key;
+    return this;
+  }
+
   public EventMessage<T> application(@Nonnull String application) {
-    this.application = application;
+    this.externalId = application;
     return this;
   }
 

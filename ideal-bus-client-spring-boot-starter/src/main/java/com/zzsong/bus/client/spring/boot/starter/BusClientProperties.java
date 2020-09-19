@@ -9,7 +9,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "ideal.cmpt.api.personnel")
+@ConfigurationProperties(prefix = "ideal.bus")
 public class BusClientProperties {
-  
+  private long applicationId;
+
+  private String brokerAddresses = "";
+
+  private String accessToken = "";
 }

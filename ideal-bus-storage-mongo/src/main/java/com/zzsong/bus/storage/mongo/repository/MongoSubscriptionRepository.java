@@ -18,11 +18,11 @@ public interface MongoSubscriptionRepository
   Mono<SubscriptionDo> findFirstByTopic(@Nonnull String topic);
 
   @Nonnull
-  Mono<SubscriptionDo> findFirstBySubscriberId(long subscriberId);
+  Mono<SubscriptionDo> findFirstByApplicationId(long applicationId);
 
   @Nonnull
-  Mono<SubscriptionDo> findFirstBySubscriberIdAndTopic(long subscriberId,
-                                                       @Nonnull String topic);
+  Mono<SubscriptionDo> findFirstByApplicationIdAndTopic(long applicationId,
+                                                        @Nonnull String topic);
 
   @Nonnull
   Flux<SubscriptionDo> findAllByStatus(int status);
@@ -31,7 +31,7 @@ public interface MongoSubscriptionRepository
   Flux<SubscriptionDo> findAllByTopic(@Nonnull String topic);
 
   @Nonnull
-  Flux<SubscriptionDo> findAllBySubscriberId(long subscriberId);
+  Flux<SubscriptionDo> findAllByApplicationId(long applicationId);
 
   @Nonnull
   Mono<Long> deleteBySubscriptionId(long subscriptionId);
@@ -43,9 +43,9 @@ public interface MongoSubscriptionRepository
   Mono<Long> deleteAllByTopic(@Nonnull String topic);
 
   @Nonnull
-  Mono<Long> deleteAllBySubscriberId(long subscriberId);
+  Mono<Long> deleteAllByApplicationId(long applicationId);
 
   @Nonnull
-  Mono<Long> deleteBySubscriberIdAndTopic(long subscriberId, @Nonnull String topic);
+  Mono<Long> deleteByApplicationIdAndTopic(long applicationId, @Nonnull String topic);
 
 }

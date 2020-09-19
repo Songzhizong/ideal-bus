@@ -16,7 +16,7 @@ public final class EventInstanceDoConverter {
     EventInstanceDo eventInstanceDo = new EventInstanceDo();
     eventInstanceDo.setEventId(eventInstance.getEventId());
     eventInstanceDo.setBizId(eventInstance.getBizId());
-    eventInstanceDo.setApplication(eventInstance.getApplication());
+    eventInstanceDo.setExternalId(eventInstance.getExternalId());
     eventInstanceDo.setTopic(eventInstance.getTopic());
     eventInstanceDo.setHeaders(eventInstance.getHeaders());
     eventInstanceDo.setDelay(eventInstance.getDelay());
@@ -30,7 +30,7 @@ public final class EventInstanceDoConverter {
     EventInstance eventInstance = new EventInstance();
     eventInstance.setEventId(eventInstanceDo.getEventId());
     eventInstance.setBizId(eventInstanceDo.getBizId());
-    eventInstance.setApplication(eventInstanceDo.getApplication());
+    eventInstance.setExternalId(eventInstanceDo.getExternalId());
     eventInstance.setTopic(eventInstanceDo.getTopic());
     eventInstance.setHeaders(eventInstanceDo.getHeaders());
     eventInstance.setDelay(eventInstanceDo.getDelay());
