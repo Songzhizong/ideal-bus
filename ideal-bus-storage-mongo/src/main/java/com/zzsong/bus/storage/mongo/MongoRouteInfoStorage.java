@@ -34,6 +34,14 @@ public class MongoRouteInfoStorage implements RouteInfoStorage {
 
   @Nonnull
   @Override
+  public Mono<RouteInfo> save(@Nonnull RouteInfo routeInfo) {
+    RouteInfoDo routeInfoDo = RouteInfoDoConverter.fromRouteInfo(routeInfo);
+    return routeInfoRepository.save(routeInfoDo)
+        .map(RouteInfoDoConverter::toRouteInfo);
+  }
+
+  @Nonnull
+  @Override
   public Mono<List<RouteInfo>> saveAll(@Nonnull Collection<RouteInfo> routeInfos) {
     if (routeInfos.isEmpty()) {
       return Mono.just(Collections.emptyList());

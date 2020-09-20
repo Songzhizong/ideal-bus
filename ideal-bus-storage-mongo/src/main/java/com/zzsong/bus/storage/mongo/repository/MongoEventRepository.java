@@ -11,7 +11,8 @@ import java.util.Collection;
 /**
  * @author 宋志宗 on 2020/9/16
  */
-public interface MongoEventRepository extends ReactiveMongoRepository<EventDo, String> {
+public interface MongoEventRepository
+    extends ReactiveMongoRepository<EventDo, String> {
 
   @Nonnull
   Flux<EventDo> findAllByTopicIn(@Nonnull Collection<String> topicList);

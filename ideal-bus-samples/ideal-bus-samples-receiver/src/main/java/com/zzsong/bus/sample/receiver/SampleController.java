@@ -37,7 +37,6 @@ public class SampleController {
     list.add("3");
 
     DeliveredEvent event = new DeliveredEvent();
-    event.setInstanceId(1232412345L);
     event.setEventId("event_id");
     event.setBizId("biz_id");
     event.setTopic("test");

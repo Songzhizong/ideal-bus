@@ -13,5 +13,8 @@ import java.util.List;
 public interface RouteInfoStorage {
 
   @Nonnull
+  Mono<RouteInfo> save(@Nonnull RouteInfo routeInfo);
+
+  @Nonnull
   Mono<List<RouteInfo>> saveAll(@Nonnull Collection<RouteInfo> routeInfos);
 }

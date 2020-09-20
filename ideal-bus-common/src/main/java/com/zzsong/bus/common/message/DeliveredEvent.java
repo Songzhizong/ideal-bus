@@ -19,8 +19,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveredEvent {
-  @Nonnull
-  private Long instanceId;
   /**
    * 事件唯一id
    */

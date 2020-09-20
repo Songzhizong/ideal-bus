@@ -1,8 +1,6 @@
 package com.zzsong.bus.common.message;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,6 +11,8 @@ import javax.annotation.Nullable;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PublishResult {
   @Nonnull
   private String eventId;

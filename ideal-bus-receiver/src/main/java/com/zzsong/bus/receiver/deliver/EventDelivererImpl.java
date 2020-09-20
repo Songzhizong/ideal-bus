@@ -35,7 +35,7 @@ public class EventDelivererImpl implements EventDeliverer {
   @Override
   public Mono<DeliveredResult> deliver(@Nonnull DeliveredEvent event) {
     DeliveredResult deliveredResult = new DeliveredResult();
-    deliveredResult.setInstanceId(event.getInstanceId());
+    deliveredResult.setEventId(event.getEventId());
 
     String topic = event.getTopic();
     Map<String, IEventListener> listenerMap = ListenerFactory.get(topic);
@@ -73,7 +73,7 @@ public class EventDelivererImpl implements EventDeliverer {
           if (log.isDebugEnabled()) {
             String conditions = JsonUtils.toJsonString(conditionsGroup);
             log.debug("条件不匹配 -> event: {} listener: {} conditions: {}",
-                event.getInstanceId(), eventListener.getListenerName(), conditions);
+                event.getEventId(), eventListener.getListenerName(), conditions);
           }
           continue;
         }

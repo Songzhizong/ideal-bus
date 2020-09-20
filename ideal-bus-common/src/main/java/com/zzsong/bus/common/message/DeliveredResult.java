@@ -17,7 +17,7 @@ import java.util.Map;
 public class DeliveredResult {
 
   @Nonnull
-  private Long instanceId;
+  private String eventId;
 
   /**
    * listener name -> ack

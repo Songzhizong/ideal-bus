@@ -12,5 +12,5 @@ import javax.annotation.Nonnull;
  */
 public interface MessagePusher {
 
-  Mono<Boolean> push(@Nonnull RouteInfo routeInfo);
+  Mono<RouteInfo> push(@Nonnull RouteInfo routeInfo);
 }

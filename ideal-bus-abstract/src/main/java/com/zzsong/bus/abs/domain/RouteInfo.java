@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 推送实例
@@ -75,4 +77,8 @@ public class RouteInfo {
    * 已重试次数
    */
   private int retryCount = -1;
+  /**
+   * 没有ack的监听器列表
+   */
+  private List<String> unackListeners = Collections.emptyList();
 }

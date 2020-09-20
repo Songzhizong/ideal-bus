@@ -11,4 +11,5 @@ public interface RSocketRoute {
   String INTERRUPT = "interrupt";
   String PUBLISH = "publish";
   String AUTO_SUBSCRIB = "auto-subscrib";
+  String CLIENT_RECEIVE = "client-receive";
 }
