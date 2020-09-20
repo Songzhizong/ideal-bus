@@ -17,6 +17,10 @@ import java.time.Duration;
 @ConfigurationProperties("ideal.bus")
 public class BusProperties {
   /**
+   * 当前节点的nodeId, 集群部署每个节点都必须有自己的id
+   */
+  private int nodeId = -1;
+  /**
    * 本地缓存的刷新间隔
    */
   private Duration refreshLocalCacheInterval = Duration.ofMinutes(10);

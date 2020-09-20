@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,8 +26,14 @@ public class RouteInfoService {
   public Mono<RouteInfo> save(@Nonnull RouteInfo routeInfo) {
     return storage.save(routeInfo);
   }
+
   @Nonnull
   public Mono<List<RouteInfo>> saveAll(@Nonnull Collection<RouteInfo> routeInfos) {
     return storage.saveAll(routeInfos);
+  }
+
+  @Nonnull
+  public Mono<List<RouteInfo>> loadDelayed(long maxNextTime, int count, int nodeId) {
+    return storage.loadDelayed(maxNextTime, count, nodeId);
   }
 }

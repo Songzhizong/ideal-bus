@@ -17,4 +17,7 @@ public interface RouteInfoStorage {
 
   @Nonnull
   Mono<List<RouteInfo>> saveAll(@Nonnull Collection<RouteInfo> routeInfos);
+
+  @Nonnull
+  Mono<List<RouteInfo>> loadDelayed(long maxNextTime, int count, int nodeId);
 }

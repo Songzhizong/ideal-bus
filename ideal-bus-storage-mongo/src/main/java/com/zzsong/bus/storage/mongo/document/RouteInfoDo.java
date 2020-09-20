@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -23,6 +25,11 @@ public class RouteInfoDo {
   @Id
   @Nonnull
   private Long instanceId;
+  /**
+   * broker nodeId
+   */
+  @Indexed
+  private int nodeId;
   /**
    * 事件唯一id
    */
@@ -60,4 +67,8 @@ public class RouteInfoDo {
    * 已重试次数
    */
   private int retryCount = -1;
+  /**
+   * 没有ack的监听器列表
+   */
+  private List<String> unackListeners = Collections.emptyList();
 }

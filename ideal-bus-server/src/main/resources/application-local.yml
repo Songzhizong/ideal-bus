@@ -14,3 +14,7 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
+ideal:
+  bus:
+    # 当前节点在集群中的编号, 必填且不可重复
+    node-id: 1

@@ -7,6 +7,11 @@ import com.zzsong.bus.abs.storage.RouteInfoStorage;
 import com.zzsong.bus.storage.mongo.converter.RouteInfoDoConverter;
 import com.zzsong.bus.storage.mongo.document.RouteInfoDo;
 import com.zzsong.bus.storage.mongo.repository.MongoRouteInfoRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -24,11 +29,15 @@ public class MongoRouteInfoStorage implements RouteInfoStorage {
   @Nonnull
   private final IDGenerator idGenerator;
   @Nonnull
+  private final ReactiveMongoTemplate template;
+  @Nonnull
   private final MongoRouteInfoRepository routeInfoRepository;
 
   public MongoRouteInfoStorage(@Nonnull IDGeneratorFactory idGeneratorFactory,
+                               @Nonnull ReactiveMongoTemplate template,
                                @Nonnull MongoRouteInfoRepository routeInfoRepository) {
     this.idGenerator = idGeneratorFactory.getGenerator("routeInfo");
+    this.template = template;
     this.routeInfoRepository = routeInfoRepository;
   }
 
@@ -57,5 +66,32 @@ public class MongoRouteInfoStorage implements RouteInfoStorage {
         .map(RouteInfoDoConverter::toRouteInfo)
         .collectList()
         .defaultIfEmpty(Collections.emptyList());
+  }
+
+  @Nonnull
+  @Override
+  public Mono<List<RouteInfo>> loadDelayed(long maxNextTime, int count, int nodeId) {
+    Criteria criteria = Criteria
+        .where("wait").is(RouteInfo.WAITING)
+        .and("nodeId").is(nodeId)
+        .and("nextPushTime").lte(maxNextTime);
+    Query query = Query.query(criteria).limit(count).with(Sort.by("instanceId"));
+    return template.find(query, RouteInfoDo.class)
+        .map(RouteInfoDoConverter::toRouteInfo)
+        .collectList()
+        .flatMap(routeInfoList -> {
+          if (routeInfoList.isEmpty()) {
+            return Mono.just(routeInfoList);
+          }
+          List<Long> instanceIds = routeInfoList.stream()
+              .map(RouteInfo::getInstanceId)
+              .collect(Collectors.toList());
+          Query updateQuery = Query.query(Criteria.where("instanceId").in(instanceIds));
+          Update update = new Update();
+          update.set("wait", RouteInfo.UN_WAITING);
+          update.set("nextPushTime", -1L);
+          return template.updateMulti(updateQuery, update, RouteInfoDo.class)
+              .map(r -> routeInfoList);
+        });
   }
 }

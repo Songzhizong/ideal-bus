@@ -9,6 +9,7 @@ import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.abs.storage.EventInstanceStorage;
 import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.bus.core.admin.service.RouteInfoService;
+import com.zzsong.bus.core.config.BusProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +29,8 @@ public class PublishService {
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
+  private final BusProperties properties;
+  @Nonnull
   private final RouteTransfer routeTransfer;
   @Nonnull
   private final RouteInfoService routeInfoService;
@@ -35,10 +38,12 @@ public class PublishService {
   private final EventInstanceStorage eventInstanceStorage;
 
   public PublishService(@Nonnull LocalCache localCache,
+                        @Nonnull BusProperties properties,
                         @Nonnull RouteTransfer routeTransfer,
                         @Nonnull RouteInfoService routeInfoService,
                         @Nonnull EventInstanceStorage eventInstanceStorage) {
     this.localCache = localCache;
+    this.properties = properties;
     this.routeTransfer = routeTransfer;
     this.routeInfoService = routeInfoService;
     this.eventInstanceStorage = eventInstanceStorage;
@@ -66,6 +71,7 @@ public class PublishService {
   }
 
   private Mono<List<RouteInfo>> route(@Nonnull EventInstance event) {
+    // 保存事件实例
     return eventInstanceStorage.save(event)
         .flatMap(ins -> {
           String topic = event.getTopic();
@@ -74,7 +80,6 @@ public class PublishService {
             return Mono.just(Collections.emptyList());
           }
           EventHeaders headers = event.getHeaders();
-
           List<RouteInfo> routeInfoList = new ArrayList<>();
           for (SubscriptionDetails details : subscription) {
             List<Set<String>> group = details.getConditionGroup();
@@ -96,6 +101,7 @@ public class PublishService {
                                     @Nonnull SubscriptionDetails details) {
     RouteInfo instance = new RouteInfo();
     instance.setEventId(event.getEventId());
+    instance.setNodeId(properties.getNodeId());
     instance.setKey(event.getKey());
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());

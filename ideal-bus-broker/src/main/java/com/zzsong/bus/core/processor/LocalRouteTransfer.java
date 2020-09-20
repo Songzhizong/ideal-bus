@@ -84,6 +84,9 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
     }
   }
 
+  /**
+   * TODO: 客户端一直不上线将会导致队列中的消息堆积
+   */
   private void push(@Nonnull RouteInfo routeInfo) throws InterruptedException {
     Long subscriptionId = routeInfo.getSubscriptionId();
     SubscriptionDetails subscription = localCache.getSubscription(subscriptionId);

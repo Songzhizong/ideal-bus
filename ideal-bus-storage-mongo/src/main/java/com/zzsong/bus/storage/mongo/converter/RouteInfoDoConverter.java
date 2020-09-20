@@ -13,8 +13,8 @@ public final class RouteInfoDoConverter {
   @Nonnull
   public static RouteInfoDo fromRouteInfo(@Nonnull RouteInfo routeInfo) {
     RouteInfoDo routeInfoDo = new RouteInfoDo();
-    Long instanceId = routeInfo.getInstanceId();
-    routeInfoDo.setInstanceId(instanceId);
+    routeInfoDo.setInstanceId(routeInfo.getInstanceId());
+    routeInfoDo.setNodeId(routeInfo.getNodeId());
     routeInfoDo.setEventId(routeInfo.getEventId());
     routeInfoDo.setSubscriptionId(routeInfo.getSubscriptionId());
     routeInfoDo.setApplicationId(routeInfo.getApplicationId());
@@ -23,6 +23,7 @@ public final class RouteInfoDoConverter {
     routeInfoDo.setNextPushTime(routeInfo.getNextPushTime());
     routeInfoDo.setSuccess(routeInfo.getSuccess());
     routeInfoDo.setRetryCount(routeInfo.getRetryCount());
+    routeInfoDo.setUnackListeners(routeInfo.getUnackListeners());
     return routeInfoDo;
   }
 
@@ -30,6 +31,7 @@ public final class RouteInfoDoConverter {
   public static RouteInfo toRouteInfo(@Nonnull RouteInfoDo routeInfoDo) {
     RouteInfo routeInfo = new RouteInfo();
     routeInfo.setInstanceId(routeInfoDo.getInstanceId());
+    routeInfo.setNodeId(routeInfoDo.getNodeId());
     routeInfo.setEventId(routeInfoDo.getEventId());
     routeInfo.setSubscriptionId(routeInfoDo.getSubscriptionId());
     routeInfo.setApplicationId(routeInfoDo.getApplicationId());
@@ -38,6 +40,7 @@ public final class RouteInfoDoConverter {
     routeInfo.setSuccess(routeInfoDo.getSuccess());
     routeInfo.setWait(routeInfoDo.getWait());
     routeInfo.setRetryCount(routeInfoDo.getRetryCount());
+    routeInfo.setUnackListeners(routeInfoDo.getUnackListeners());
     return routeInfo;
   }
 }

@@ -39,6 +39,10 @@ public class RouteInfo {
   @Nonnull
   private Long instanceId;
   /**
+   * broker nodeId
+   */
+  private int nodeId;
+  /**
    * 事件唯一id
    */
   @Nonnull

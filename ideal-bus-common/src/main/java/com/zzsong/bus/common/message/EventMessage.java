@@ -33,7 +33,9 @@ public class EventMessage<T> {
    */
   @Nonnull
   private String bizId = "";
-
+  /**
+   * 相同的key会尽可能的投递到同一个队列中
+   */
   @Nullable
   private String key;
   /**
