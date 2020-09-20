@@ -40,6 +40,15 @@ public interface LbFactory<Server extends LbServer> {
    */
   void addServers(@Nonnull String appName, @Nonnull List<Server> newServers);
 
+
+  /**
+   * 将服务标记为可达
+   *
+   * @param server 可达服务
+   * @author 宋志宗 on 2020/8/19 23:40
+   */
+  void markServerReachable(@Nonnull String appName, @Nonnull Server server);
+
   /**
    * 将服务标记为不可达
    *

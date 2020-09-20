@@ -1,10 +1,13 @@
 package com.zzsong.bus.client.rsocket;
 
+import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.client.BusChannel;
 import com.zzsong.bus.client.BusClient;
+import com.zzsong.bus.client.SimpleBusClient;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.*;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
+import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.utils.JsonUtils;
 import io.rsocket.SocketAcceptor;
 import lombok.Setter;
@@ -44,6 +47,8 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   private final String clientIpPort;
   @Nonnull
   private final BusClient busClient;
+  @Nonnull
+  private final LbFactory<BusChannel> lbFactory;
   @Setter
   private String accessToken;
 
@@ -55,16 +60,19 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   public RSocketBusChannel(@Nonnull String brokerIp,
                            int brokerPort, long applicationId,
                            @Nonnull String clientIpPort,
-                           @Nonnull BusClient busClient) {
+                           @Nonnull BusClient busClient,
+                           @Nonnull LbFactory<BusChannel> lbFactory) {
     this.brokerIp = brokerIp;
     this.brokerPort = brokerPort;
     this.applicationId = applicationId;
     this.clientIpPort = clientIpPort;
     this.busClient = busClient;
+    this.lbFactory = lbFactory;
     this.brokerAddress = brokerIp + ":" + brokerPort;
   }
 
   public void startChannel() {
+    lbFactory.addServers(SimpleBusClient.BUS_BROKER_APP_NAME, ImmutableList.of(this));
     this.start();
   }
 
@@ -99,7 +107,6 @@ public class RSocketBusChannel extends Thread implements BusChannel {
             .doOnNext(r -> log.info("Broker {} login success.", brokerAddress))
             .block();
       } catch (Exception e) {
-        running = false;
         restartSocket();
         return;
       }
@@ -114,7 +121,6 @@ public class RSocketBusChannel extends Thread implements BusChannel {
             .doOnNext(r -> log.info("Broker {} login success.", brokerAddress))
             .block();
       } catch (Exception e) {
-        running = false;
         restartSocket();
         return;
       }
@@ -128,16 +134,20 @@ public class RSocketBusChannel extends Thread implements BusChannel {
           log.info("Broker socket error: {}", errMessage);
         })
         .doFinally(consumer -> {
-          running = false;
           log.info("Broker {} 连接断开: {}, {} 秒后尝试重连...",
               brokerAddress, consumer, RESTART_DELAY);
           restartSocket();
         })
         .subscribe();
     running = true;
+    lbFactory.markServerReachable(SimpleBusClient.BUS_BROKER_APP_NAME, this);
   }
 
   private void restartSocket() {
+    if (running) {
+      lbFactory.markServerDown(SimpleBusClient.BUS_BROKER_APP_NAME, this);
+    }
+    running = false;
     restartNoticeQueue.offer(true);
   }
 
@@ -221,7 +231,6 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   public Mono<String> interrupt(String status) {
     log.warn("Broker: {} 服务中断: {}, {} 秒后尝试重连...",
         brokerAddress, status, RESTART_DELAY);
-    running = false;
     restartSocket();
     return Mono.just("received...");
   }

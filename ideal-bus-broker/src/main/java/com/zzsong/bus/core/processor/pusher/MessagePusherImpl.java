@@ -66,6 +66,7 @@ public class MessagePusherImpl implements MessagePusher {
       }
       int currentRetryCount = routeInfo.getRetryCount() + 1;
       routeInfo.setRetryCount(currentRetryCount);
+      routeInfo.setWait(RouteInfo.UN_WAITING);
       if (unackList.isEmpty()) {
         // 全部ack, 标记为成功状态
         routeInfo.setSuccess(RouteInfo.STATUS_SUCCESS);

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class SimpleBusClient implements BusClient {
   private static final Logger log = LoggerFactory.getLogger(SimpleBusClient.class);
-  private static final String BUS_BROKER_APP_NAME = "busBroker";
+  public static final String BUS_BROKER_APP_NAME = "busBroker";
   private final BusReceiver busReceiver;
   private final LbFactory<BusChannel> lbFactory = new SimpleLbFactory<>();
 
@@ -83,12 +83,11 @@ public class SimpleBusClient implements BusClient {
         throw new IllegalArgumentException("RSocket地址配置错误");
       }
       RSocketBusChannel channel = new RSocketBusChannel(
-          ip, port, applicationId, clientIpPort, this);
+          ip, port, applicationId, clientIpPort, this, lbFactory);
       channel.setAccessToken(accessToken);
       channel.startChannel();
       busChannels.add(channel);
     }
-    lbFactory.addServers(BUS_BROKER_APP_NAME, busChannels);
     return busChannels;
   }
 

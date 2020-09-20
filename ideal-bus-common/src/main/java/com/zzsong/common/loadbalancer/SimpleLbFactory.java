@@ -47,6 +47,12 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
   }
 
   @Override
+  public void markServerReachable(@Nonnull String appName, @Nonnull Server server) {
+    final LbServerHolder<Server> serverHolder = getServerHolder(appName);
+    serverHolder.markServerReachable(server);
+  }
+
+  @Override
   public void markServerDown(@Nonnull String appName, @Nonnull Server server) {
     final LbServerHolder<Server> serverHolder = getServerHolder(appName);
     serverHolder.markServerDown(server);
