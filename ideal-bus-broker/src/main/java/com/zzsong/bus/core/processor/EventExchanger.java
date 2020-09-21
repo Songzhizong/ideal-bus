@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @author 宋志宗 on 2020/9/17
  */
 @Component
-public class PublishService {
+public class EventExchanger {
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -37,7 +37,7 @@ public class PublishService {
   @Nonnull
   private final EventInstanceStorage eventInstanceStorage;
 
-  public PublishService(@Nonnull LocalCache localCache,
+  public EventExchanger(@Nonnull LocalCache localCache,
                         @Nonnull BusProperties properties,
                         @Nonnull RouteTransfer routeTransfer,
                         @Nonnull RouteInstanceService routeInstanceService,
