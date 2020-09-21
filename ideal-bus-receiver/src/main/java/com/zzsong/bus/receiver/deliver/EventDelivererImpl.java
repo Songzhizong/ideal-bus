@@ -8,8 +8,7 @@ import com.zzsong.bus.common.message.EventHeaders;
 import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.common.utils.JsonUtils;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -21,8 +20,8 @@ import java.util.stream.Collectors;
 /**
  * @author 宋志宗 on 2020/9/17
  */
+@Slf4j
 public class EventDelivererImpl implements EventDeliverer {
-  private static final Logger log = LoggerFactory.getLogger(EventDelivererImpl.class);
 
   @Nonnull
   private final Scheduler scheduler;
@@ -49,7 +48,7 @@ public class EventDelivererImpl implements EventDeliverer {
     List<String> listeners = event.getListeners();
 
     // 存储待调用的监听器列表
-    List<IEventListener> invorkListeners = new ArrayList<>();
+    List<IEventListener> invokeListeners = new ArrayList<>();
     if (listeners != null && listeners.size() > 0) {
       // 指定的监听器不为空, 直接交给该监听器执行
       for (String listenerName : listeners) {
@@ -60,7 +59,7 @@ public class EventDelivererImpl implements EventDeliverer {
           log.error("topic: {} 没有名称为: {} 的监听器", topic, listenerName);
           deliveredResult.markAck(listenerName, false);
         } else {
-          invorkListeners.add(listener);
+          invokeListeners.add(listener);
         }
       }
     } else {
@@ -77,14 +76,14 @@ public class EventDelivererImpl implements EventDeliverer {
           }
           continue;
         }
-        invorkListeners.add(eventListener);
+        invokeListeners.add(eventListener);
       }
     }
     // 待执行的监听器列表为空, 直接返回结果
-    if (invorkListeners.isEmpty()) {
+    if (invokeListeners.isEmpty()) {
       return Mono.just(deliveredResult);
     }
-    List<Mono<EventContext<Object>>> monoList = invorkListeners.stream()
+    List<Mono<EventContext<Object>>> monoList = invokeListeners.stream()
         .map(l -> Mono.just(l)
             .map(listener -> {
               String listenerName = listener.getListenerName();
@@ -97,7 +96,9 @@ public class EventDelivererImpl implements EventDeliverer {
                   context.ack();
                 }
               } catch (Exception e) {
+                String errMessage = e.getClass().getName() + ":" + e.getMessage();
                 log.info("event处理异常: ", e);
+                context.setMessage(errMessage);
               }
               return context;
             }).subscribeOn(scheduler)

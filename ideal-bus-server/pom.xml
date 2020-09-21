@@ -52,7 +52,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
         <configuration>
-          <mainClass>com.zzsong.bus.server.BusApplication</mainClass>
+          <mainClass>com.zzsong.bus.server.BrokerApplication</mainClass>
         </configuration>
         <executions>
           <execution>

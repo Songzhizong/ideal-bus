@@ -41,6 +41,28 @@ public class SubscriptionController {
   }
 
   /**
+   * 修改订阅信息
+   */
+  @Nonnull
+  @PostMapping("/update")
+  public Mono<Res<Subscription>> update(@Validated @RequestBody
+                                        @Nonnull SubscribeArgs args,
+                                        @NotNull(message = "订阅关系id不能为空")
+                                        @Nonnull Long subscriptionId) {
+    return subscriptionService.update(args, subscriptionId).map(Res::data);
+  }
+
+  /**
+   * 反转订阅状态
+   */
+  @Nonnull
+  @PostMapping("/status/reversal")
+  public Mono<Res<Integer>> reversalStatus(@NotNull(message = "订阅关系id不能为空")
+                                           @Nonnull Long subscriptionId) {
+    return subscriptionService.reversalStatus(subscriptionId).map(Res::data);
+  }
+
+  /**
    * 自动订阅
    *
    * @param args 订阅参数
@@ -50,7 +72,7 @@ public class SubscriptionController {
   @PostMapping("/subscribe/auto")
   public Mono<Res<List<Subscription>>> autoSubscription(@Validated @RequestBody
                                                         @Nonnull AutoSubscribeArgs args) {
-    return subscriptionService.autoSubscrib(args).map(Res::data);
+    return subscriptionService.autoSubscribe(args).map(Res::data);
   }
 
   /**

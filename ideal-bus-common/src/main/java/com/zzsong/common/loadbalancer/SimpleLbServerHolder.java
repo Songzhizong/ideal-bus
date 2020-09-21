@@ -3,8 +3,7 @@ package com.zzsong.common.loadbalancer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -18,8 +17,8 @@ import java.util.concurrent.*;
  *
  * @author 宋志宗 on 2020/8/20
  */
+@Slf4j
 public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
-  private static final Logger log = LoggerFactory.getLogger(SimpleLbServerHolder.class);
   private static final int defaultHeartbeatIntervalSeconds = 20;
   private static ThreadPoolExecutor heartbeatThreadPool;
   private static volatile boolean RUNNING = false;

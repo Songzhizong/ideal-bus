@@ -1,8 +1,8 @@
 package com.zzsong.bus.core.processor;
 
 import com.zzsong.bus.abs.core.RouteTransfer;
-import com.zzsong.bus.abs.domain.RouteInfo;
-import com.zzsong.bus.core.admin.service.RouteInfoService;
+import com.zzsong.bus.abs.domain.RouteInstance;
+import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.config.BusProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class TimingScheduler implements SmartInitializingSingleton {
-  private static final int preReadCount = 2000;
+  private static final int preReadCount = 1000;
   private static final long preReadMills = 5000L;
 
-  private final ConcurrentMap<Integer, List<RouteInfo>> ringData
+  private final ConcurrentMap<Integer, List<RouteInstance>> ringData
       = new ConcurrentHashMap<>();
   private Thread scheduleThread;
   private Thread ringThread;
@@ -37,14 +37,14 @@ public class TimingScheduler implements SmartInitializingSingleton {
   @Nonnull
   private final RouteTransfer routeTransfer;
   @Nonnull
-  private final RouteInfoService routeInfoService;
+  private final RouteInstanceService routeInstanceService;
 
   public TimingScheduler(@Nonnull BusProperties busProperties,
                          @Nonnull RouteTransfer routeTransfer,
-                         @Nonnull RouteInfoService routeInfoService) {
+                         @Nonnull RouteInstanceService routeInstanceService) {
     this.busProperties = busProperties;
     this.routeTransfer = routeTransfer;
-    this.routeInfoService = routeInfoService;
+    this.routeInstanceService = routeInstanceService;
   }
 
   private void start() {
@@ -63,28 +63,25 @@ public class TimingScheduler implements SmartInitializingSingleton {
         long maxNextTime = nowTime + preReadMills;
         int nodeId = busProperties.getNodeId();
         boolean preReadSuc = true;
-        List<RouteInfo> routeInfoList = routeInfoService
+        List<RouteInstance> routeInstanceList = routeInstanceService
             .loadDelayed(maxNextTime, preReadCount, nodeId)
             .block();
-        if (routeInfoList != null && routeInfoList.size() > 0) {
-          log.debug("loadDelayed: {}", routeInfoList.size());
-          List<RouteInfo> submitList = new ArrayList<>();
-          for (RouteInfo routeInfo : routeInfoList) {
-            long nextPushTime = routeInfo.getNextPushTime();
-            if (nowTime > nextPushTime + preReadMills) {
-              log.warn("过期任务: {}", routeInfo.getInstanceId());
-            } else if (nowTime >= nextPushTime) {
-              submitList.add(routeInfo);
+        if (routeInstanceList != null && routeInstanceList.size() > 0) {
+          log.debug("loadDelayed: {}", routeInstanceList.size());
+          List<RouteInstance> submitList = new ArrayList<>();
+          for (RouteInstance routeInstance : routeInstanceList) {
+            long nextPushTime = routeInstance.getNextPushTime();
+            if (nowTime >= nextPushTime) {
+              submitList.add(routeInstance);
             } else {
               int ringSecond = (int) (nextPushTime / 1000 % 60);
-              pushTimeRing(ringSecond, routeInfo);
+              pushTimeRing(ringSecond, routeInstance);
             }
           }
           if (submitList.size() > 0) {
             routeTransfer.submit(submitList).subscribe();
           }
         } else {
-          log.debug("loadDelayed: empty");
           preReadSuc = false;
         }
         long cost = System.currentTimeMillis() - start;
@@ -121,7 +118,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
         int nowSecond = Calendar.getInstance().get(Calendar.SECOND);
         for (int i = 0; i < 2; i++) {
           int second = (nowSecond + 60 - i) % 60;
-          List<RouteInfo> tmpData = ringData.remove(second);
+          List<RouteInstance> tmpData = ringData.remove(second);
           if (tmpData != null) {
             routeTransfer.submit(tmpData).subscribe();
           }
@@ -143,10 +140,10 @@ public class TimingScheduler implements SmartInitializingSingleton {
   }
 
 
-  private void pushTimeRing(int ringSecond, RouteInfo routeInfo) {
-    List<RouteInfo> routeInfos
+  private void pushTimeRing(int ringSecond, RouteInstance routeInstance) {
+    List<RouteInstance> routeInstances
         = ringData.computeIfAbsent(ringSecond, k -> new ArrayList<>());
-    routeInfos.add(routeInfo);
+    routeInstances.add(routeInstance);
   }
 
   public void stop() {
@@ -174,7 +171,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
     boolean hasRingData = false;
     if (!ringData.isEmpty()) {
       for (Integer second : ringData.keySet()) {
-        List<RouteInfo> viewList = ringData.get(second);
+        List<RouteInstance> viewList = ringData.get(second);
         if (viewList != null && viewList.size() > 0) {
           hasRingData = true;
           break;

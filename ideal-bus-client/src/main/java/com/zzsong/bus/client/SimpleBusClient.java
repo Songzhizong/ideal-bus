@@ -14,9 +14,8 @@ import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.loadbalancer.LbStrategyEnum;
 import com.zzsong.common.loadbalancer.SimpleLbFactory;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,8 +27,8 @@ import java.util.stream.Collectors;
 /**
  * @author 宋志宗 on 2020/9/19 11:43 下午
  */
+@Slf4j
 public class SimpleBusClient implements BusClient {
-  private static final Logger log = LoggerFactory.getLogger(SimpleBusClient.class);
   public static final String BUS_BROKER_APP_NAME = "busBroker";
   private final BusReceiver busReceiver;
   private final LbFactory<BusChannel> lbFactory = new SimpleLbFactory<>();
@@ -45,6 +44,8 @@ public class SimpleBusClient implements BusClient {
   private String accessToken;
   @Setter
   private String clientIpPort;
+  @Setter
+  private boolean autoSubscribe;
 
   public SimpleBusClient(BusReceiver busReceiver) {
     this.busReceiver = busReceiver;
@@ -58,8 +59,8 @@ public class SimpleBusClient implements BusClient {
     // 初始化和broker之间的连接
     final List<BusChannel> channels = initChannel();
     // 自动注册
-    if (!channels.isEmpty()) {
-      autoSubscrib(channels.get(0));
+    if (!channels.isEmpty() && autoSubscribe) {
+      autoSubscribe(channels.get(0));
     }
   }
 
@@ -91,7 +92,7 @@ public class SimpleBusClient implements BusClient {
     return busChannels;
   }
 
-  private void autoSubscrib(@Nonnull BusChannel busChannel) {
+  private void autoSubscribe(@Nonnull BusChannel busChannel) {
     final Map<String, Map<String, IEventListener>> all = ListenerFactory.getAll();
     final AutoSubscribeArgs autoSubscribeArgs = new AutoSubscribeArgs();
     autoSubscribeArgs.setApplicationId(applicationId);

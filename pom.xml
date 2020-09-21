@@ -30,7 +30,7 @@
     <ideal-bus.version>1.0.0</ideal-bus.version>
 
     <reactor-bom.version>Dysprosium-SR12</reactor-bom.version>
-    <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
+    <spring.boot.version>2.3.4.RELEASE</spring.boot.version>
     <spring.cloud.version>Hoxton.SR8</spring.cloud.version>
     <spring-boot-starter-actuator.version>2.2.9.RELEASE</spring-boot-starter-actuator.version>
 

@@ -3,8 +3,7 @@ package com.zzsong.bus.core.config;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.abs.share.Res;
 import com.zzsong.bus.abs.share.ResMsg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,9 @@ import javax.annotation.Nonnull;
 /**
  * Created by 宋志宗 on 2020/9/12
  */
+@Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
-  private static final Logger log = LoggerFactory.getLogger(CustomExceptionHandler.class);
   private static final MultiValueMap<String, String> RESPONSE_HEADERS = new LinkedMultiValueMap<>();
 
   @ExceptionHandler(WebExchangeBindException.class)

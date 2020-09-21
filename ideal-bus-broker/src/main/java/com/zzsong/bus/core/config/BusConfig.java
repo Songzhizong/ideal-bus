@@ -4,13 +4,13 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.zzsong.bus.abs.core.MessagePusher;
 import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
+import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.bus.core.processor.LocalRouteTransfer;
-import com.zzsong.bus.core.processor.pusher.DelivereChannel;
+import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.loadbalancer.SimpleLbFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +25,9 @@ import java.util.concurrent.*;
 /**
  * @author 宋志宗 on 2020/9/16
  */
+@Slf4j
 @Configuration
 public class BusConfig {
-  private static final Logger log = LoggerFactory.getLogger(BusConfig.class);
 
   @Value("${spring.application.name}")
   private String applicationName;
@@ -39,17 +39,20 @@ public class BusConfig {
   }
 
   @Bean
-  public LbFactory<DelivereChannel> lbFactory() {
-    final SimpleLbFactory<DelivereChannel> lbFactory = new SimpleLbFactory<>();
+  public LbFactory<DelivererChannel> lbFactory() {
+    final SimpleLbFactory<DelivererChannel> lbFactory = new SimpleLbFactory<>();
     return lbFactory;
   }
 
   @Bean
   @ConditionalOnMissingBean
   public RouteTransfer routeTransfer(@Nonnull LocalCache localCache,
+                                     @Nonnull BusProperties properties,
                                      @Nonnull MessagePusher messagePusher,
-                                     @Nonnull LbFactory<DelivereChannel> lbFactory) {
-    return new LocalRouteTransfer(localCache, messagePusher, lbFactory);
+                                     @Nonnull LbFactory<DelivererChannel> lbFactory,
+                                     @Nonnull RouteInstanceService routeInstanceService) {
+    return new LocalRouteTransfer(
+        localCache, properties, messagePusher, lbFactory, routeInstanceService);
   }
 
   @Bean

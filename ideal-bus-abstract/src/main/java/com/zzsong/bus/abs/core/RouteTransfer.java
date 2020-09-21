@@ -1,6 +1,6 @@
 package com.zzsong.bus.abs.core;
 
-import com.zzsong.bus.abs.domain.RouteInfo;
+import com.zzsong.bus.abs.domain.RouteInstance;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -11,5 +11,5 @@ import java.util.List;
  */
 public interface RouteTransfer {
 
-  Mono<Boolean> submit(@Nonnull List<RouteInfo> routeInfoList);
+  Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList);
 }

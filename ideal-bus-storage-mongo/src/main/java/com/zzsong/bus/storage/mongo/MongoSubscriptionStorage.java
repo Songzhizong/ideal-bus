@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -96,6 +97,15 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
 
   @Nonnull
   @Override
+  public Mono<Optional<Subscription>> findById(long subscriptionId) {
+    return repository.findById(subscriptionId)
+        .map(SubscriptionDoConverter::toSubscription)
+        .map(Optional::of)
+        .defaultIfEmpty(Optional.empty());
+  }
+
+  @Nonnull
+  @Override
   public Mono<List<Subscription>> findAll() {
     return repository.findAll()
         .map(SubscriptionDoConverter::toSubscription)
@@ -137,6 +147,13 @@ public class MongoSubscriptionStorage implements SubscriptionStorage {
   @Override
   public Mono<Boolean> existByApplication(long applicationId) {
     return repository.findFirstByApplicationId(applicationId)
+        .map(s -> true).defaultIfEmpty(false);
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Boolean> existByApplicationAndTopic(long applicationId, @Nonnull String topic) {
+    return repository.findFirstByApplicationIdAndTopic(applicationId, topic)
         .map(s -> true).defaultIfEmpty(false);
   }
 }

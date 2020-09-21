@@ -3,7 +3,6 @@ package com.zzsong.bus.core.socket.rsocket;
 import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.EventInstance;
-import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
@@ -11,12 +10,11 @@ import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.bus.core.processor.PublishService;
-import com.zzsong.bus.core.processor.pusher.DelivereChannel;
+import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.utils.JsonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -25,15 +23,14 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * @author 宋志宗 on 2020/9/19 5:48 下午
  */
+@Slf4j
 @Controller
 public class RSocketServer {
-  private static final Logger log = LoggerFactory.getLogger(RSocketServer.class);
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -41,12 +38,12 @@ public class RSocketServer {
   @Nonnull
   private final SubscriptionService subscriptionService;
   @Nonnull
-  private final LbFactory<DelivereChannel> lbFactory;
+  private final LbFactory<DelivererChannel> lbFactory;
 
   public RSocketServer(@Nonnull LocalCache localCache,
                        @Nonnull PublishService publishService,
                        @Nonnull SubscriptionService subscriptionService,
-                       @Nonnull LbFactory<DelivereChannel> lbFactory) {
+                       @Nonnull LbFactory<DelivererChannel> lbFactory) {
     this.localCache = localCache;
     this.publishService = publishService;
     this.subscriptionService = subscriptionService;
@@ -62,7 +59,7 @@ public class RSocketServer {
     final String accessToken = message.getAccessToken();
     final String appName = applicationId + "";
     final Application application = localCache.getApplication(applicationId);
-    DelivereChannel[] warp = new DelivereChannel[1];
+    DelivererChannel[] warp = new DelivererChannel[1];
     requester.rsocket()
         .onClose()
         .doFirst(() -> {
@@ -84,8 +81,8 @@ public class RSocketServer {
                 .subscribe();
           } else {
             log.info("{} 客户端: {} 建立连接.", applicationId, instanceId);
-            RSocketDelivereChannel channel
-                = new RSocketDelivereChannel(applicationId, instanceId, requester);
+            RSocketDelivererChannel channel
+                = new RSocketDelivererChannel(instanceId, requester);
             warp[0] = channel;
             lbFactory.addServers(appName, ImmutableList.of(channel));
           }
@@ -96,7 +93,7 @@ public class RSocketServer {
           log.info("socket error: {}", errMessage);
         })
         .doFinally(consumer -> {
-          DelivereChannel channel = warp[0];
+          DelivererChannel channel = warp[0];
           if (channel != null) {
             lbFactory.markServerDown(appName, channel);
           }
@@ -111,7 +108,7 @@ public class RSocketServer {
   }
 
   @MessageMapping(RSocketRoute.AUTO_SUBSCRIB)
-  public Mono<String> autoSubscrib(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
-    return subscriptionService.autoSubscrib(autoSubscribeArgs).map(JsonUtils::toJsonString);
+  public Mono<String> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
+    return subscriptionService.autoSubscribe(autoSubscribeArgs).map(JsonUtils::toJsonString);
   }
 }

@@ -11,8 +11,7 @@ import com.zzsong.bus.core.admin.service.ApplicationService;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,10 @@ import java.util.stream.Collectors;
  *
  * @author 宋志宗 on 2020/9/17
  */
+@Slf4j
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Component
 public class LocalCache implements InitializingBean, DisposableBean {
-  private static final Logger log = LoggerFactory.getLogger(LocalCache.class);
   private ScheduledExecutorService scheduledExecutor;
   @Autowired
   private EventInstanceService eventInstanceService;

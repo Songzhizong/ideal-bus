@@ -1,9 +1,8 @@
 package com.zzsong.bus.common.util;
 
 import com.zzsong.bus.common.message.EventHeaders;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -11,8 +10,8 @@ import java.util.*;
 /**
  * @author 宋志宗 on 2020/5/27
  */
+@Slf4j
 public class ConditionMatcher {
-  private static final Logger log = LoggerFactory.getLogger(ConditionMatcher.class);
 
   /**
    * 将条件表达式解析为条件组

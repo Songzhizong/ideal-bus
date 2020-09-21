@@ -1,6 +1,7 @@
 package com.zzsong.bus.receiver.deliver;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
 
@@ -12,7 +13,14 @@ public class EventContext<T> {
    * 是否ack
    */
   @Getter
-  private transient boolean ack = false;
+  private boolean ack = false;
+  /**
+   * 执行信息
+   */
+  @Getter
+  @Setter
+  @Nonnull
+  private String message = "";
   /**
    * 事件主体
    */
@@ -32,5 +40,10 @@ public class EventContext<T> {
 
   public void ack() {
     this.ack = true;
+  }
+
+  public void reject(@Nonnull String message) {
+    this.ack = false;
+    this.message = message;
   }
 }

@@ -4,8 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.zzsong.bus.client.SpringBusClient;
 import com.zzsong.bus.receiver.SpringBusReceiver;
 import com.zzsong.common.utils.IpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 宋志宗 on 2020/9/17
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties({BusClientProperties.class})
 public class BusClientAutoConfig {
-  private static final Logger log = LoggerFactory.getLogger(BusClientAutoConfig.class);
 
   @Nonnull
   private final BusClientProperties properties;
@@ -68,6 +67,7 @@ public class BusClientAutoConfig {
     final String ip = IpUtil.getIp();
     final int port = serverPort == null ? 8080 : serverPort;
     busClient.setClientIpPort(ip + ":" + port);
+    busClient.setAutoSubscribe(properties.isAutoSubscribe());
     return busClient;
   }
 }

@@ -23,7 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/application")
 public class ApplicationController {
-
   @Nonnull
   private final ApplicationService applicationService;
 
@@ -34,14 +33,14 @@ public class ApplicationController {
   @Nonnull
   @PostMapping("/create")
   public Mono<Res<Application>> create(@Validated @RequestBody
-                                      @Nonnull CreateApplicationArgs args) {
+                                       @Nonnull CreateApplicationArgs args) {
     return applicationService.create(args).map(Res::data);
   }
 
   @Nonnull
   @PostMapping("/update")
   public Mono<Res<Application>> update(@Validated @RequestBody
-                                      @Nonnull UpdateApplicationArgs args) {
+                                       @Nonnull UpdateApplicationArgs args) {
     return applicationService.update(args).map(Res::data);
   }
 

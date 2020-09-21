@@ -31,9 +31,13 @@ public class SubscriptionService {
   @Autowired
   private ApplicationService applicationService;
   @Nonnull
+  private final CacheService cacheService;
+  @Nonnull
   private final SubscriptionStorage storage;
 
-  public SubscriptionService(@Nonnull SubscriptionStorage storage) {
+  public SubscriptionService(@Nonnull CacheService cacheService,
+                             @Nonnull SubscriptionStorage storage) {
+    this.cacheService = cacheService;
     this.storage = storage;
   }
 
@@ -50,12 +54,49 @@ public class SubscriptionService {
 
   @Nonnull
   public Mono<Subscription> subscribe(@Nonnull SubscribeArgs args) {
-    Subscription subscription = SubscriptionConverter.fromSubscribeArgs(args);
-    return storage.save(subscription);
+    long applicationId = args.getApplicationId();
+    String topic = args.getTopic();
+    return storage.existByApplicationAndTopic(applicationId, topic)
+        .flatMap(b -> {
+          if (b) {
+            return Mono.error(new VisibleException("订阅关系已存在"));
+          } else {
+            Subscription subscription = SubscriptionConverter.fromSubscribeArgs(args);
+            return storage.save(subscription);
+          }
+        });
   }
 
   @Nonnull
-  public Mono<List<Subscription>> autoSubscrib(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
+  public Mono<Subscription> update(@Nonnull SubscribeArgs args, long subscriptionId) {
+    return storage.findById(subscriptionId)
+        .flatMap(opt -> {
+          if (!opt.isPresent()) {
+            return Mono.error(new VisibleException("订阅关系不存在"));
+          }
+          Subscription subscription = opt.get();
+          subscription.setCondition(args.getCondition());
+          subscription.setBroadcast(args.isBroadcast());
+          subscription.setRetryCount(args.getRetryCount());
+          return storage.save(subscription);
+        });
+  }
+
+  public Mono<Integer> reversalStatus(long subscriptionId) {
+    return storage.findById(subscriptionId)
+        .flatMap(opt -> {
+          if (!opt.isPresent()) {
+            return Mono.error(new VisibleException("订阅关系不存在"));
+          }
+          Subscription subscription = opt.get();
+          int status = subscription.getStatus();
+          subscription.setStatus(status ^ 1);
+          return storage.save(subscription).map(Subscription::getStatus);
+        });
+  }
+
+  @Nonnull
+  public Mono<List<Subscription>> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
     long applicationId = autoSubscribeArgs.getApplicationId();
     return applicationService.loadById(applicationId)
         .flatMap(opt -> {
@@ -103,8 +144,14 @@ public class SubscriptionService {
                 changeList.size(), unsubscribeList.size());
             Mono<List<Subscription>> saveAll = storage.saveAll(changeList);
             Mono<Long> unsubscribeAll = storage.unsubscribeAll(unsubscribeList);
-            return Mono.zip(saveAll, unsubscribeAll)
+            Mono<List<Subscription>> result = Mono.zip(saveAll, unsubscribeAll)
                 .flatMap(t -> storage.findAllByApplication(applicationId));
+
+            if (changeList.size() > 0 || unsubscribeList.size() > 0) {
+              return result.doOnNext(res -> cacheService.notificationRefreshCache().subscribe());
+            } else {
+              return result;
+            }
           });
         })
         .doOnNext(res -> {
@@ -177,4 +224,5 @@ public class SubscriptionService {
   public Mono<List<Subscription>> findAllEnabled() {
     return storage.findAllEnabled();
   }
+
 }

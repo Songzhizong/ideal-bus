@@ -1,0 +1,20 @@
+logging:
+  config: classpath:logback-spring-dev.xml
+server:
+  port: 13201
+spring:
+  application:
+    name: IDEAL-BUS-CLIENT
+  banner:
+    location: banner.txt
+  jackson:
+    locale: zh_CN
+    time-zone: 'GMT+8'
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+  main:
+    allow-bean-definition-overriding: true
+ideal:
+  bus:
+    application-id: 1294996762263552
+    broker-addresses: 127.0.0.1:13266

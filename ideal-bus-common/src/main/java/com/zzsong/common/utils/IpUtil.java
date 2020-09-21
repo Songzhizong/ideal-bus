@@ -1,7 +1,6 @@
 package com.zzsong.common.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.Inet6Address;
@@ -15,9 +14,9 @@ import java.util.regex.Pattern;
  * ip tool
  * <p>Copy from <a href="https://github.com/xuxueli/xxl-job/blob/master/xxl-job-core/src/main/java/com/xxl/job/core/util/IpUtil.java">xxl-job IpUtil</a></p></p>
  */
+@Slf4j
 @SuppressWarnings({"unused", "RedundantSuppression", "SpellCheckingInspection"})
 public class IpUtil {
-  private static final Logger log = LoggerFactory.getLogger(IpUtil.class);
 
   private static final String ANY_HOST_VALUE = "0.0.0.0";
   private static final String LOCALHOST_VALUE = "127.0.0.1";

@@ -8,9 +8,8 @@ import com.zzsong.bus.receiver.annotation.EventListener;
 import com.zzsong.bus.receiver.deliver.EventContext;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
 import com.zzsong.bus.receiver.listener.MethodEventListener;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
@@ -27,9 +26,9 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author 宋志宗 on 2020/9/18
  */
+@Slf4j
 public class SpringBusReceiver extends SimpleBusReceiver
     implements ApplicationContextAware, SmartInitializingSingleton {
-  private static final Logger log = LoggerFactory.getLogger(SpringBusReceiver.class);
   private ApplicationContext applicationContext;
 
   public SpringBusReceiver(ExecutorService executorService) {

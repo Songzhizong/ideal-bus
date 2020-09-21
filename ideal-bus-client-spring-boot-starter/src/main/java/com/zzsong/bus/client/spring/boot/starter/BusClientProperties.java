@@ -16,4 +16,6 @@ public class BusClientProperties {
   private String brokerAddresses = "";
 
   private String accessToken = "";
+
+  private boolean autoSubscribe = false;
 }

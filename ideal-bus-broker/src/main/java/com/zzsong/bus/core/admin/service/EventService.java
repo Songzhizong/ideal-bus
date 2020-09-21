@@ -8,8 +8,7 @@ import com.zzsong.bus.abs.transfer.SaveEventArgs;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.abs.share.Paging;
 import com.zzsong.bus.abs.share.Res;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -21,10 +20,10 @@ import java.util.List;
 /**
  * @author 宋志宗 on 2020/9/16
  */
+@Slf4j
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Service
 public class EventService {
-  private static final Logger log = LoggerFactory.getLogger(EventService.class);
   @Autowired
   private SubscriptionService subscriptionService;
   @Nonnull

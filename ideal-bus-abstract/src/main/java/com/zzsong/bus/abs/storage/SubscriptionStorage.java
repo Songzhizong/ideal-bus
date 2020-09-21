@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -45,6 +46,9 @@ public interface SubscriptionStorage {
   Mono<Long> unsubscribeAll(@Nonnull String topic);
 
   @Nonnull
+  Mono<Optional<Subscription>> findById(long subscriptionId);
+
+  @Nonnull
   Mono<List<Subscription>> findAll();
 
   @Nonnull
@@ -61,4 +65,7 @@ public interface SubscriptionStorage {
 
   @Nonnull
   Mono<Boolean> existByApplication(long applicationId);
+
+  @Nonnull
+  Mono<Boolean> existByApplicationAndTopic(long applicationId, @Nonnull String topic);
 }

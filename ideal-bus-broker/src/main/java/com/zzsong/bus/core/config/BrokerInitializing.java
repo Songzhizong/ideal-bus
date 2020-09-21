@@ -1,7 +1,6 @@
 package com.zzsong.bus.core.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -14,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 宋志宗 on 2020/9/20 5:52 下午
  */
+@Slf4j
 @Configuration
 public class BrokerInitializing implements InitializingBean {
-  private static final Logger log = LoggerFactory.getLogger(BrokerInitializing.class);
   @Nonnull
   private final BusProperties busProperties;
   @Nonnull
@@ -37,7 +36,7 @@ public class BrokerInitializing implements InitializingBean {
     }
     String key = "ideal:register:bus:broker:node:" + nodeId;
     final Boolean block = redisTemplate.opsForValue()
-        .setIfAbsent(key, "1", Duration.ofMinutes(5))
+        .setIfAbsent(key, "1", Duration.ofMinutes(1))
         .block();
     if (block == null || !block) {
       log.error("nodeId重复: {} ", nodeId);
@@ -45,14 +44,15 @@ public class BrokerInitializing implements InitializingBean {
     }
     Executors.newSingleThreadScheduledExecutor()
         .scheduleAtFixedRate(() -> redisTemplate
-                .expire(key, Duration.ofMinutes(5))
+                .opsForValue()
+                .set(key, "1", Duration.ofMinutes(1))
                 .doOnError(throwable -> {
                   String errMsg = throwable.getClass().getName() +
                       ": " + throwable.getMessage();
                   log.error("NodeId automatically renewed exception: {}",
                       errMsg);
                 }).subscribe(),
-            1, 1, TimeUnit.MINUTES);
+            15, 15, TimeUnit.SECONDS);
     Runtime.getRuntime().addShutdownHook(new Thread(() -> redisTemplate.delete(key).block()));
   }
 }

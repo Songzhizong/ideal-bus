@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -17,11 +19,14 @@ public class SubscribeArgs {
   /**
    * 订阅者id
    */
-  private long applicationId;
+  @Nonnull
+  @NotNull(message = "应用id不能为空")
+  private Long applicationId;
   /**
    * 事件主题, 也是事件的唯一id
    */
   @Nonnull
+  @NotBlank(message = "topic不能为空")
   private String topic;
   /**
    * 订阅条件表达式

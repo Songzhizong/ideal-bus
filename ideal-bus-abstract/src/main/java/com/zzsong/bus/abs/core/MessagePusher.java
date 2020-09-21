@@ -1,6 +1,6 @@
 package com.zzsong.bus.abs.core;
 
-import com.zzsong.bus.abs.domain.RouteInfo;
+import com.zzsong.bus.abs.domain.RouteInstance;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -12,5 +12,5 @@ import javax.annotation.Nonnull;
  */
 public interface MessagePusher {
 
-  Mono<RouteInfo> push(@Nonnull RouteInfo routeInfo);
+  Mono<RouteInstance> push(@Nonnull RouteInstance routeInstance);
 }

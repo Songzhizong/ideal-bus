@@ -7,7 +7,7 @@ public class SnowFlake implements IDGenerator {
   /**
    * 起始时间戳
    */
-  private static final long START_TIMESTAMP = 1600348294001L;
+  public static final long START_TIMESTAMP = 1600348294001L;
   /**
    * 序列号位数, 单节点每毫秒最多生成 4096个唯一ID
    */

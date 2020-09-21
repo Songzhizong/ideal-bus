@@ -1,7 +1,6 @@
 package com.zzsong.bus.abs.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.ReactiveValueOperations;
 
@@ -14,9 +13,8 @@ import java.util.concurrent.*;
  *
  * @author 宋志宗 on 2020/9/2
  */
+@Slf4j
 public class ReactiveRedisSnowFlakeFactory implements IDGeneratorFactory {
-  private static final Logger log = LoggerFactory
-      .getLogger(ReactiveRedisSnowFlakeFactory.class);
   private final ConcurrentMap<String, IDGenerator> generatorMap = new ConcurrentHashMap<>();
   private final String prefix;
   private final Duration expire;

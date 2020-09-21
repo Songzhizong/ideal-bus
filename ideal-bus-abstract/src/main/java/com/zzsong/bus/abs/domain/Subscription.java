@@ -49,9 +49,9 @@ public class Subscription {
    */
   private boolean broadcast = false;
   /**
-   * 失败重试次数
+   * 失败重试次数, 默认重试3次
    */
-  private int retryCount = 0;
+  private int retryCount = 3;
   /**
    * 订阅状态
    */

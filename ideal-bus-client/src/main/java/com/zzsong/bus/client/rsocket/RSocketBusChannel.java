@@ -11,8 +11,7 @@ import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.utils.JsonUtils;
 import io.rsocket.SocketAcceptor;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -28,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 宋志宗 on 2020/9/19 11:45 下午
  */
+@Slf4j
 public class RSocketBusChannel extends Thread implements BusChannel {
-  private static final Logger log = LoggerFactory.getLogger(RSocketBusChannel.class);
   private static final int RESTART_DELAY = 10;
   private static final ParameterizedTypeReference<PublishResult> PUBLISH_RESULT_RES
       = new ParameterizedTypeReference<PublishResult>() {
