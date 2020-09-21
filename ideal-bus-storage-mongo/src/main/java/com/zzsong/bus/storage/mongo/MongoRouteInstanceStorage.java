@@ -74,8 +74,10 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int nodeId) {
     Criteria criteria = Criteria
         .where("nodeId").is(nodeId)
-        .and("nextPushTime").gt(SnowFlake.START_TIMESTAMP)
-        .and("nextPushTime").lte(maxNextTime);
+        .andOperator(
+            Criteria.where("nextPushTime").gt(SnowFlake.START_TIMESTAMP),
+            Criteria.where("nextPushTime").lte(maxNextTime)
+        );
     Query query = Query.query(criteria).limit(count).with(Sort.by("instanceId"));
     return template.find(query, RouteInstanceDo.class)
         .map(RouteInstanceDoConverter::toRouteInstance)

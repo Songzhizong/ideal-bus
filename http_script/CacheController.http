@@ -1,0 +1,2 @@
+### 新建
+GET http://127.0.0.1:13256/cache/refresh/notice

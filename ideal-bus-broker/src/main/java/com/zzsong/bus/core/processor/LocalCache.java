@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
  * @author 宋志宗 on 2020/9/17
  */
 @Slf4j
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Component
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class LocalCache implements InitializingBean, DisposableBean {
   private ScheduledExecutorService scheduledExecutor;
   @Autowired
@@ -135,6 +135,7 @@ public class LocalCache implements InitializingBean, DisposableBean {
           break;
         }
         if (poll != null) {
+          log.info("更新本地缓存");
           refreshLocalCache().subscribe();
         }
       }

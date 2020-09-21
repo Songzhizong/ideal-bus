@@ -31,13 +31,12 @@ public class SubscriptionService {
   @Autowired
   private ApplicationService applicationService;
   @Nonnull
-  private final CacheService cacheService;
+  @Autowired
+  private  CacheService cacheService;
   @Nonnull
   private final SubscriptionStorage storage;
 
-  public SubscriptionService(@Nonnull CacheService cacheService,
-                             @Nonnull SubscriptionStorage storage) {
-    this.cacheService = cacheService;
+  public SubscriptionService(@Nonnull SubscriptionStorage storage) {
     this.storage = storage;
   }
 
