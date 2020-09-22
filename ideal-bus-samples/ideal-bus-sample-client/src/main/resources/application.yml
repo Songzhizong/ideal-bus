@@ -16,5 +16,6 @@ spring:
     allow-bean-definition-overriding: true
 ideal:
   bus:
-    application-id: 1294996762263552
+    auto-subscribe: true
+    application-id: 1482309794533376
     broker-addresses: 127.0.0.1:13266

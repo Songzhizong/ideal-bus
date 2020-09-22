@@ -31,8 +31,8 @@ public class SpringBusReceiver extends SimpleBusReceiver
     implements ApplicationContextAware, SmartInitializingSingleton {
   private ApplicationContext applicationContext;
 
-  public SpringBusReceiver(ExecutorService executorService) {
-    super(executorService);
+  public SpringBusReceiver(int corePoolSize, int maximumPoolSize) {
+    super(corePoolSize, maximumPoolSize);
   }
 
   @Override

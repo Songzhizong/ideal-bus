@@ -1,0 +1,22 @@
+package com.zzsong.bus.receiver.spring.boot.starter;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+/**
+ * @author 宋志宗 on 2020/9/17
+ */
+@Getter
+@Setter
+@ConfigurationProperties(prefix = "ideal.receive")
+public class BusReceiveProperties {
+  /**
+   * 核心线程数
+   */
+  private int corePoolSize = 0;
+  /**
+   * 最大线程数
+   */
+  private int maximumPoolSize = 64;
+}

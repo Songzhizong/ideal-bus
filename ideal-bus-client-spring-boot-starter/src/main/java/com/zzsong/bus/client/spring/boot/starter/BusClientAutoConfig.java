@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({BusClientProperties.class})
+@EnableConfigurationProperties({BusClientProperties.class, BusReceiveProperties.class})
 public class BusClientAutoConfig {
 
   @Nonnull
@@ -39,23 +39,8 @@ public class BusClientAutoConfig {
   }
 
   @Bean
-  public ThreadPoolExecutor threadPoolExecutor() {
-    int corePoolSize = 0;
-    int maximumPoolSize = 100;
-    return new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-        60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-        new ThreadFactoryBuilder().setNameFormat("event-pool-%d").build(),
-        (r, executor) -> {
-          log.error("任务执行线程池资源不足, 请尝试修改线程数配置, 当前核心线程数: {}, 最大线程数: {}, 队列长度: {}",
-              corePoolSize, maximumPoolSize, 0);
-          throw new RejectedExecutionException("Task " + r.toString() +
-              " rejected from Job executor thread pool");
-        });
-  }
-
-  @Bean
-  public SpringBusReceiver springBusReceiver(ThreadPoolExecutor threadPoolExecutor) {
-    return new SpringBusReceiver(threadPoolExecutor);
+  public SpringBusReceiver springBusReceiver(BusReceiveProperties properties) {
+    return new SpringBusReceiver(properties.getCorePoolSize(), properties.getMaximumPoolSize());
   }
 
   @Bean
