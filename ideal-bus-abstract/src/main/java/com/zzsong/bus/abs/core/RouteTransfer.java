@@ -11,5 +11,7 @@ import java.util.List;
  */
 public interface RouteTransfer {
 
-  Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList);
+  Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList, boolean force);
+
+  Mono<Boolean> giveBack(@Nonnull RouteInstance routeInstance);
 }

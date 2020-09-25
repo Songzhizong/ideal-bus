@@ -4,7 +4,7 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: mongodb://127.0.0.1:27017/ideal-bus
+      uri: mongodb://127.0.0.1:27017/ideal-bus?maxPoolSize=4
   redis:
     host: 127.0.0.1
     port: 6379

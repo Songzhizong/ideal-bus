@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="client-2" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="ideal-bus-sample-client" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.bus.sample.client.SampleClientApplication" />
+    <option name="PROGRAM_PARAMETERS" value="--server.port=13202" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

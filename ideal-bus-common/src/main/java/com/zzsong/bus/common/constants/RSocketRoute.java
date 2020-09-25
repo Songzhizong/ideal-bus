@@ -10,6 +10,7 @@ public interface RSocketRoute {
   String LOGIN = "login";
   String INTERRUPT = "interrupt";
   String PUBLISH = "publish";
-  String AUTO_SUBSCRIB = "auto-subscrib";
+  String AUTO_SUBSCRIBE = "auto-subscribe";
   String CLIENT_RECEIVE = "client-receive";
+  String CHANNEL_CHANGE = "channel-change";
 }

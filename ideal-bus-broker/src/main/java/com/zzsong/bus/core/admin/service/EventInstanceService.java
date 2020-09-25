@@ -20,6 +20,11 @@ public class EventInstanceService {
     this.storage = storage;
   }
 
+  @Nonnull
+  public Mono<EventInstance> save(@Nonnull EventInstance eventInstance) {
+    return storage.save(eventInstance);
+  }
+
   public Mono<Optional<EventInstance>> loadByEventId(@Nonnull String eventId) {
     return storage.findByEventId(eventId);
   }

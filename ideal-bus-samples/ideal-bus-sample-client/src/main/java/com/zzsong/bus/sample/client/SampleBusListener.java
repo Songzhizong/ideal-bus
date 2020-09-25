@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author 宋志宗 on 2020/9/18
@@ -17,89 +19,25 @@ import java.util.List;
 @Component
 @BusListenerBean
 public class SampleBusListener {
+  private final AtomicInteger counter = new AtomicInteger();
 
-  @EventListener(topic = "test", autoAck = false)
+  @EventListener(topic = "testUnAck", autoAck = true)
   public void testUnAck(@Nonnull EventContext<List<String>> context) {
-    log.info("testUnAck 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
+    log.info("testUnAck 接收到消息: {}, 序号: {}",
+        JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
   }
 
-  @EventListener(topic = "test", autoAck = true)
-  public void testAutoAck(@Nonnull EventContext<List<String>> context) {
-    log.info("testAutoAck 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
+  @EventListener(topic = "testAutoAck", autoAck = true)
+  public void testAutoAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
+    int incrementAndGet = counter.incrementAndGet();
+//    TimeUnit.SECONDS.sleep(1);
+//    log.info("testAutoAck 接收到消息: {}, 接收到消息序号: {}",
+//        JsonUtils.toJsonString(context.getPayload()), incrementAndGet);
   }
 
   @EventListener(topic = "broadcast")
   public void broadcast(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "a")
-  public void a(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "b")
-  public void b(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "c")
-  public void c(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "d")
-  public void d(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "e")
-  public void e(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "f")
-  public void f(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "g")
-  public void g(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "h")
-  public void h(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "i")
-  public void i(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "j")
-  public void j(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "k")
-  public void k(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "l")
-  public void l(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "m")
-  public void m(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
-  }
-
-  @EventListener(topic = "n")
-  public void n(@Nonnull EventContext<List<String>> context) {
-    log.info("broadcast 接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
+    log.info("broadcast 接收到消息: {}, 序号: {}",
+        JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
   }
 }

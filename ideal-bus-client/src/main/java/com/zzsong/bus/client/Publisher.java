@@ -19,7 +19,7 @@ public interface Publisher {
   Mono<PublishResult> publish(@Nonnull EventMessage<?> message);
 
   /**
-   * 批量发布
+   * 批量发布, 单次上限100
    */
   @Nonnull
   Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages);

@@ -2,6 +2,7 @@ package com.zzsong.bus.core.processor.pusher;
 
 import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
 import com.zzsong.bus.abs.core.MessagePusher;
+import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.RouteInstance;
@@ -15,6 +16,7 @@ import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.loadbalancer.LbStrategyEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,8 +31,11 @@ import java.util.Map;
  */
 @Slf4j
 @Component
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class MessagePusherImpl implements MessagePusher {
   private static final long retryInterval = 10 * 1000L;
+  @Autowired
+  private RouteTransfer routeTransfer;
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -78,8 +83,13 @@ public class MessagePusherImpl implements MessagePusher {
         routeInstance.setUnAckListeners(unAckList);
         int maxRetryCount = subscription.getRetryCount();
         if (currentRetryCount < maxRetryCount) {
+          routeInstance.setStatus(RouteInstance.STATUS_WAITING);
           routeInstance.setNextPushTime(System.currentTimeMillis() + retryInterval);
+        } else {
+          routeInstance.setStatus(RouteInstance.STATUS_DISCARD);
         }
+      } else {
+        localCache.removeEventCache(routeInstance.getEventId());
       }
       return routeInstanceService.save(routeInstance);
     });
@@ -129,10 +139,11 @@ public class MessagePusherImpl implements MessagePusher {
                 channel = lbFactory.chooseServer(applicationId + "",
                     key, LbStrategyEnum.CONSISTENT_HASH);
               } else {
-                channel = lbFactory.chooseServer(applicationId + "", topic);
+                channel = lbFactory.chooseServer(applicationId + "", topic, LbStrategyEnum.ROUND_ROBIN);
               }
               if (channel == null) {
-                return Mono.error(new VisibleException("选取DelivererChannel为空"));
+//                return Mono.error(new VisibleException("选取DelivererChannel为空"));
+                return routeTransfer.giveBack(routeInstance).then(Mono.empty());
               }
               return channel.deliver(deliveredEvent);
             }

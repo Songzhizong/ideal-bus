@@ -3,7 +3,6 @@ package com.zzsong.common.loadbalancer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 负载均衡器工厂
@@ -21,15 +20,6 @@ public interface LbFactory<Server extends LbServer> {
    */
   @Nonnull
   List<Server> getReachableServers(@Nonnull String appName);
-
-  /**
-   * 获取所有可达的服务
-   *
-   * @return appName -> 所有可达的服务
-   * @author 宋志宗 on 2020/8/19 23:40
-   */
-  @Nonnull
-  Map<String, List<Server>> getReachableServers();
 
   /**
    * 添加一组服务
@@ -59,19 +49,6 @@ public interface LbFactory<Server extends LbServer> {
   void markServerDown(@Nonnull String appName, @Nonnull Server server);
 
   /**
-   * 选取一个server, 默认为轮询策略
-   *
-   * @param serverName 服务名称
-   * @param key        负载均衡器可以使用该对象来确定返回哪个服务
-   * @author on 2020/8/20 9:59 上午
-   */
-  @Nullable
-  default Server chooseServer(@Nonnull String serverName,
-                              @Nullable Object key) {
-    return chooseServer(serverName, key, null);
-  }
-
-  /**
    * 选取一个server
    *
    * @param serverName 服务名称
@@ -83,18 +60,6 @@ public interface LbFactory<Server extends LbServer> {
   Server chooseServer(@Nonnull String serverName,
                       @Nullable Object key,
                       @Nullable LbStrategyEnum strategy);
-
-  /**
-   * 获取负载均衡器, 默认为轮询策略
-   *
-   * @param serverName 服务名称
-   * @return LoadBalancer
-   * @author on 2020/8/20 9:50 上午
-   */
-  @Nonnull
-  default LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName) {
-    return getLoadBalancer(serverName, null);
-  }
 
   /**
    * 获取负载均衡器

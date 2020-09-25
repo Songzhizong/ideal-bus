@@ -22,11 +22,20 @@
       <artifactId>ideal-bus-storage-mongo</artifactId>
       <version>${ideal-bus.version}</version>
     </dependency>
-
+    <!--  caffeine  -->
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>${caffeine.version}</version>
+    </dependency>
     <!-- reactor-netty -->
     <dependency>
       <groupId>io.projectreactor.netty</groupId>
       <artifactId>reactor-netty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.projectreactor.addons</groupId>
+      <artifactId>reactor-extra</artifactId>
     </dependency>
     <!-- webflux -->
     <dependency>

@@ -78,7 +78,8 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
             Criteria.where("nextPushTime").gt(SnowFlake.START_TIMESTAMP),
             Criteria.where("nextPushTime").lte(maxNextTime)
         );
-    Query query = Query.query(criteria).limit(count).with(Sort.by("instanceId"));
+    Query query = Query.query(criteria).limit(count)
+        .with(Sort.by(Sort.Direction.ASC, "instanceId"));
     return template.find(query, RouteInstanceDo.class)
         .map(RouteInstanceDoConverter::toRouteInstance)
         .collectList()
@@ -99,12 +100,15 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
 
   @Nonnull
   @Override
-  public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId) {
+  public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId) {
     Criteria criteria = Criteria
         .where("nodeId").is(nodeId)
+        .and("subscriptionId").is(subscriptionId)
         .and("nextPushTime").lte(SnowFlake.START_TIMESTAMP)
+        .and("success").lte(RouteInstance.FAILURE)
         .and("status").is(RouteInstance.STATUS_WAITING);
-    Query query = Query.query(criteria).limit(count).with(Sort.by("instanceId"));
+    Query query = Query.query(criteria).limit(count)
+        .with(Sort.by(Sort.Direction.ASC, "instanceId"));
     return template.find(query, RouteInstanceDo.class)
         .map(RouteInstanceDoConverter::toRouteInstance)
         .collectList()

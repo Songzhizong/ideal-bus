@@ -2,6 +2,7 @@ package com.zzsong.bus.abs.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.redis.core.index.Indexed;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,14 +26,13 @@ public class RouteInstance {
    */
   public static final int SUCCESS = 1;
   /**
-   * 非等待执行状态
-   */
-  public static final int STATUS_DISCARD = 0;
-  /**
    * 等待执行状态
    */
-  public static final int STATUS_WAITING = 1;
-
+  public static final int STATUS_WAITING = 0;
+  /**
+   * 非等待执行状态
+   */
+  public static final int STATUS_DISCARD = 1;
   /**
    * 实例id
    */
@@ -55,6 +55,7 @@ public class RouteInstance {
   /**
    * 订阅关系id
    */
+  @Indexed
   @Nonnull
   private Long subscriptionId;
   /**

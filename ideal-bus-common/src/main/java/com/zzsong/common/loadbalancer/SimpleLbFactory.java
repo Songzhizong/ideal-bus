@@ -32,14 +32,6 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
     return serverHolder.getReachableServers();
   }
 
-  @Nonnull
-  @Override
-  public Map<String, List<Server>> getReachableServers() {
-    Map<String, List<Server>> map = new HashMap<>();
-    serverHolderMap.forEach((appName, holder) -> map.put(appName, holder.getReachableServers()));
-    return map;
-  }
-
   @Override
   public void addServers(@Nonnull String appName, @Nonnull List<Server> newServers) {
     final LbServerHolder<Server> serverHolder = getServerHolder(appName);

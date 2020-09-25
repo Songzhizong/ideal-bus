@@ -1,114 +1,41 @@
 package com.zzsong.common.loadbalancer;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * <pre>
- * todo 如果客户端下线后长时间没有上线甚至不再上线,
- *  对象内的定时任务也不会自动结束, 为了防止资源浪费后续需要针对此情况进行优化
- * </pre>
- *
  * @author 宋志宗 on 2020/8/20
  */
 @Slf4j
 public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
-  private static final int defaultHeartbeatIntervalSeconds = 20;
-  private static ThreadPoolExecutor heartbeatThreadPool;
-  private static volatile boolean RUNNING = false;
-
-  static {
-    int corePoolSize = Runtime.getRuntime().availableProcessors();
-    int maximumPoolSize = corePoolSize << 1;
-    heartbeatThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-        60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(corePoolSize),
-        new ThreadFactoryBuilder().setNameFormat("LbServer-heartbeat-%d").build(),
-        new ThreadPoolExecutor.DiscardPolicy());
-    heartbeatThreadPool.allowCoreThreadTimeOut(true);
-  }
-
-  @SuppressWarnings({"unused", "RedundantSuppression"})
-  public static void setHeartbeatThreadPool(ThreadPoolExecutor threadPool) {
-    if (RUNNING) {
-      throw new UnsupportedOperationException("SimpleLbServerHolder已运行, 请尝试在程序初始化过程中进行此项设置");
-    }
-    SimpleLbServerHolder.heartbeatThreadPool = threadPool;
-  }
 
   @Getter
   private final String serverName;
-
   @Nonnull
-  private final BlockingQueue<Boolean> refreshReachableServersQueue
-      = new ArrayBlockingQueue<>(1);
-
-  private volatile int cycleStrategy = 1;
+  private final LbFactory<Server> lbFactory;
   /**
    * 所有服务列表
    */
   private List<Server> allServers = new ArrayList<>();
-  /**
-   * 可用服务映射, instanceId -> LbServer
-   */
-  private final ConcurrentMap<String, Server> reachableServerMap
-      = new ConcurrentHashMap<>();
-  private List<Server> reachableServers = Collections.emptyList();
-  private final Thread daemonThread;
-  private volatile boolean destroyed;
+  private final List<Server> reachableServers = new LinkedList<>();
+  private final Lock allServersLock = new ReentrantLock();
 
-
-  SimpleLbServerHolder(@Nonnull String serverName, @Nonnull LbFactory<Server> lbFactory) {
-    this(serverName, defaultHeartbeatIntervalSeconds, lbFactory);
-  }
 
   SimpleLbServerHolder(@Nonnull String serverName,
-                       int heartbeatIntervalSeconds,
                        @Nonnull LbFactory<Server> lbFactory) {
-    SimpleLbServerHolder.RUNNING = true;
-    long heartbeatIntervalMills = heartbeatIntervalSeconds * 1000;
     this.serverName = serverName;
-
-    daemonThread = new Thread(() -> {
-      long lastHeartbeatTime = System.currentTimeMillis();
-      while (!destroyed) {
-        try {
-          Boolean poll = refreshReachableServersQueue.poll(5, TimeUnit.SECONDS);
-          long currentTimeMillis = System.currentTimeMillis();
-          if (currentTimeMillis - lastHeartbeatTime > heartbeatIntervalMills) {
-            lastHeartbeatTime = currentTimeMillis;
-            heartbeatThreadPool.execute(this::heartbeat);
-          }
-          if (poll != null) {
-            reachableServers = ImmutableList.copyOf(reachableServerMap.values());
-            final int serviceCount = allServers.size();
-            final int reachableServerCount = reachableServers.size();
-            log.info("{} 可用服务列表发生变化, 当前总服务数: {}, 当前可达服务数: {}",
-                serverName, serviceCount, reachableServerCount);
-            final LbFactoryEvent event = new LbFactoryEvent();
-            event.setServerName(serverName);
-            event.setServerCount(serviceCount);
-            event.setReachableServerCount(reachableServerCount);
-            lbFactory.serverChange(event);
-          }
-        } catch (InterruptedException e) {
-          log.debug("{}", e.getMessage());
-        }
-      }
-    });
-    daemonThread.setDaemon(true);
-    daemonThread.start();
+    this.lbFactory = lbFactory;
   }
 
   @Override
-  public void addServers(@Nonnull List<Server> newServers, boolean reachable) {
-    synchronized (this) {
-      boolean refreshReachableServers = false;
+  public void addServers(@Nonnull List<Server> newServers) {
+    try {
+      allServersLock.lock();
       Map<String, Integer> indexMap = new HashMap<>();
       for (int i = 0; i < allServers.size(); i++) {
         final Server server = allServers.get(i);
@@ -123,134 +50,96 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
           allServers.add(newServer);
         } else {
           // 服务已注册, 将原有的替换成新的并销毁原对象
-          Server server = allServers.get(integer);
+          Server server = allServers.set(integer, newServer);
           server.dispose();
-          allServers.set(integer, newServer);
         }
-        if (reachable && newServer.heartbeat()) {
-          refreshReachableServers = true;
-          reachableServerMap.put(instanceId, newServer);
-        }
+        markServerReachable(newServer);
       }
-      if (refreshReachableServers) {
-        refreshReachableServers();
-      }
+    } finally {
+      allServersLock.unlock();
     }
+    this.serverChange();
   }
 
   @Override
   public void markServerReachable(@Nonnull Server server) {
-    reachableServerMap.put(server.getInstanceId(), server);
-    refreshReachableServers();
+    String instanceId = server.getInstanceId();
+    synchronized (reachableServers) {
+      boolean flag = true;
+      for (int i = 0; i < reachableServers.size(); i++) {
+        if (instanceId.equals(reachableServers.get(i).getInstanceId())) {
+          reachableServers.set(i, server);
+          flag = false;
+          break;
+        }
+      }
+      if (flag) {
+        reachableServers.add(server);
+      }
+    }
+    this.serverChange();
   }
 
   @Override
   public void markServerDown(@Nonnull Server server) {
-    reachableServerMap.remove(server.getInstanceId());
-    refreshReachableServers();
+    String instanceId = server.getInstanceId();
+    synchronized (reachableServers) {
+      final Iterator<Server> iterator = reachableServers.iterator();
+      while (iterator.hasNext()) {
+        Server next = iterator.next();
+        if (instanceId.equals(next.getInstanceId())) {
+          iterator.remove();
+          break;
+        }
+      }
+    }
+    this.serverChange();
   }
 
   @Override
   public void removeServer(@Nonnull Server server) {
-    removeServer(server.getInstanceId());
-  }
-
-  private synchronized void removeServer(@Nonnull String instanceId) {
-    reachableServerMap.remove(instanceId);
-    List<Server> newAllServers = new ArrayList<>(allServers.size());
-    for (Server lbServer : allServers) {
-      if (!instanceId.equals(lbServer.getInstanceId())) {
-        newAllServers.add(lbServer);
+    allServersLock.lock();
+    try {
+      List<Server> newAllServers = new ArrayList<>(allServers.size());
+      for (Server lbServer : allServers) {
+        if (!server.getInstanceId().equals(lbServer.getInstanceId())) {
+          newAllServers.add(lbServer);
+        } else {
+          markServerDown(server);
+        }
       }
+      this.allServers = newAllServers;
+    } finally {
+      allServersLock.unlock();
     }
-    this.allServers = newAllServers;
-    refreshReachableServers();
+    this.serverChange();
   }
 
   @Nonnull
   @Override
   public List<Server> getReachableServers() {
-    return reachableServers;
+    return Collections.unmodifiableList(reachableServers);
   }
 
   @Nonnull
   @Override
   public List<Server> getAllServers() {
     if (allServers.size() > 0) {
-      return Collections.unmodifiableList(new ArrayList<>(allServers));
+      return Collections.unmodifiableList(allServers);
     } else {
       return Collections.emptyList();
     }
   }
 
-  /**
-   * 可用性检测
-   */
-  @SuppressWarnings("DuplicatedCode")
-  private void heartbeat() {
-    final List<Server> temp;
-    synchronized (this) {
-      cycleStrategy = cycleStrategy ^ 1;
-      // 心跳之前先对allServers进行保护性拷贝, 防止循环心跳过程中allServers列表发生变更导致异常
-      temp = new ArrayList<>(allServers);
-    }
-    int size = temp.size();
-    if (cycleStrategy == 0) {
-      for (Server server : temp) {
-        String instanceId = server.getInstanceId();
-        boolean available;
-        try {
-          available = server.heartbeat();
-        } catch (Exception e) {
-          String message = e.getClass().getSimpleName() + ":" + e.getMessage();
-          log.info("server: {} heartbeat exception: {}", instanceId, message);
-          available = false;
-        }
-        final Server containsInstance = reachableServerMap.get(instanceId);
-        if (available && containsInstance == null) {
-          reachableServerMap.put(instanceId, server);
-          refreshReachableServers();
-        } else if (!available && containsInstance != null) {
-          reachableServerMap.remove(instanceId);
-          refreshReachableServers();
-        }
-      }
-    } else {
-      for (int i = size - 1; i >= 0; i--) {
-        Server server = temp.get(i);
-        String instanceId = server.getInstanceId();
-        boolean available;
-        try {
-          available = server.heartbeat();
-        } catch (Exception e) {
-          String message = e.getClass().getSimpleName() + ":" + e.getMessage();
-          log.info("server: {} heartbeat exception: {}", instanceId, message);
-          available = false;
-        }
-        final Server containsInstance = reachableServerMap.get(instanceId);
-        if (available && containsInstance == null) {
-          reachableServerMap.put(instanceId, server);
-          refreshReachableServers();
-        } else if (!available && containsInstance != null) {
-          reachableServerMap.remove(instanceId);
-          refreshReachableServers();
-        }
-      }
-    }
+  private void serverChange() {
+    final LbFactoryEvent event = new LbFactoryEvent();
+    event.setServerName(serverName);
+    event.setAllServers(getAllServers());
+    event.setReachableServers(getReachableServers());
+    lbFactory.serverChange(event);
   }
 
   @Override
   public void destroy() {
-    if (!destroyed) {
-      destroyed = true;
-      if (daemonThread != null) {
-        daemonThread.interrupt();
-      }
-    }
   }
-
-  private void refreshReachableServers() {
-    refreshReachableServersQueue.offer(true);
-  }
-
 }

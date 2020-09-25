@@ -18,6 +18,7 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -25,6 +26,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 和broker的连接通道,每个通道建立两条RSocket连接分别用于收发消息
+ *
  * @author 宋志宗 on 2020/9/19 11:45 下午
  */
 @Slf4j
@@ -54,7 +57,8 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   private volatile boolean running = false;
   private volatile boolean destroyed = false;
 
-  private RSocketRequester rsocketRequester;
+  private RSocketRequester sendSocket;
+  private RSocketRequester receiveSocket;
 
   public RSocketBusChannel(@Nonnull String brokerIp,
                            int brokerPort, long applicationId,
@@ -84,6 +88,24 @@ public class RSocketBusChannel extends Thread implements BusChannel {
       log.info("RSocketBusChannel is running, brokerAddress: {}", brokerAddress);
       return;
     }
+    boolean connect = connect(LoginMessage.SOCKET_TYPE_RECEIVE);
+    if (!connect) {
+      restartSocket();
+      return;
+    }
+    boolean connectSend = connect(LoginMessage.SOCKET_TYPE_SEND);
+    if (!connectSend) {
+      restartSocket();
+      return;
+    }
+    running = true;
+    lbFactory.markServerReachable(SimpleBusClient.BUS_BROKER_APP_NAME, this);
+  }
+
+  /**
+   * @param socketType 0 发送消息通道, 1 接收消息通道
+   */
+  private boolean connect(int socketType) {
     RSocketStrategies rSocketStrategies = RSocketConfigure.rsocketStrategies;
     RSocketRequester.Builder requesterBuilder = RSocketConfigure.rSocketRequesterBuilder;
     SocketAcceptor responder
@@ -92,12 +114,18 @@ public class RSocketBusChannel extends Thread implements BusChannel {
     message.setApplicationId(applicationId);
     message.setInstanceId(clientIpPort);
     message.setAccessToken(accessToken);
+    message.setSocketType(socketType);
     final String messageString = message.toMessageString();
-
-    if (rsocketRequester != null && !rsocketRequester.rsocket().isDisposed()) {
+    RSocketRequester tempSocket;
+    if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
+      tempSocket = receiveSocket;
+    } else {
+      tempSocket = sendSocket;
+    }
+    if (tempSocket != null && !tempSocket.rsocket().isDisposed()) {
       try {
-        this.rsocketRequester.rsocket().dispose();
-        this.rsocketRequester = requesterBuilder
+        tempSocket.rsocket().dispose();
+        tempSocket = requesterBuilder
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
@@ -106,26 +134,29 @@ public class RSocketBusChannel extends Thread implements BusChannel {
             .doOnNext(r -> log.info("Broker {} login success.", brokerAddress))
             .block();
       } catch (Exception e) {
-        restartSocket();
-        return;
+        return false;
       }
     } else {
       try {
-        this.rsocketRequester = requesterBuilder
+        tempSocket = requesterBuilder
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(brokerIp, brokerPort)
-            .doOnError(e -> log.warn("Broker {} Login fail: ", brokerAddress, e))
-            .doOnNext(r -> log.info("Broker {} login success.", brokerAddress))
+            .doOnError(e -> log.warn("Broker {}-{} Login fail: ", brokerAddress, socketType, e))
+            .doOnNext(r -> log.info("Broker {}-{} login success.", brokerAddress, socketType))
             .block();
       } catch (Exception e) {
-        restartSocket();
-        return;
+        return false;
       }
     }
-    assert this.rsocketRequester != null;
-    this.rsocketRequester.rsocket()
+    assert tempSocket != null;
+    if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
+      receiveSocket = tempSocket;
+    } else {
+      sendSocket = tempSocket;
+    }
+    tempSocket.rsocket()
         .onClose()
         .doOnError(error -> {
           String errMessage = error.getClass().getSimpleName() +
@@ -138,8 +169,7 @@ public class RSocketBusChannel extends Thread implements BusChannel {
           restartSocket();
         })
         .subscribe();
-    running = true;
-    lbFactory.markServerReachable(SimpleBusClient.BUS_BROKER_APP_NAME, this);
+    return true;
   }
 
   private void restartSocket() {
@@ -178,8 +208,11 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   public boolean heartbeat() {
     return running
         && !destroyed
-        && rsocketRequester != null
-        && !rsocketRequester.rsocket().isDisposed();
+        && sendSocket != null
+        && !sendSocket.rsocket().isDisposed()
+        && receiveSocket != null
+        && !receiveSocket.rsocket().isDisposed()
+        ;
   }
 
   @Override
@@ -188,27 +221,38 @@ public class RSocketBusChannel extends Thread implements BusChannel {
       return;
     }
     destroyed = true;
-    rsocketRequester.rsocket().dispose();
+    sendSocket.rsocket().dispose();
+    receiveSocket.rsocket().dispose();
     this.interrupt();
     log.info("RSocketBusChannel destroy, broker address: {}", brokerAddress);
   }
 
   @Override
-  public Mono<PublishResult> publishEvent(EventMessage<?> message) {
-    return rsocketRequester.route(RSocketRoute.PUBLISH)
+  public Mono<PublishResult> publishEvent(@Nonnull EventMessage<?> message) {
+    return sendSocket.route(RSocketRoute.PUBLISH)
         .data(message)
         .retrieveMono(PUBLISH_RESULT_RES)
         .doOnNext(res -> {
           if (log.isDebugEnabled()) {
             log.debug("Publish result: {}", JsonUtils.toJsonString(res));
           }
-        });
+        }).subscribeOn(Schedulers.elastic());
+  }
 
+  @Override
+  public Mono<Boolean> changeStates(int status) {
+    final ChannelInfo channelInfo = new ChannelInfo();
+    channelInfo.setAppName(applicationId + "");
+    channelInfo.setInstanceId(clientIpPort);
+    channelInfo.setStatus(status);
+    return sendSocket.route(RSocketRoute.CHANNEL_CHANGE)
+        .data(channelInfo)
+        .retrieveMono(Boolean.class);
   }
 
   @Override
   public Mono<Boolean> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
-    return rsocketRequester.route(RSocketRoute.AUTO_SUBSCRIB)
+    return sendSocket.route(RSocketRoute.AUTO_SUBSCRIBE)
         .data(autoSubscribeArgs)
         .retrieveMono(String.class)
         .doOnNext(res -> {

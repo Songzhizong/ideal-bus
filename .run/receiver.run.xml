@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="receiver" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="ideal-bus-sample-receiver" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.bus.sample.receiver.SampleReceiverApplication" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

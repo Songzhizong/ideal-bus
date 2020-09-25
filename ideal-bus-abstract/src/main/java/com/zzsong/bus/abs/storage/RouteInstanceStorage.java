@@ -22,5 +22,5 @@ public interface RouteInstanceStorage {
   Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int nodeId);
 
   @Nonnull
-  Mono<List<RouteInstance>> loadWaiting(int count, int nodeId);
+  Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId);
 }

@@ -1,5 +1,6 @@
 package com.zzsong.bus.client;
 
+import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.EventMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
@@ -14,7 +15,9 @@ import javax.annotation.Nonnull;
  */
 public interface BusChannel extends BusReceiver, LbServer {
 
-  Mono<PublishResult> publishEvent(EventMessage<?> message);
+  Mono<PublishResult> publishEvent(@Nonnull EventMessage<?> message);
+
+  Mono<Boolean> changeStates(int status);
 
   Mono<Boolean> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs);
 }

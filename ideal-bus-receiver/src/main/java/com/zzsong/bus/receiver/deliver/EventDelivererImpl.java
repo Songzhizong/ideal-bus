@@ -101,7 +101,8 @@ public class EventDelivererImpl implements EventDeliverer {
                 context.setMessage(errMessage);
               }
               return context;
-            }).subscribeOn(scheduler)
+            })
+            .subscribeOn(scheduler)
         ).collect(Collectors.toList());
     return Flux.merge(monoList)
         .collectList()

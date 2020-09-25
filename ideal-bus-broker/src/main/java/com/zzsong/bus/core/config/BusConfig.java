@@ -1,7 +1,6 @@
 package com.zzsong.bus.core.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.zzsong.bus.abs.core.MessagePusher;
 import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
@@ -48,11 +47,10 @@ public class BusConfig {
   @ConditionalOnMissingBean
   public RouteTransfer routeTransfer(@Nonnull LocalCache localCache,
                                      @Nonnull BusProperties properties,
-                                     @Nonnull MessagePusher messagePusher,
                                      @Nonnull LbFactory<DelivererChannel> lbFactory,
                                      @Nonnull RouteInstanceService routeInstanceService) {
     return new LocalRouteTransfer(
-        localCache, properties, messagePusher, lbFactory, routeInstanceService);
+        localCache, properties, lbFactory, routeInstanceService);
   }
 
   @Bean

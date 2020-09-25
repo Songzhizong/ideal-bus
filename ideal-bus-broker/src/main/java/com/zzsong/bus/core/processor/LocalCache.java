@@ -1,5 +1,7 @@
 package com.zzsong.bus.core.processor;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zzsong.bus.abs.converter.SubscriptionConverter;
 import com.zzsong.bus.abs.domain.Event;
 import com.zzsong.bus.abs.domain.Application;
@@ -13,7 +15,6 @@ import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-public class LocalCache implements InitializingBean, DisposableBean {
+public class LocalCache implements DisposableBean {
   private ScheduledExecutorService scheduledExecutor;
   @Autowired
   private EventInstanceService eventInstanceService;
@@ -48,6 +49,12 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nonnull
   private final SubscriptionService subscriptionService;
 
+
+  private final Cache<String, EventInstance> eventInstanceCache = Caffeine.newBuilder()
+      .maximumSize(100_000)
+      .expireAfterAccess(Duration.ofMinutes(5))
+      .build();
+
   public LocalCache(@Nonnull BusProperties properties,
                     @Nonnull EventService eventService,
                     @Nonnull ApplicationService applicationService,
@@ -56,6 +63,10 @@ public class LocalCache implements InitializingBean, DisposableBean {
     this.eventService = eventService;
     this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
+    Executors.newSingleThreadScheduledExecutor()
+        .scheduleAtFixedRate(() -> log.info("缓存大小: {}", eventInstanceCache.estimatedSize()),
+            10, 10, TimeUnit.SECONDS);
+    afterPropertiesSet();
   }
 
   private Thread refreshCacheThread;
@@ -79,6 +90,11 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nullable
   public SubscriptionDetails getSubscription(long subscriptionId) {
     return subscriptionMapping.get(subscriptionId);
+  }
+
+  @Nonnull
+  public Collection<SubscriptionDetails> getAllSubscription() {
+    return subscriptionMapping.values();
   }
 
   /**
@@ -113,11 +129,33 @@ public class LocalCache implements InitializingBean, DisposableBean {
   }
 
   @Nonnull
-  public Mono<Optional<EventInstance>> loadEventInstance(@Nonnull String eventId) {
-    return eventInstanceService.loadByEventId(eventId);
+  Mono<EventInstance> saveEventInstance(@Nonnull EventInstance eventInstance) {
+    return eventInstanceService.save(eventInstance)
+        .doOnNext(instance -> eventInstanceCache.put(instance.getEventId(), instance));
   }
 
-  @Override
+  @Nonnull
+  public Mono<Optional<EventInstance>> loadEventInstance(@Nonnull String eventId) {
+    EventInstance instance = eventInstanceCache.getIfPresent(eventId);
+    if (instance != null) {
+      return Mono.just(Optional.of(instance));
+    } else {
+      return eventInstanceService.loadByEventId(eventId)
+          .doOnNext(opt -> {
+            if (opt.isPresent()) {
+              final EventInstance eventInstance = opt.get();
+              eventInstanceCache.put(eventInstance.getEventId(), eventInstance);
+            } else {
+              log.info("从存储库中加载event: {} 返回空", eventId);
+            }
+          });
+    }
+  }
+
+  public void removeEventCache(@Nonnull String eventId) {
+    eventInstanceCache.invalidate(eventId);
+  }
+
   public void afterPropertiesSet() {
     refreshLocalCache().subscribe();
     Duration duration = properties.getRefreshLocalCacheInterval();

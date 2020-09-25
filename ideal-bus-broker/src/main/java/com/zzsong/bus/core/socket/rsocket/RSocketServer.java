@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.common.constants.RSocketRoute;
+import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
@@ -24,6 +25,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author 宋志宗 on 2020/9/19 5:48 下午
@@ -39,6 +42,8 @@ public class RSocketServer {
   private final SubscriptionService subscriptionService;
   @Nonnull
   private final LbFactory<DelivererChannel> lbFactory;
+  @Nonnull
+  private final ConcurrentMap<String, DelivererChannel> channelMap = new ConcurrentHashMap<>();
 
   public RSocketServer(@Nonnull LocalCache localCache,
                        @Nonnull EventExchanger eventExchanger,
@@ -57,6 +62,7 @@ public class RSocketServer {
     long applicationId = message.getApplicationId();
     final String instanceId = message.getInstanceId();
     final String accessToken = message.getAccessToken();
+    int socketType = message.getSocketType();
     final String appName = applicationId + "";
     final Application application = localCache.getApplication(applicationId);
     DelivererChannel[] warp = new DelivererChannel[1];
@@ -72,7 +78,7 @@ public class RSocketServer {
               log.info("应用: {} 不存在", applicationId);
             } else {
               errMsg = "accessToken不合法";
-              log.info("{} 客户端: {} accessToken不合法", applicationId, instanceId);
+              log.info("{} 客户端: {}-{} accessToken不合法", applicationId, instanceId, socketType);
             }
             requester.route(RSocketRoute.INTERRUPT)
                 .data(errMsg)
@@ -80,11 +86,15 @@ public class RSocketServer {
                 .doOnNext(log::info)
                 .subscribe();
           } else {
-            log.info("{} 客户端: {} 建立连接.", applicationId, instanceId);
-            RSocketDelivererChannel channel
-                = new RSocketDelivererChannel(instanceId, requester);
-            warp[0] = channel;
-            lbFactory.addServers(appName, ImmutableList.of(channel));
+            log.info("{} 客户端: {}-{} 建立连接.", applicationId, instanceId, socketType);
+            if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
+              RSocketDelivererChannel channel
+                  = new RSocketDelivererChannel(instanceId, requester);
+              warp[0] = channel;
+              String channelKey = buildChannelKey(appName, instanceId);
+              channelMap.put(channelKey, channel);
+              lbFactory.addServers(appName, ImmutableList.of(channel));
+            }
           }
         })
         .doOnError(error -> {
@@ -97,7 +107,7 @@ public class RSocketServer {
           if (channel != null) {
             lbFactory.markServerDown(appName, channel);
           }
-          log.info("{} 客户端: {} 断开连接: {}", applicationId, instanceId, consumer);
+          log.info("{} 客户端: {}-{} 断开连接: {}", applicationId, instanceId, socketType, consumer);
         })
         .subscribe();
   }
@@ -107,8 +117,39 @@ public class RSocketServer {
     return eventExchanger.publish(message);
   }
 
-  @MessageMapping(RSocketRoute.AUTO_SUBSCRIB)
+  @MessageMapping(RSocketRoute.AUTO_SUBSCRIBE)
   public Mono<String> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
     return subscriptionService.autoSubscribe(autoSubscribeArgs).map(JsonUtils::toJsonString);
+  }
+
+  /**
+   * 将通道标记为忙碌状态
+   *
+   * @param channelInfo 通道信息
+   */
+  @MessageMapping(RSocketRoute.CHANNEL_CHANGE)
+  public Mono<Boolean> markChannelBusy(@Nonnull ChannelInfo channelInfo) {
+    String instanceId = channelInfo.getInstanceId();
+    String appName = channelInfo.getAppName();
+    int status = channelInfo.getStatus();
+    String channelKey = buildChannelKey(appName, instanceId);
+    DelivererChannel channel = channelMap.get(channelKey);
+    if (channel == null) {
+      log.error("channel: {} 不存在", channelKey);
+    } else {
+      if (status == ChannelInfo.STATUS_BUSY) {
+        lbFactory.markServerDown(appName, channel);
+      } else if (status == ChannelInfo.STATUS_IDLE) {
+        lbFactory.markServerReachable(appName, channel);
+      } else {
+        log.warn("未知的通道状态: {}", status);
+      }
+    }
+    return Mono.just(true);
+  }
+
+  @Nonnull
+  private String buildChannelKey(@Nonnull String appName, @Nonnull String instanceId) {
+    return appName + "-" + instanceId;
   }
 }

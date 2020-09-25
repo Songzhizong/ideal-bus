@@ -12,12 +12,14 @@ import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.nio.channels.ClosedChannelException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -25,12 +27,17 @@ import java.util.concurrent.*;
  * @author 宋志宗 on 2020/9/19 8:08 下午
  */
 @Slf4j
-public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, DisposableBean {
+@SuppressWarnings("SpringJavaAutowiredMembersInspection")
+public class LocalRouteTransfer implements RouteTransfer, InitializingBean, DisposableBean {
   /**
    * 单个队列上限
    */
-  private static final int QUEUE_SIZE = 10_000;
+  private static final int QUEUE_SIZE = 1_000;
   private static final int WAIT_SECONDS = 10;
+  /**
+   * 读取队列的默认阻塞时间
+   */
+  private static final int DEFAULT_POLL_TIMEOUT = 5;
   /**
    * 每个订阅关系一个队列
    */
@@ -40,16 +47,22 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
    * 记录offer失败的队列
    */
   private final ConcurrentMap<Long, Boolean> noSpaceMarkMap = new ConcurrentHashMap<>();
+  /**
+   * 存储每个队列的当前阻塞时间
+   */
+  private final ConcurrentMap<Long, Integer> pollTimeMap = new ConcurrentHashMap<>();
   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final List<Thread> customerThreadList = new ArrayList<>();
   private volatile boolean startThread = true;
 
   @Nonnull
+  @Autowired
+  private MessagePusher messagePusher;
+
+  @Nonnull
   private final LocalCache localCache;
   @Nonnull
   private final BusProperties properties;
-  @Nonnull
-  private final MessagePusher messagePusher;
   @Nonnull
   private final LbFactory<DelivererChannel> lbFactory;
   @Nonnull
@@ -57,55 +70,85 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
 
   public LocalRouteTransfer(@Nonnull LocalCache localCache,
                             @Nonnull BusProperties properties,
-                            @Nonnull MessagePusher messagePusher,
                             @Nonnull LbFactory<DelivererChannel> lbFactory,
                             @Nonnull RouteInstanceService routeInstanceService) {
     this.localCache = localCache;
     this.properties = properties;
-    this.messagePusher = messagePusher;
     this.lbFactory = lbFactory;
     this.routeInstanceService = routeInstanceService;
   }
 
   @Override
-  public Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList) {
+  public Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList, boolean force) {
     for (RouteInstance routeInstance : routeInstanceList) {
-      long key = routeInstance.getSubscriptionId();
-      BlockingDeque<RouteInstance> queue = queueMap.computeIfAbsent(key, k -> {
-        LinkedBlockingDeque<RouteInstance> routeQueue = new LinkedBlockingDeque<>(QUEUE_SIZE);
-        createConsumeThread(key, routeQueue);
-        return routeQueue;
-      });
-      Boolean mark = noSpaceMarkMap.get(key);
-      if (mark == null || !mark) {
+      long subscriptionId = routeInstance.getSubscriptionId();
+      BlockingDeque<RouteInstance> queue = loadQueue(subscriptionId);
+      Boolean mark = noSpaceMarkMap.get(subscriptionId);
+      // 如果是强制提交或者队列没有被标记为暂停服务状态则向队列中添加消息
+      if (force || mark == null || !mark) {
         boolean offer = queue.offerLast(routeInstance);
         if (!offer) {
-          noSpaceMarkMap.put(key, true);
+          log.warn("队列: {} 已满, topic: {}, application: {}",
+              subscriptionId, routeInstance.getTopic(), routeInstance.getApplicationId());
+          noSpaceMarkMap.put(subscriptionId, true);
         }
       }
     }
     return Mono.just(true);
   }
 
-  private void createConsumeThread(long key, BlockingDeque<RouteInstance> queue) {
+  private BlockingDeque<RouteInstance> loadQueue(long subscriptionId) {
+    // 设置默认的队列读取超时时间
+    pollTimeMap.put(subscriptionId, DEFAULT_POLL_TIMEOUT);
+    return queueMap.computeIfAbsent(subscriptionId, k -> {
+      LinkedBlockingDeque<RouteInstance> routeQueue = new LinkedBlockingDeque<>(QUEUE_SIZE);
+      createConsumeThread(subscriptionId, routeQueue);
+      return routeQueue;
+    });
+  }
+
+  /**
+   * 向队列头归还消息
+   */
+  @Override
+  public Mono<Boolean> giveBack(@Nonnull RouteInstance routeInstance) {
+    Long subscriptionId = routeInstance.getSubscriptionId();
+    BlockingDeque<RouteInstance> deque = queueMap.get(subscriptionId);
+    if (deque != null) {
+      deque.offerFirst(routeInstance);
+      return Mono.just(true);
+    }
+    return Mono.just(false);
+  }
+
+  /**
+   * 为队列创建消费线程
+   */
+  private void createConsumeThread(long subscriptionId, BlockingDeque<RouteInstance> queue) {
     Thread customerThread = new Thread(() -> {
       while (startThread) {
         try {
-          RouteInstance routeInstance = queue.pollFirst(5, TimeUnit.SECONDS);
+          RouteInstance routeInstance = queue
+              .pollFirst(pollTimeMap.get(subscriptionId), TimeUnit.SECONDS);
           if (routeInstance == null) {
-            Boolean mark = noSpaceMarkMap.get(key);
+            Boolean mark = noSpaceMarkMap.get(subscriptionId);
             if (mark != null && mark) {
               int nodeId = properties.getNodeId();
-              routeInstanceService.loadWaiting(QUEUE_SIZE, nodeId)
+              routeInstanceService.loadWaiting(QUEUE_SIZE, nodeId, subscriptionId)
                   .flatMap(list -> {
-                    if (list.size() < QUEUE_SIZE) {
-                      noSpaceMarkMap.remove(key);
+                    final int size = list.size();
+                    log.info("队列: {} 从存储库读取 {}条消息", subscriptionId, size);
+                    if (size < QUEUE_SIZE) {
+                      noSpaceMarkMap.remove(subscriptionId);
+                      log.info("队列: {} 进入对外可用状态", subscriptionId);
+                      pollTimeMap.put(subscriptionId, DEFAULT_POLL_TIMEOUT);
+                    } else {
+                      pollTimeMap.put(subscriptionId, 0);
                     }
-                    return submit(list);
+                    return submit(list, true);
                   }).block();
             }
           } else {
-            long subscriptionId = routeInstance.getSubscriptionId();
             SubscriptionDetails subscription = localCache.getSubscription(subscriptionId);
             if (subscription == null) {
               log.error("订阅关系: {} 不存在", subscriptionId);
@@ -119,8 +162,9 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
               List<DelivererChannel> servers = lbFactory
                   .getReachableServers(applicationId + "");
               if (servers.isEmpty()) {
-                log.info("应用: {} 当前没有在线实例", applicationId);
+                int size = queue.size();
                 queue.offerFirst(routeInstance);
+                log.info("应用: {} 没有可用实例, 当前队列大小: {}", applicationId, size);
                 // 如果当前没有在线的服务, 先睡眠10秒然后重试
                 TimeUnit.SECONDS.sleep(WAIT_SECONDS);
                 continue;
@@ -131,7 +175,15 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
               messagePusher.push(routeInstance).block();
             } else {
               // 并行消息异步推送
-              messagePusher.push(routeInstance).subscribe();
+              messagePusher.push(routeInstance)
+                  .onErrorResume(throwable -> {
+                    log.info("ex: ", throwable);
+                    if (throwable instanceof ClosedChannelException) {
+                      queue.offerFirst(routeInstance);
+                    }
+                    return Mono.empty();
+                  })
+                  .subscribe();
             }
           }
         } catch (InterruptedException e) {
@@ -147,8 +199,16 @@ public class LocalRouteTransfer implements RouteTransfer, ApplicationRunner, Dis
   }
 
   @Override
-  public void run(ApplicationArguments args) {
-    // 按订阅关系从存储库中取出固定条数的消息加入队列
+  public void afterPropertiesSet() {
+    // 为每个订阅关系创建队列, 并设置为暂不可用状态
+    final Collection<SubscriptionDetails> subscription = localCache.getAllSubscription();
+    log.info("存在订阅关系 {}条", subscription.size());
+    for (SubscriptionDetails details : subscription) {
+      final Long subscriptionId = details.getSubscriptionId();
+      loadQueue(subscriptionId);
+      pollTimeMap.put(subscriptionId, 0);
+      noSpaceMarkMap.put(subscriptionId, true);
+    }
   }
 
   @Override

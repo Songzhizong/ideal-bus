@@ -6,6 +6,7 @@ import com.zzsong.bus.storage.mongo.converter.EventInstanceDoConverter;
 import com.zzsong.bus.storage.mongo.document.EventInstanceDo;
 import com.zzsong.bus.storage.mongo.repository.MongoEventInstanceRepository;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -27,6 +28,13 @@ public class MongoEventInstanceStorage implements EventInstanceStorage {
   public Mono<EventInstance> save(@Nonnull EventInstance eventInstance) {
     EventInstanceDo instanceDo = EventInstanceDoConverter.fromEventInstance(eventInstance);
     return repository.save(instanceDo).map(EventInstanceDoConverter::toEventInstance);
+  }
+
+  @Nonnull
+  @Override
+  public Flux<EventInstance> saveAll(@Nonnull Flux<EventInstance> eventInstances) {
+    Flux<EventInstanceDo> map = eventInstances.map(EventInstanceDoConverter::fromEventInstance);
+    return repository.saveAll(map).map(EventInstanceDoConverter::toEventInstance);
   }
 
   @Nonnull

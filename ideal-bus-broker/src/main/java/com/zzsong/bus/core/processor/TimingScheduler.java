@@ -79,7 +79,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
             }
           }
           if (submitList.size() > 0) {
-            routeTransfer.submit(submitList).subscribe();
+            routeTransfer.submit(submitList, false).subscribe();
           }
         } else {
           preReadSuc = false;
@@ -120,7 +120,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
           int second = (nowSecond + 60 - i) % 60;
           List<RouteInstance> tmpData = ringData.remove(second);
           if (tmpData != null) {
-            routeTransfer.submit(tmpData).subscribe();
+            routeTransfer.submit(tmpData, false).subscribe();
           }
         }
         try {

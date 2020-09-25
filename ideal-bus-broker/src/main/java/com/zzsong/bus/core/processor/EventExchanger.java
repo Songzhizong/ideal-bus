@@ -6,7 +6,6 @@ import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.common.message.EventHeaders;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
-import com.zzsong.bus.abs.storage.EventInstanceStorage;
 import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.config.BusProperties;
@@ -34,19 +33,15 @@ public class EventExchanger {
   private final RouteTransfer routeTransfer;
   @Nonnull
   private final RouteInstanceService routeInstanceService;
-  @Nonnull
-  private final EventInstanceStorage eventInstanceStorage;
 
   public EventExchanger(@Nonnull LocalCache localCache,
                         @Nonnull BusProperties properties,
                         @Nonnull RouteTransfer routeTransfer,
-                        @Nonnull RouteInstanceService routeInstanceService,
-                        @Nonnull EventInstanceStorage eventInstanceStorage) {
+                        @Nonnull RouteInstanceService routeInstanceService) {
     this.localCache = localCache;
     this.properties = properties;
     this.routeTransfer = routeTransfer;
     this.routeInstanceService = routeInstanceService;
-    this.eventInstanceStorage = eventInstanceStorage;
   }
 
   @Nonnull
@@ -66,13 +61,13 @@ public class EventExchanger {
       List<RouteInstance> collect = instanceList.stream()
           .filter(instance -> instance.getNextPushTime() < 1L)
           .collect(Collectors.toList());
-      return routeTransfer.submit(collect).map(b -> builder.message("success").build());
+      return routeTransfer.submit(collect, false).map(b -> builder.message("success").build());
     });
   }
 
   private Mono<List<RouteInstance>> route(@Nonnull EventInstance event) {
     // 保存事件实例
-    return eventInstanceStorage.save(event)
+    return localCache.saveEventInstance(event)
         .flatMap(ins -> {
           String topic = event.getTopic();
           List<SubscriptionDetails> subscription = localCache.getTopicSubscription(topic);

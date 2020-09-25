@@ -1,13 +1,10 @@
 package com.zzsong.bus.client;
 
 import com.zzsong.bus.client.rsocket.RSocketBusChannel;
-import com.zzsong.bus.common.message.DeliveredEvent;
-import com.zzsong.bus.common.message.DeliveredResult;
-import com.zzsong.bus.common.message.EventMessage;
-import com.zzsong.bus.common.message.PublishResult;
+import com.zzsong.bus.common.message.*;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.common.transfer.SubscriptionArgs;
-import com.zzsong.bus.receiver.BusReceiver;
+import com.zzsong.bus.receiver.SimpleBusReceiver;
 import com.zzsong.bus.receiver.listener.IEventListener;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
 import com.zzsong.common.loadbalancer.LbFactory;
@@ -28,9 +25,8 @@ import java.util.stream.Collectors;
  * @author 宋志宗 on 2020/9/19 11:43 下午
  */
 @Slf4j
-public class SimpleBusClient implements BusClient {
+public class SimpleBusClient extends SimpleBusReceiver implements BusClient {
   public static final String BUS_BROKER_APP_NAME = "busBroker";
-  private final BusReceiver busReceiver;
   private final LbFactory<BusChannel> lbFactory = new SimpleLbFactory<>();
 
   /**
@@ -47,11 +43,12 @@ public class SimpleBusClient implements BusClient {
   @Setter
   private boolean autoSubscribe;
 
-  public SimpleBusClient(BusReceiver busReceiver) {
-    this.busReceiver = busReceiver;
+  public SimpleBusClient(int corePoolSize, int maximumPoolSize) {
+    super(corePoolSize, maximumPoolSize);
   }
 
   public void startClient() {
+    super.startReceiver();
     if (StringUtils.isBlank(brokerAddresses)) {
       log.error("brokerAddresses为空...");
       return;
@@ -121,12 +118,30 @@ public class SimpleBusClient implements BusClient {
     if (StringUtils.isNotBlank(key)) {
       channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, key, LbStrategyEnum.CONSISTENT_HASH);
     } else {
-      channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, message.getTopic());
+      channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, message.getTopic(), LbStrategyEnum.ROUND_ROBIN);
     }
     if (channel == null) {
       throw new RuntimeException("选取channel为空");
     }
     return channel;
+  }
+
+  @Override
+  protected void idleNotice() {
+    List<BusChannel> channelList = lbFactory.getReachableServers(BUS_BROKER_APP_NAME);
+    Flux.fromIterable(channelList)
+        .flatMap(channel -> channel.changeStates(ChannelInfo.STATUS_IDLE))
+        .collectList()
+        .subscribe();
+  }
+
+  @Override
+  protected void busyNotice() {
+    List<BusChannel> channelList = lbFactory.getReachableServers(BUS_BROKER_APP_NAME);
+    Flux.fromIterable(channelList)
+        .flatMap(channel -> channel.changeStates(ChannelInfo.STATUS_BUSY))
+        .collectList()
+        .subscribe();
   }
 
   @Nonnull
@@ -139,12 +154,12 @@ public class SimpleBusClient implements BusClient {
   @Nonnull
   @Override
   public Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages) {
+//    int batchSize = messages.size();
+//    if (batchSize > 100) {
+//      String message = String.format("超过批量发布上限100 -> %s", batchSize);
+//      log.error(message);
+//      return Flux.error(new RuntimeException(message));
+//    }
     return Flux.fromIterable(messages).flatMap(this::publish);
-  }
-
-  @Nonnull
-  @Override
-  public Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event) {
-    return busReceiver.receive(event);
   }
 }

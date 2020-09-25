@@ -3,6 +3,8 @@ package com.zzsong.common.loadbalancer;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @author 宋志宗 on 2020/9/9
  */
@@ -14,11 +16,11 @@ public class LbFactoryEvent {
    */
   private String serverName;
   /**
-   * 服务总数
+   * 所有服务列表
    */
-  private int serverCount;
+  private List<? extends LbServer> allServers;
   /**
-   * 可达服务数
+   * 可达服务列表
    */
-  private int reachableServerCount;
+  private List<? extends LbServer> reachableServers;
 }

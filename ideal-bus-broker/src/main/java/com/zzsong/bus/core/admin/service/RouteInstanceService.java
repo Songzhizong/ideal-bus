@@ -47,12 +47,13 @@ public class RouteInstanceService {
   /**
    * 从存储库中读取等待消费的消息
    *
-   * @param count  读取实例
-   * @param nodeId 当前节点id
+   * @param count          读取实例
+   * @param nodeId         当前节点id
+   * @param subscriptionId 订阅关系
    * @return 路由实例
    */
   @Nonnull
-  public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId) {
-    return storage.loadWaiting(count, nodeId);
+  public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId) {
+    return storage.loadWaiting(count, nodeId, subscriptionId);
   }
 }
