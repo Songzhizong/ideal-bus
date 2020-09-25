@@ -1,10 +1,9 @@
 package com.zzsong.bus.common.transfer;
 
+import com.google.common.collect.ImmutableList;
 import lombok.*;
 
 import javax.annotation.Nonnull;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,13 +20,22 @@ public class AutoSubscribeArgs {
    * 订阅者id
    */
   @Nonnull
-  @NotNull(message = "订阅者id不能为空")
   private Long applicationId;
 
   /**
    * 订阅关系信息
    */
-  @Valid
   @Nonnull
   private List<SubscriptionArgs> subscriptionArgsList = Collections.emptyList();
+
+  public AutoSubscribeArgs checkAndGet() {
+    //noinspection ConstantConditions
+    if (applicationId == null) {
+      throw new IllegalArgumentException("订阅者id不能为空");
+    }
+    for (SubscriptionArgs args : subscriptionArgsList) {
+      args.checkAndGet();
+    }
+    return this;
+  }
 }

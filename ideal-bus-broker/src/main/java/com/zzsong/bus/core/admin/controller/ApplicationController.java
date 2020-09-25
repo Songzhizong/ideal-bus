@@ -7,7 +7,6 @@ import com.zzsong.bus.abs.transfer.UpdateApplicationArgs;
 import com.zzsong.bus.abs.share.Paging;
 import com.zzsong.bus.abs.share.Res;
 import com.zzsong.bus.core.admin.service.ApplicationService;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -32,16 +31,14 @@ public class ApplicationController {
 
   @Nonnull
   @PostMapping("/create")
-  public Mono<Res<Application>> create(@Validated @RequestBody
-                                       @Nonnull CreateApplicationArgs args) {
-    return applicationService.create(args).map(Res::data);
+  public Mono<Res<Application>> create(@RequestBody @Nonnull CreateApplicationArgs args) {
+    return Mono.just(args.checkAndGet()).flatMap(applicationService::create).map(Res::data);
   }
 
   @Nonnull
   @PostMapping("/update")
-  public Mono<Res<Application>> update(@Validated @RequestBody
-                                       @Nonnull UpdateApplicationArgs args) {
-    return applicationService.update(args).map(Res::data);
+  public Mono<Res<Application>> update(@RequestBody @Nonnull UpdateApplicationArgs args) {
+    return Mono.just(args.checkAndGet()).flatMap(applicationService::update).map(Res::data);
   }
 
   @Nonnull

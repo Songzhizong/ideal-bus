@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
 
 /**
  * @author 宋志宗 on 2020/9/18 10:58 下午
@@ -21,7 +21,6 @@ public class SubscriptionArgs {
    * 事件主题, 也是事件的唯一id
    */
   @Nonnull
-  @NotBlank(message = "topic不能为空")
   private String topic;
   /**
    * 订阅条件表达式
@@ -41,4 +40,11 @@ public class SubscriptionArgs {
    */
   @Nullable
   private Integer retryCount;
+
+  public SubscriptionArgs checkAndGet() {
+    if (StringUtils.isBlank(topic)) {
+      throw new IllegalArgumentException("topic不能为空");
+    }
+    return this;
+  }
 }

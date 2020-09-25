@@ -1,6 +1,5 @@
 package com.zzsong.bus.storage.mongo;
 
-import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.storage.mongo.converter.ApplicationDoConverter;
 import com.zzsong.bus.storage.mongo.document.ApplicationDo;
@@ -24,6 +23,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +79,7 @@ public class MongoApplicationStorage implements ApplicationStorage {
     return repository.findAll()
         .map(ApplicationDoConverter::toApp)
         .collectList()
-        .defaultIfEmpty(ImmutableList.of());
+        .defaultIfEmpty(Collections.emptyList());
   }
 
   @Nonnull
@@ -88,7 +88,7 @@ public class MongoApplicationStorage implements ApplicationStorage {
     return repository.findAllById(applicationIdList)
         .map(ApplicationDoConverter::toApp)
         .collectList()
-        .defaultIfEmpty(ImmutableList.of());
+        .defaultIfEmpty(Collections.emptyList());
   }
 
   @SuppressWarnings("DuplicatedCode")
@@ -114,7 +114,7 @@ public class MongoApplicationStorage implements ApplicationStorage {
     return template.count(query, ApplicationDo.class)
         .flatMap(count -> {
           if (count == 0) {
-            return Mono.just(Res.ofPaging(paging, 0, ImmutableList.of()));
+            return Mono.just(Res.ofPaging(paging, 0, Collections.emptyList()));
           }
           int offset = paging.getOffset();
           int size = paging.getSize();

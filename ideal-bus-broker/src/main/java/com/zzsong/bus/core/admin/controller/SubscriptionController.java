@@ -5,13 +5,11 @@ import com.zzsong.bus.abs.transfer.SubscribeArgs;
 import com.zzsong.bus.abs.share.Res;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
-import org.springframework.validation.annotation.Validated;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -19,7 +17,6 @@ import java.util.List;
  *
  * @author 宋志宗 on 2020/9/16
  */
-@Validated
 @RestController
 @RequestMapping("/subscription")
 public class SubscriptionController {
@@ -35,9 +32,8 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/subscribe")
-  public Mono<Res<Subscription>> subscribe(@Validated @RequestBody
-                                           @Nonnull SubscribeArgs args) {
-    return subscriptionService.subscribe(args).map(Res::data);
+  public Mono<Res<Subscription>> subscribe(@RequestBody @Nonnull SubscribeArgs args) {
+    return Mono.just(args.checkAndGet()).flatMap(subscriptionService::subscribe).map(Res::data);
   }
 
   /**
@@ -45,11 +41,18 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/update")
-  public Mono<Res<Subscription>> update(@Validated @RequestBody
-                                        @Nonnull SubscribeArgs args,
-                                        @NotNull(message = "订阅关系id不能为空")
+  public Mono<Res<Subscription>> update(@RequestBody @Nonnull SubscribeArgs args,
                                         @Nonnull Long subscriptionId) {
-    return subscriptionService.update(args, subscriptionId).map(Res::data);
+    return Mono.just(args.checkAndGet())
+        .doOnNext(a -> {
+          //noinspection ConstantConditions
+          if (subscriptionId == null) {
+            throw new IllegalArgumentException("subscriptionId不能为空");
+          }
+        })
+        .flatMap(checkedArgs ->
+            subscriptionService.update(args, subscriptionId).map(Res::data)
+        );
   }
 
   /**
@@ -57,9 +60,15 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/status/reversal")
-  public Mono<Res<Integer>> reversalStatus(@NotNull(message = "订阅关系id不能为空")
-                                           @Nonnull Long subscriptionId) {
-    return subscriptionService.reversalStatus(subscriptionId).map(Res::data);
+  public Mono<Res<Integer>> reversalStatus(@Nonnull Long subscriptionId) {
+    return Mono.just(1)
+        .doOnNext(t -> {
+          //noinspection ConstantConditions
+          if (subscriptionId == null) {
+            throw new IllegalArgumentException("subscriptionId不能为空");
+          }
+        })
+        .flatMap(t -> subscriptionService.reversalStatus(subscriptionId)).map(Res::data);
   }
 
   /**
@@ -70,8 +79,8 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/subscribe/auto")
-  public Mono<Res<List<Subscription>>> autoSubscription(@Validated @RequestBody
-                                                        @Nonnull AutoSubscribeArgs args) {
+  public Mono<Res<List<Subscription>>> autoSubscription(@RequestBody @Nonnull
+                                                            AutoSubscribeArgs args) {
     return subscriptionService.autoSubscribe(args).map(Res::data);
   }
 
@@ -84,11 +93,19 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/unsubscribe")
-  public Mono<Res<Long>> unsubscribe(@NotNull(message = "订阅者不能为空")
-                                     @Nonnull Long applicationId,
-                                     @NotBlank(message = "主题不能为空")
+  public Mono<Res<Long>> unsubscribe(@Nonnull Long applicationId,
                                      @Nonnull String topic) {
-    return subscriptionService.unsubscribe(applicationId, topic).map(Res::data);
+    return Mono.just(1)
+        .doOnNext(t -> {
+          //noinspection ConstantConditions
+          if (applicationId == null) {
+            throw new IllegalArgumentException("订阅者不能为空");
+          }
+          if (StringUtils.isBlank(topic)) {
+            throw new IllegalArgumentException("主题不能为空");
+          }
+        })
+        .flatMap(i -> subscriptionService.unsubscribe(applicationId, topic)).map(Res::data);
   }
 
   /**
@@ -99,9 +116,14 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/topic/unsubscribe")
-  public Mono<Res<Long>> unsubscribe(@NotBlank(message = "主题不能为空")
-                                     @Nonnull String topic) {
-    return subscriptionService.unsubscribe(topic).map(Res::data);
+  public Mono<Res<Long>> unsubscribe(@Nonnull String topic) {
+    return Mono.just(1)
+        .doOnNext(t -> {
+          if (StringUtils.isBlank(topic)) {
+            throw new IllegalArgumentException("主题不能为空");
+          }
+        })
+        .flatMap(t -> subscriptionService.unsubscribe(topic)).map(Res::data);
   }
 
   /**
@@ -112,9 +134,15 @@ public class SubscriptionController {
    */
   @Nonnull
   @PostMapping("/application/unsubscribe")
-  public Mono<Res<Long>> unsubscribe(@NotNull(message = "订阅者不能为空")
-                                     @Nonnull Long applicationId) {
-    return subscriptionService.unsubscribe(applicationId).map(Res::data);
+  public Mono<Res<Long>> unsubscribe(@Nonnull Long applicationId) {
+    return Mono.just(1)
+        .doOnNext(t -> {
+          //noinspection ConstantConditions
+          if (applicationId == null) {
+            throw new IllegalArgumentException("订阅者不能为空");
+          }
+        })
+        .flatMap(i -> subscriptionService.unsubscribe(applicationId)).map(Res::data);
   }
 
   /**
@@ -125,9 +153,15 @@ public class SubscriptionController {
    */
   @Nonnull
   @GetMapping("/application")
-  public Mono<Res<List<Subscription>>> getSubscription(@NotNull(message = "订阅者不能为空")
-                                                       @Nonnull Long applicationId) {
-    return subscriptionService.getSubscription(applicationId).map(Res::data);
+  public Mono<Res<List<Subscription>>> getSubscription(@Nonnull Long applicationId) {
+    return Mono.just(1)
+        .doOnNext(t -> {
+          //noinspection ConstantConditions
+          if (applicationId == null) {
+            throw new IllegalArgumentException("订阅者不能为空");
+          }
+        })
+        .flatMap(i -> subscriptionService.getSubscription(applicationId)).map(Res::data);
   }
 
   /**
@@ -138,8 +172,7 @@ public class SubscriptionController {
    */
   @Nonnull
   @GetMapping("/topic")
-  public Mono<Res<List<Subscription>>> getSubscription(@NotBlank(message = "主题不能为空")
-                                                       @Nonnull String topic) {
+  public Mono<Res<List<Subscription>>> getSubscription(@Nonnull String topic) {
     return null;
   }
 }

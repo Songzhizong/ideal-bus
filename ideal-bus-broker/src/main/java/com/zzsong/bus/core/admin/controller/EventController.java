@@ -6,7 +6,6 @@ import com.zzsong.bus.abs.transfer.SaveEventArgs;
 import com.zzsong.bus.abs.share.Paging;
 import com.zzsong.bus.abs.share.Res;
 import com.zzsong.bus.core.admin.service.EventService;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -34,9 +33,8 @@ public class EventController {
    */
   @Nonnull
   @PostMapping("/create")
-  public Mono<Res<Event>> create(@Validated @RequestBody
-                                 @Nonnull SaveEventArgs args) {
-    return eventService.create(args).map(Res::data);
+  public Mono<Res<Event>> create(@RequestBody @Nonnull SaveEventArgs args) {
+    return Mono.just(args.checkAndGet()).flatMap(eventService::create).map(Res::data);
   }
 
   /**
@@ -44,9 +42,8 @@ public class EventController {
    */
   @Nonnull
   @PostMapping("/update")
-  public Mono<Res<Event>> update(@Validated @RequestBody
-                                 @Nonnull SaveEventArgs args) {
-    return eventService.update(args).map(Res::data);
+  public Mono<Res<Event>> update(@RequestBody @Nonnull SaveEventArgs args) {
+    return Mono.just(args.checkAndGet()).flatMap(eventService::update).map(Res::data);
   }
 
   /**

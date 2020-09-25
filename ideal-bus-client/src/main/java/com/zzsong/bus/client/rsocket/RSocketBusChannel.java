@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -75,6 +76,7 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   }
 
   public void startChannel() {
+
     lbFactory.addServers(SimpleBusClient.BUS_BROKER_APP_NAME, ImmutableList.of(this));
     this.start();
   }

@@ -2,12 +2,12 @@ package com.zzsong.bus.abs.transfer;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.share.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -19,13 +19,11 @@ public class UpdateApplicationArgs {
    * 订阅者id
    */
   @Nonnull
-  @NotNull(message = "applicationId不能为空")
   private Long applicationId;
   /**
    * 订阅者名称
    */
   @Nonnull
-  @NotBlank(message = "订阅者名称不能为空")
   private String title;
 
   /**
@@ -60,4 +58,15 @@ public class UpdateApplicationArgs {
    */
   @Nonnull
   private String receiveUrl = DBDefaults.STRING_VALUE;
+
+  public UpdateApplicationArgs checkAndGet() {
+    //noinspection ConstantConditions
+    if (this.applicationId == null) {
+      throw new IllegalArgumentException("applicationId不能为空");
+    }
+    if (StringUtils.isBlank(title)) {
+      throw new IllegalArgumentException("订阅者名称不能为空");
+    }
+    return this;
+  }
 }

@@ -1,6 +1,5 @@
 package com.zzsong.bus.storage.mongo;
 
-import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.abs.domain.Event;
 import com.zzsong.bus.storage.mongo.converter.EventDoConverter;
 import com.zzsong.bus.storage.mongo.document.EventDo;
@@ -24,6 +23,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +84,7 @@ public class MongoEventStorage implements EventStorage {
     return repository.findAll()
         .map(EventDoConverter::toEvent)
         .collectList()
-        .defaultIfEmpty(ImmutableList.of());
+        .defaultIfEmpty(Collections.emptyList());
   }
 
   @Nonnull
@@ -93,7 +93,7 @@ public class MongoEventStorage implements EventStorage {
     return repository.findAllByTopicIn(topicList)
         .map(EventDoConverter::toEvent)
         .collectList()
-        .defaultIfEmpty(ImmutableList.of());
+        .defaultIfEmpty(Collections.emptyList());
   }
 
   @SuppressWarnings("DuplicatedCode")
@@ -125,7 +125,7 @@ public class MongoEventStorage implements EventStorage {
     return template.count(query, EventDo.class)
         .flatMap(count -> {
           if (count == 0) {
-            return Mono.just(Res.ofPaging(paging, 0, ImmutableList.of()));
+            return Mono.just(Res.ofPaging(paging, 0, Collections.emptyList()));
           }
           int offset = paging.getOffset();
           int size = paging.getSize();

@@ -1,6 +1,5 @@
 package com.zzsong.bus.core.config;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
@@ -15,11 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.*;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -39,8 +35,7 @@ public class BusConfig {
 
   @Bean
   public LbFactory<DelivererChannel> lbFactory() {
-    final SimpleLbFactory<DelivererChannel> lbFactory = new SimpleLbFactory<>();
-    return lbFactory;
+    return new SimpleLbFactory<>();
   }
 
   @Bean
@@ -53,38 +48,38 @@ public class BusConfig {
         localCache, properties, lbFactory, routeInstanceService);
   }
 
-  @Bean
-  public ExecutorService blockThreadPool(@Nonnull BusProperties busProperties) {
-    int processors = Runtime.getRuntime().availableProcessors();
-    ThreadPoolProperties properties = busProperties.getBlockPool();
-    int corePoolSize = properties.getCorePoolSize();
-    if (corePoolSize < 0) {
-      corePoolSize = processors << 1;
-    }
-    int maximumPoolSize = properties.getMaximumPoolSize();
-    if (maximumPoolSize < 1) {
-      maximumPoolSize = processors << 4;
-    }
-    BlockingQueue<Runnable> workQueue;
-    int workQueueSize = properties.getWorkQueueSize();
-    if (workQueueSize < 1) {
-      workQueue = new SynchronousQueue<>();
-    } else {
-      workQueue = new ArrayBlockingQueue<>(workQueueSize);
-    }
-    ThreadPoolExecutor pool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-        60, TimeUnit.SECONDS, workQueue,
-        new ThreadFactoryBuilder().setNameFormat("job-callback-pool-%d").build(),
-        (r, executor) -> {
-          throw new RejectedExecutionException("Task " + r.toString() +
-              " rejected from jobCallbackThreadPool");
-        });
-    pool.allowCoreThreadTimeOut(true);
-    return pool;
-  }
-
-  @Bean
-  public Scheduler blockScheduler(ExecutorService blockThreadPool) {
-    return Schedulers.fromExecutorService(blockThreadPool, "blockScheduler");
-  }
+//  @Bean
+//  public ExecutorService blockThreadPool(@Nonnull BusProperties busProperties) {
+//    int processors = Runtime.getRuntime().availableProcessors();
+//    ThreadPoolProperties properties = busProperties.getBlockPool();
+//    int corePoolSize = properties.getCorePoolSize();
+//    if (corePoolSize < 0) {
+//      corePoolSize = processors << 1;
+//    }
+//    int maximumPoolSize = properties.getMaximumPoolSize();
+//    if (maximumPoolSize < 1) {
+//      maximumPoolSize = processors << 4;
+//    }
+//    BlockingQueue<Runnable> workQueue;
+//    int workQueueSize = properties.getWorkQueueSize();
+//    if (workQueueSize < 1) {
+//      workQueue = new SynchronousQueue<>();
+//    } else {
+//      workQueue = new ArrayBlockingQueue<>(workQueueSize);
+//    }
+//    ThreadPoolExecutor pool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+//        60, TimeUnit.SECONDS, workQueue,
+//        new BasicThreadFactory.Builder().namingPattern("job-callback-pool-%d").build(),
+//        (r, executor) -> {
+//          throw new RejectedExecutionException("Task " + r.toString() +
+//              " rejected from jobCallbackThreadPool");
+//        });
+//    pool.allowCoreThreadTimeOut(true);
+//    return pool;
+//  }
+//
+//  @Bean
+//  public Scheduler blockScheduler(ExecutorService blockThreadPool) {
+//    return Schedulers.fromExecutorService(blockThreadPool, "blockScheduler");
+//  }
 }

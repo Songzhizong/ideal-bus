@@ -4,9 +4,9 @@ import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -19,7 +19,6 @@ public class CreateApplicationArgs {
    * 订阅者名称
    */
   @Nonnull
-  @NotBlank(message = "订阅者名称不能为空")
   private String title;
 
   /**
@@ -54,4 +53,11 @@ public class CreateApplicationArgs {
    */
   @Nonnull
   private String receiveUrl = DBDefaults.STRING_VALUE;
+
+  public CreateApplicationArgs checkAndGet() {
+    if (StringUtils.isBlank(title)) {
+      throw new IllegalArgumentException("订阅者名称不能为空");
+    }
+    return this;
+  }
 }

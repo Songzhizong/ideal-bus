@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
 
 /**
  * @author 宋志宗 on 2020/9/16
@@ -23,7 +23,6 @@ public class SaveEventArgs {
    * 主题, 也是事件的唯一id
    */
   @Nonnull
-  @NotBlank(message = "topic不能为空")
   private String topic;
 
   /**
@@ -48,4 +47,11 @@ public class SaveEventArgs {
    */
   @Nonnull
   private String desc = DBDefaults.STRING_VALUE;
+
+  public SaveEventArgs checkAndGet() {
+    if (StringUtils.isBlank(topic)) {
+      throw new IllegalArgumentException("topic不能为空");
+    }
+    return this;
+  }
 }

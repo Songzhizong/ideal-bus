@@ -1,12 +1,12 @@
 package com.zzsong.bus.receiver;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
 import com.zzsong.bus.receiver.deliver.EventDeliverer;
 import com.zzsong.bus.receiver.deliver.EventDelivererImpl;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -31,7 +31,7 @@ public class SimpleBusReceiver implements BusReceiver {
     this.maximumPoolSize = maximumPoolSize;
     this.primary = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-        new ThreadFactoryBuilder().setNameFormat("event-pool-%d").build(),
+        new BasicThreadFactory.Builder().namingPattern("event-pool-%d").build(),
         (r, e) -> {
           log.warn("任务执行线程池资源不足, 请尝试修改线程数配置, 当前核心线程数: {}, 最大线程数: {}",
               corePoolSize, maximumPoolSize);
@@ -86,7 +86,7 @@ public class SimpleBusReceiver implements BusReceiver {
     int spareTireSize = Math.max(maxListener << 2, processors << 2);
     this.spareTire = new ThreadPoolExecutor(0, spareTireSize,
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-        new ThreadFactoryBuilder().setNameFormat("spare-pool-%d").build(),
+        new BasicThreadFactory.Builder().namingPattern("spare-pool-%d").build(),
         (r, executor) -> {
           log.error("备用线程池已满: {}", spareTireSize);
           if (!executor.isShutdown()) {

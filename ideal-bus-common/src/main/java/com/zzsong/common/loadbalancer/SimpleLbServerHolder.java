@@ -1,5 +1,6 @@
 package com.zzsong.common.loadbalancer;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -118,14 +119,14 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
   @Nonnull
   @Override
   public List<Server> getReachableServers() {
-    return Collections.unmodifiableList(reachableServers);
+    return ImmutableList.copyOf(reachableServers);
   }
 
   @Nonnull
   @Override
   public List<Server> getAllServers() {
     if (allServers.size() > 0) {
-      return Collections.unmodifiableList(allServers);
+      return ImmutableList.copyOf(allServers);
     } else {
       return Collections.emptyList();
     }

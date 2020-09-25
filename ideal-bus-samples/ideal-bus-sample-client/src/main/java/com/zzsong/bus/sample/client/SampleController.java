@@ -4,16 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.client.Publisher;
 import com.zzsong.bus.common.message.EventMessage;
 import com.zzsong.common.utils.JsonUtils;
-import com.zzsong.common.utils.ReactorUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -29,7 +24,6 @@ import java.util.concurrent.Executors;
 @RestController
 @RequestMapping("/client")
 public class SampleController {
-  private final WebClient webClient = ReactorUtils.createWebClient(200, 200, 500);
   @Nonnull
   private final Publisher publisher;
   private final ExecutorService executorService = Executors.newFixedThreadPool(16);

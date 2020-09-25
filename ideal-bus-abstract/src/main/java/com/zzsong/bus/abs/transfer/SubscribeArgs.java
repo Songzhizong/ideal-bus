@@ -4,10 +4,9 @@ import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.constants.DBDefaults;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -20,13 +19,11 @@ public class SubscribeArgs {
    * 订阅者id
    */
   @Nonnull
-  @NotNull(message = "应用id不能为空")
   private Long applicationId;
   /**
    * 事件主题, 也是事件的唯一id
    */
   @Nonnull
-  @NotBlank(message = "topic不能为空")
   private String topic;
   /**
    * 订阅条件表达式
@@ -45,4 +42,15 @@ public class SubscribeArgs {
    * 订阅状态
    */
   private int status = Subscription.STATUS_ENABLED;
+
+  public SubscribeArgs checkAndGet() {
+    //noinspection ConstantConditions
+    if (applicationId == null) {
+      throw new IllegalArgumentException("应用id不能为空");
+    }
+    if (StringUtils.isBlank(topic)) {
+      throw new IllegalArgumentException("topic不能为空");
+    }
+    return this;
+  }
 }
