@@ -6,7 +6,7 @@
   <groupId>com.zzsong</groupId>
   <artifactId>ideal-bus</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>1.0.0.RC1</version>
 
   <modules>
     <module>ideal-bus-abstract</module>
@@ -26,8 +26,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
-
-    <ideal-bus.version>1.0.0</ideal-bus.version>
 
     <reactor-bom.version>Dysprosium-SR12</reactor-bom.version>
     <spring.boot.version>2.3.4.RELEASE</spring.boot.version>
