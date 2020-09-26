@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -56,8 +55,7 @@ public class EventMessage<T> {
   /**
    * 延迟时间,默认不延迟
    */
-  @Nullable
-  private Duration delay;
+  private int delaySeconds = 0;
   /**
    * 消息内容
    */
@@ -120,9 +118,59 @@ public class EventMessage<T> {
     return this;
   }
 
-  public EventMessage<T> delay(@Nonnull Duration delay) {
-    this.delay = delay;
+  /**
+   * 在现有的延迟时间基础上增加一定的秒数
+   *
+   * @param delaySeconds 增加秒数
+   * @return EventMessage
+   */
+  public EventMessage<T> delaySeconds(int delaySeconds) {
+    if (delaySeconds < 0) {
+      throw new IllegalArgumentException("延迟时间不能小于0");
+    }
+    this.delaySeconds += delaySeconds;
     return this;
+  }
+
+
+  /**
+   * 在现有的延迟时间基础上增加一定的分钟数
+   *
+   * @param delayMinutes 增加分钟数
+   * @return EventMessage
+   */
+  public EventMessage<T> delayMinutes(int delayMinutes) {
+    if (delayMinutes < 0) {
+      throw new IllegalArgumentException("延迟时间不能小于0");
+    }
+    return delaySeconds(delayMinutes * 60);
+  }
+
+  /**
+   * 在现有的延迟时间基础上增加一定的小时数
+   *
+   * @param delayHours 增加小时数
+   * @return EventMessage
+   */
+  public EventMessage<T> delayHours(int delayHours) {
+    if (delayHours < 0) {
+      throw new IllegalArgumentException("延迟时间不能小于0");
+    }
+    return delayMinutes(delayHours * 60);
+  }
+
+
+  /**
+   * 在现有的延迟时间基础上增加一定的天数
+   *
+   * @param delayDays 增加天数
+   * @return EventMessage
+   */
+  public EventMessage<T> delayDays(int delayDays) {
+    if (delayDays < 0) {
+      throw new IllegalArgumentException("延迟时间不能小于0");
+    }
+    return delayHours(delayDays * 24);
   }
 
   public EventMessage<T> addHeader(@Nonnull String name, @Nonnull String value) {

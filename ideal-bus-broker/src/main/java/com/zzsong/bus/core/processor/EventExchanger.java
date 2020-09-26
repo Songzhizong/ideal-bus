@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -106,9 +105,9 @@ public class EventExchanger {
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
     instance.setTopic(event.getTopic());
-    Duration delay = event.getDelay();
-    if (delay != null) {
-      long nextPushTime = System.currentTimeMillis() + delay.toMillis();
+    int delaySeconds = event.getDelaySeconds();
+    if (delaySeconds > 0) {
+      long nextPushTime = System.currentTimeMillis() + delaySeconds * 1000L;
       instance.setNextPushTime(nextPushTime);
     }
     return instance;

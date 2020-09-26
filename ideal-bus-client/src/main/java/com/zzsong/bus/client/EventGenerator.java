@@ -3,7 +3,6 @@ package com.zzsong.bus.client;
 import com.zzsong.bus.common.message.EventMessage;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.List;
 public class EventGenerator {
   private int cursor = -1;
   private final List<EventMessage<?>> messages = new ArrayList<>();
-
 
   @Nonnull
   public static EventGenerator create() {
@@ -102,12 +100,54 @@ public class EventGenerator {
   }
 
   /**
-   * 设置消息的延迟发布事件,单位: 毫秒
+   * 在现有的延迟时间基础上增加一定的秒数
+   *
+   * @param delaySeconds 增加秒数
+   * @return EventGenerator
    */
   @Nonnull
-  public EventGenerator delay(@Nonnull Duration delay) {
+  public EventGenerator delaySeconds(int delaySeconds) {
     EventMessage<?> message = messages.get(cursor);
-    message.setDelay(delay);
+    message.delaySeconds(delaySeconds);
+    return this;
+  }
+
+  /**
+   * 在现有的延迟时间基础上增加一定的分钟数
+   *
+   * @param delayMinutes 增加分钟数
+   * @return EventGenerator
+   */
+  @Nonnull
+  public EventGenerator delayMinutes(int delayMinutes) {
+    EventMessage<?> message = messages.get(cursor);
+    message.delayMinutes(delayMinutes);
+    return this;
+  }
+
+  /**
+   * 在现有的延迟时间基础上增加一定的小时数
+   *
+   * @param delayHours 增加小时数
+   * @return EventGenerator
+   */
+  @Nonnull
+  public EventGenerator delayHours(int delayHours) {
+    EventMessage<?> message = messages.get(cursor);
+    message.delayHours(delayHours);
+    return this;
+  }
+
+  /**
+   * 在现有的延迟时间基础上增加一定的天数
+   *
+   * @param delayDays 增加天数
+   * @return EventGenerator
+   */
+  @Nonnull
+  public EventGenerator delayDays(int delayDays) {
+    EventMessage<?> message = messages.get(cursor);
+    message.delayDays(delayDays);
     return this;
   }
 
@@ -129,5 +169,4 @@ public class EventGenerator {
   public List<EventMessage<?>> get() {
     return messages;
   }
-
 }

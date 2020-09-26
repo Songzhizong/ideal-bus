@@ -11,7 +11,6 @@
   <modules>
     <module>ideal-bus-abstract</module>
     <module>ideal-bus-broker</module>
-    <module>ideal-bus-broker-adapter-rabbit</module>
     <module>ideal-bus-client</module>
     <module>ideal-bus-client-spring-boot-starter</module>
     <module>ideal-bus-common</module>

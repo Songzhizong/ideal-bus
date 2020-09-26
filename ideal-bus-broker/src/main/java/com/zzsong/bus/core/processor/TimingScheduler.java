@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * todo 延迟的消息应该加入队头而不是队尾
+ *
  * @author 宋志宗 on 2020/9/20 7:50 下午
  */
 @Slf4j
