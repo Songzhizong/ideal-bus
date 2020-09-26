@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class LocalCache implements DisposableBean {
-  private ScheduledExecutorService scheduledExecutor;
-
   @Nonnull
   private final BusProperties properties;
   @Nonnull
@@ -112,25 +110,26 @@ public class LocalCache implements DisposableBean {
     return applicationMapping.get(applicationId);
   }
 
-  public void afterPropertiesSet() {
-    refreshLocalCache().subscribe();
+  private void afterPropertiesSet() {
+    refreshLocalCache().block();
     Duration duration = properties.getRefreshLocalCacheInterval();
-    long interval = Math.max(duration.toMillis(), 60 * 1000);
-    scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-    scheduledExecutor.scheduleAtFixedRate(() -> refreshLocalCache().subscribe(),
-        interval, interval, TimeUnit.MILLISECONDS);
+    // 自动更新本地缓存的间隔时间至少1分钟
+    long intervalSeconds = Math.max(duration.getSeconds(), 60);
     refreshCacheThread = new Thread(() -> {
+      long timeout = 5L;
+      long times = 0;
       while (startRefreshCacheThread) {
         Boolean poll;
         try {
-          poll = refreshCacheSignQueue.poll(5, TimeUnit.SECONDS);
+          poll = refreshCacheSignQueue.poll(timeout, TimeUnit.SECONDS);
+          times++;
         } catch (InterruptedException e) {
           log.info("refreshCacheThread interrupted");
           break;
         }
-        if (poll != null) {
-          log.info("更新本地缓存");
-          refreshLocalCache().subscribe();
+        if (poll != null || times >= intervalSeconds / timeout) {
+          refreshLocalCache().doOnNext(b -> log.info("已更新本地缓存...")).subscribe();
+          times = 0;
         }
       }
     });
@@ -174,8 +173,7 @@ public class LocalCache implements DisposableBean {
 
   @Override
   public void destroy() {
-    refreshCacheThread.interrupt();
     startRefreshCacheThread = false;
-    scheduledExecutor.shutdown();
+    refreshCacheThread.interrupt();
   }
 }

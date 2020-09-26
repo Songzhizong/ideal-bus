@@ -44,6 +44,5 @@ public class MongoEventInstanceStorage implements EventInstanceStorage {
         .map(EventInstanceDoConverter::toEventInstance)
         .map(Optional::of)
         .defaultIfEmpty(Optional.empty());
-
   }
 }
