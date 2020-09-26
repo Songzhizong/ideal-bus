@@ -7,6 +7,7 @@ import com.zzsong.bus.common.message.EventHeaders;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.common.util.ConditionMatcher;
+import com.zzsong.bus.core.admin.service.EventInstanceService;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.config.BusProperties;
 import org.springframework.stereotype.Component;
@@ -33,15 +34,19 @@ public class EventExchanger {
   private final RouteTransfer routeTransfer;
   @Nonnull
   private final RouteInstanceService routeInstanceService;
+  @Nonnull
+  private final EventInstanceService eventInstanceService;
 
   public EventExchanger(@Nonnull LocalCache localCache,
                         @Nonnull BusProperties properties,
                         @Nonnull RouteTransfer routeTransfer,
-                        @Nonnull RouteInstanceService routeInstanceService) {
+                        @Nonnull RouteInstanceService routeInstanceService,
+                        @Nonnull EventInstanceService eventInstanceService) {
     this.localCache = localCache;
     this.properties = properties;
     this.routeTransfer = routeTransfer;
     this.routeInstanceService = routeInstanceService;
+    this.eventInstanceService = eventInstanceService;
   }
 
   @Nonnull
@@ -67,7 +72,7 @@ public class EventExchanger {
 
   private Mono<List<RouteInstance>> route(@Nonnull EventInstance event) {
     // 保存事件实例
-    return localCache.saveEventInstance(event)
+    return eventInstanceService.save(event)
         .flatMap(ins -> {
           String topic = event.getTopic();
           List<SubscriptionDetails> subscription = localCache.getTopicSubscription(topic);

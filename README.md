@@ -4,7 +4,7 @@
 
 <p align="center">
     <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg?longCache=true&style=flat-square">
-    <img src="https://img.shields.io/badge/Spring%20Boot-2.3.3-yellow.svg?style=flat-square">
+    <img src="https://img.shields.io/badge/Spring%20Boot-2.3.4-yellow.svg?style=flat-square">
     <img
         src="https://img.shields.io/badge/Project%20Reactor-Dysprosium%20SR12-orange.svg?longCache=true&style=flat-square">
     <img src="https://img.shields.io/badge/RSocket-1.0.2-brightgreen.svg?longCache=true&style=flat-square">

@@ -25,7 +25,6 @@ public final class RouteInstanceDoConverter {
     if (nextPushTime > SnowFlake.START_TIMESTAMP) {
       routeInstanceDo.setNextPushTime(nextPushTime);
     }
-    routeInstanceDo.setSuccess(routeInstance.getSuccess());
     routeInstanceDo.setStatus(routeInstance.getStatus());
     routeInstanceDo.setRetryCount(routeInstance.getRetryCount());
     routeInstanceDo.setUnackListeners(routeInstance.getUnAckListeners());
@@ -43,7 +42,6 @@ public final class RouteInstanceDoConverter {
     routeInstance.setTopic(routeInstanceDo.getTopic());
     long nextPushTime = routeInstanceDo.getNextPushTime();
     routeInstance.setNextPushTime(nextPushTime);
-    routeInstance.setSuccess(routeInstanceDo.getSuccess());
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
     routeInstance.setUnAckListeners(routeInstanceDo.getUnackListeners());

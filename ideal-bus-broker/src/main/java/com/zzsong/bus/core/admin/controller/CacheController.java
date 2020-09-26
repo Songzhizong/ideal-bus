@@ -24,7 +24,7 @@ public class CacheController {
 
   @Nonnull
   @GetMapping("/refresh/notice")
-  Mono<Res<Boolean>> refreshCacheNotice() {
+  Mono<Res<Long>> refreshCacheNotice() {
     return cacheService.notificationRefreshCache().map(Res::data);
   }
 

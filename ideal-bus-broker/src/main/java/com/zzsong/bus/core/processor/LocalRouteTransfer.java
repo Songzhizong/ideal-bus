@@ -130,6 +130,7 @@ public class LocalRouteTransfer implements RouteTransfer, InitializingBean, Disp
         try {
           RouteInstance routeInstance = queue
               .pollFirst(pollTimeMap.get(subscriptionId), TimeUnit.SECONDS);
+          // 是否需要从存储库读取读取未消费掉的消息
           if (routeInstance == null) {
             Boolean mark = noSpaceMarkMap.get(subscriptionId);
             if (mark != null && mark) {

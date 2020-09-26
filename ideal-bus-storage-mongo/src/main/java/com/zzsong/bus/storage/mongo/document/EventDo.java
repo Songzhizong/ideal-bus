@@ -24,14 +24,14 @@ public class EventDo {
   /**
    * 主题, 也是事件的唯一id
    */
-  @Indexed(unique = true)
   @NonNull
+  @Indexed(name = "event_topic", unique = true)
   private String topic;
 
   /**
    * 归属模块
    */
-  @Indexed
+  @Indexed(name = "event_moduleId")
   private long moduleId = DBDefaults.LONG_VALUE;
 
   /**

@@ -18,21 +18,18 @@ import java.util.List;
 @Setter
 public class RouteInstance {
   /**
-   * 执行失败
+   * 丢弃
    */
-  public static final int FAILURE = 0;
-  /**
-   * 执行成功
-   */
-  public static final int SUCCESS = 1;
+  public static final int STATUS_DISCARD = -1;
   /**
    * 等待执行状态
    */
   public static final int STATUS_WAITING = 0;
   /**
-   * 非等待执行状态
+   * 执行成功
    */
-  public static final int STATUS_DISCARD = 1;
+  public static final int STATUS_SUCCESS = 1;
+
   /**
    * 实例id
    */
@@ -55,8 +52,8 @@ public class RouteInstance {
   /**
    * 订阅关系id
    */
-  @Indexed
   @Nonnull
+  @Indexed
   private Long subscriptionId;
   /**
    * 订阅者id
@@ -72,10 +69,6 @@ public class RouteInstance {
    * 下次推送时间
    */
   private long nextPushTime = -1;
-  /**
-   * 是否执行成功
-   */
-  private int success = FAILURE;
   /**
    * 状态: 0 丢弃, 1 等待执行
    */

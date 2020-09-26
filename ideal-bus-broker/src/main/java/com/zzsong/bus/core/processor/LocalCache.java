@@ -1,13 +1,10 @@
 package com.zzsong.bus.core.processor;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Maps;
 import com.zzsong.bus.abs.converter.SubscriptionConverter;
 import com.zzsong.bus.abs.domain.Event;
 import com.zzsong.bus.abs.domain.Application;
-import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.Subscription;
-import com.zzsong.bus.core.admin.service.EventInstanceService;
 import com.zzsong.bus.core.admin.service.EventService;
 import com.zzsong.bus.core.admin.service.ApplicationService;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
@@ -15,7 +12,6 @@ import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -34,11 +30,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class LocalCache implements DisposableBean {
   private ScheduledExecutorService scheduledExecutor;
-  @Autowired
-  private EventInstanceService eventInstanceService;
 
   @Nonnull
   private final BusProperties properties;
@@ -49,12 +42,6 @@ public class LocalCache implements DisposableBean {
   @Nonnull
   private final SubscriptionService subscriptionService;
 
-
-  private final Cache<String, EventInstance> eventInstanceCache = Caffeine.newBuilder()
-      .maximumSize(100_000)
-      .expireAfterAccess(Duration.ofMinutes(5))
-      .build();
-
   public LocalCache(@Nonnull BusProperties properties,
                     @Nonnull EventService eventService,
                     @Nonnull ApplicationService applicationService,
@@ -63,9 +50,6 @@ public class LocalCache implements DisposableBean {
     this.eventService = eventService;
     this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
-    Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(() -> log.info("缓存大小: {}", eventInstanceCache.estimatedSize()),
-            10, 10, TimeUnit.SECONDS);
     afterPropertiesSet();
   }
 
@@ -76,7 +60,7 @@ public class LocalCache implements DisposableBean {
   // ------------------------------ 缓存相关数据 ~ ~ ~
 
   private Map<String, Event> eventMapping = Collections.emptyMap();
-  private Map<Long, Application> applicationMapping = Collections.emptyMap();
+  private ConcurrentMap<Long, Application> applicationMapping = Maps.newConcurrentMap();
   private Map<Long, SubscriptionDetails> subscriptionMapping = Collections.emptyMap();
   private Map<String, List<SubscriptionDetails>> topicSubscriptionMapping = Collections.emptyMap();
 
@@ -128,34 +112,6 @@ public class LocalCache implements DisposableBean {
     return applicationMapping.get(applicationId);
   }
 
-  @Nonnull
-  Mono<EventInstance> saveEventInstance(@Nonnull EventInstance eventInstance) {
-    return eventInstanceService.save(eventInstance)
-        .doOnNext(instance -> eventInstanceCache.put(instance.getEventId(), instance));
-  }
-
-  @Nonnull
-  public Mono<Optional<EventInstance>> loadEventInstance(@Nonnull String eventId) {
-    EventInstance instance = eventInstanceCache.getIfPresent(eventId);
-    if (instance != null) {
-      return Mono.just(Optional.of(instance));
-    } else {
-      return eventInstanceService.loadByEventId(eventId)
-          .doOnNext(opt -> {
-            if (opt.isPresent()) {
-              final EventInstance eventInstance = opt.get();
-              eventInstanceCache.put(eventInstance.getEventId(), eventInstance);
-            } else {
-              log.info("从存储库中加载event: {} 返回空", eventId);
-            }
-          });
-    }
-  }
-
-  public void removeEventCache(@Nonnull String eventId) {
-    eventInstanceCache.invalidate(eventId);
-  }
-
   public void afterPropertiesSet() {
     refreshLocalCache().subscribe();
     Duration duration = properties.getRefreshLocalCacheInterval();
@@ -195,7 +151,7 @@ public class LocalCache implements DisposableBean {
           this.eventMapping = events.stream()
               .collect(Collectors.toMap(Event::getTopic, e -> e));
           this.applicationMapping = applications.stream()
-              .collect(Collectors.toMap(Application::getApplicationId, s -> s));
+              .collect(Collectors.toConcurrentMap(Application::getApplicationId, s -> s));
           this.subscriptionMapping = new HashMap<>();
           this.topicSubscriptionMapping = subscriptions.stream()
               .map(s -> {

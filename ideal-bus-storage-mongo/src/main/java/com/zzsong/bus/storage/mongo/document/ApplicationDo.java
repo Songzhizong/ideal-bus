@@ -30,8 +30,8 @@ public class ApplicationDo {
   /**
    * 订阅者名称
    */
-  @Indexed
   @NonNull
+  @Indexed(name = "app_title")
   private String title = DBDefaults.STRING_VALUE;
 
   /**
@@ -58,8 +58,8 @@ public class ApplicationDo {
   /**
    * 应用编码, 外部应用拥有此属性
    */
-  @Indexed
   @NonNull
+  @Indexed(name = "app_externalId")
   private String externalId = DBDefaults.STRING_VALUE;
 
   /**

@@ -105,7 +105,6 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
         .where("nodeId").is(nodeId)
         .and("subscriptionId").is(subscriptionId)
         .and("nextPushTime").lte(SnowFlake.START_TIMESTAMP)
-        .and("success").lte(RouteInstance.FAILURE)
         .and("status").is(RouteInstance.STATUS_WAITING);
     Query query = Query.query(criteria).limit(count)
         .with(Sort.by(Sort.Direction.ASC, "instanceId"));

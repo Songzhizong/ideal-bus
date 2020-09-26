@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class RouteInstanceDo {
   /**
    * broker nodeId
    */
-  @Indexed
+  @Indexed(name = "route_nodeId")
   private int nodeId;
   /**
    * 事件唯一id
@@ -55,12 +54,8 @@ public class RouteInstanceDo {
   /**
    * 下次推送时间
    */
-  @Indexed
+  @Indexed(name = "route_nextPushTime")
   private long nextPushTime = -1;
-  /**
-   * 是否执行成功
-   */
-  private int success;
   /**
    * 状态: 0 丢弃, 1 等待执行
    */

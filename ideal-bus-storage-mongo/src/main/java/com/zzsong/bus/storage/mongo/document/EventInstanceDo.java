@@ -39,8 +39,8 @@ public class EventInstanceDo {
   /**
    * 事件主题
    */
-  @Indexed
   @Nonnull
+  @Indexed(name = "eventInst_topic")
   private String topic;
   /**
    * 消息头,可用于条件匹配

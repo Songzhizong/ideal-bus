@@ -10,6 +10,7 @@ import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
+import com.zzsong.bus.core.admin.service.EventInstanceService;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.common.loadbalancer.LbFactory;
@@ -41,16 +42,20 @@ public class MessagePusherImpl implements MessagePusher {
   @Nonnull
   private final RouteInstanceService routeInstanceService;
   @Nonnull
+  private final EventInstanceService eventInstanceService;
+  @Nonnull
   private final LbFactory<DelivererChannel> lbFactory;
   @Nonnull
   private final ExternalDelivererChannel externalDelivererChannel;
 
   public MessagePusherImpl(@Nonnull LocalCache localCache,
                            @Nonnull RouteInstanceService routeInstanceService,
+                           @Nonnull EventInstanceService eventInstanceService,
                            @Nonnull LbFactory<DelivererChannel> lbFactory,
                            @Nonnull ExternalDelivererChannel externalDelivererChannel) {
     this.localCache = localCache;
     this.routeInstanceService = routeInstanceService;
+    this.eventInstanceService = eventInstanceService;
     this.lbFactory = lbFactory;
     this.externalDelivererChannel = externalDelivererChannel;
   }
@@ -75,10 +80,9 @@ public class MessagePusherImpl implements MessagePusher {
       }
       int currentRetryCount = routeInstance.getRetryCount() + 1;
       routeInstance.setRetryCount(currentRetryCount);
-      routeInstance.setSuccess(RouteInstance.SUCCESS);
+      routeInstance.setStatus(RouteInstance.STATUS_SUCCESS);
       routeInstance.setNextPushTime(-1L);
       if (!unAckList.isEmpty()) {
-        routeInstance.setSuccess(RouteInstance.FAILURE);
         // 还有没ack的, 尝试重试
         routeInstance.setUnAckListeners(unAckList);
         int maxRetryCount = subscription.getRetryCount();
@@ -88,8 +92,6 @@ public class MessagePusherImpl implements MessagePusher {
         } else {
           routeInstance.setStatus(RouteInstance.STATUS_DISCARD);
         }
-      } else {
-        localCache.removeEventCache(routeInstance.getEventId());
       }
       return routeInstanceService.save(routeInstance);
     });
@@ -154,7 +156,7 @@ public class MessagePusherImpl implements MessagePusher {
 
   @Nonnull
   private Mono<DeliveredEvent> loadDeliveredEvent(@Nonnull RouteInstance routeInstance) {
-    return localCache.loadEventInstance(routeInstance.getEventId())
+    return eventInstanceService.loadByEventId(routeInstance.getEventId())
         .map(opt -> {
           if (!opt.isPresent()) {
             throw new VisibleException("event实例不存在");
