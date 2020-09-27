@@ -5,10 +5,6 @@ spring:
     name: IDEAL-BUS
   banner:
     location: banner.txt
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
   jackson:
     locale: zh_CN
     time-zone: 'GMT+8'

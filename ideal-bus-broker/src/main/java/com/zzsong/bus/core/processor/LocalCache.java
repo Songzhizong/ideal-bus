@@ -5,9 +5,9 @@ import com.zzsong.bus.abs.converter.SubscriptionConverter;
 import com.zzsong.bus.abs.domain.Event;
 import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.Subscription;
-import com.zzsong.bus.core.admin.service.EventService;
-import com.zzsong.bus.core.admin.service.ApplicationService;
-import com.zzsong.bus.core.admin.service.SubscriptionService;
+import com.zzsong.bus.abs.storage.ApplicationStorage;
+import com.zzsong.bus.abs.storage.EventStorage;
+import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
 import lombok.Getter;
@@ -35,21 +35,21 @@ public class LocalCache implements DisposableBean {
   @Nonnull
   private final BusProperties properties;
   @Nonnull
-  private final EventService eventService;
+  private final EventStorage eventStorage;
   @Nonnull
-  private final ApplicationService applicationService;
+  private final ApplicationStorage applicationService;
   @Nonnull
-  private final SubscriptionService subscriptionService;
+  private final SubscriptionStorage subscriptionService;
 
   @Getter
   private volatile boolean initialized = false;
 
   public LocalCache(@Nonnull BusProperties properties,
-                    @Nonnull EventService eventService,
-                    @Nonnull ApplicationService applicationService,
-                    @Nonnull SubscriptionService subscriptionService) {
+                    @Nonnull EventStorage eventStorage,
+                    @Nonnull ApplicationStorage applicationService,
+                    @Nonnull SubscriptionStorage subscriptionService) {
     this.properties = properties;
-    this.eventService = eventService;
+    this.eventStorage = eventStorage;
     this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
     afterPropertiesSet();
@@ -148,7 +148,7 @@ public class LocalCache implements DisposableBean {
 
   @Nonnull
   private Mono<Boolean> refreshLocalCache() {
-    Mono<List<Event>> eventListMono = eventService.findAll();
+    Mono<List<Event>> eventListMono = eventStorage.findAll();
     Mono<List<Application>> applicationListMono = applicationService.findAll();
     Mono<List<Subscription>> enabledSubscriptionMono = subscriptionService.findAllEnabled();
     return Mono.zip(eventListMono, applicationListMono, enabledSubscriptionMono)
