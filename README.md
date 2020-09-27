@@ -1,7 +1,5 @@
 ![image-logo](assets/image-logo.png)
 
-<p align="center"><a href="https://github.com/Songzhizong/ideal-bus/"><strong>-- Home Page --</strong></a></p>
-
 <p align="center">
     <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg?longCache=true&style=flat-square">
     <img src="https://img.shields.io/badge/Spring%20Boot-2.3.4-yellow.svg?style=flat-square">
