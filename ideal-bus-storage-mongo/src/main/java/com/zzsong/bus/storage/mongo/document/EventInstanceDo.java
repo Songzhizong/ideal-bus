@@ -9,8 +9,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.Duration;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -51,8 +49,7 @@ public class EventInstanceDo {
   /**
    * 延迟时间,默认不延迟
    */
-  @Nullable
-  private Duration delay;
+  private int delaySeconds;
   /**
    * 消息内容
    */
@@ -62,4 +59,9 @@ public class EventInstanceDo {
    * 事件产生时间戳
    */
   private long timestamp;
+
+  /**
+   * 状态
+   */
+  private int status = 0;
 }

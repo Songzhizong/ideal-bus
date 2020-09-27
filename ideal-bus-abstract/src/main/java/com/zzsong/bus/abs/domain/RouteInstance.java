@@ -70,7 +70,7 @@ public class RouteInstance {
    */
   private long nextPushTime = -1;
   /**
-   * 状态: 0 丢弃, 1 等待执行
+   * 状态: -1 丢弃, 0 等待执行, 1 完成
    */
   private int status = STATUS_WAITING;
   /**

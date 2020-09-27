@@ -10,6 +10,7 @@ import com.zzsong.bus.core.admin.service.ApplicationService;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,9 @@ public class LocalCache implements DisposableBean {
   private final ApplicationService applicationService;
   @Nonnull
   private final SubscriptionService subscriptionService;
+
+  @Getter
+  private volatile boolean initialized = false;
 
   public LocalCache(@Nonnull BusProperties properties,
                     @Nonnull EventService eventService,
@@ -111,7 +115,12 @@ public class LocalCache implements DisposableBean {
   }
 
   private void afterPropertiesSet() {
-    refreshLocalCache().block();
+    log.info("Init local cache...");
+    refreshLocalCache()
+        .subscribe(b -> {
+          initialized = true;
+          log.info("Init local cache completed.");
+        });
     Duration duration = properties.getRefreshLocalCacheInterval();
     // 自动更新本地缓存的间隔时间至少1分钟
     long intervalSeconds = Math.max(duration.getSeconds(), 60);

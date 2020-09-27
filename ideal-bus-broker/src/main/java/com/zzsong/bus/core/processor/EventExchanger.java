@@ -56,7 +56,15 @@ public class EventExchanger {
         .topic(event.getTopic())
         .success(true);
     // 路由, 获取满足订阅条件的订阅者列表
-    Mono<List<RouteInstance>> route = route(event);
+    Mono<List<RouteInstance>> route = route(event)
+        .flatMap(list -> {
+          if (list.isEmpty()) {
+            event.setStatus(EventInstance.NOT_ROUTED);
+          } else {
+            event.setStatus(EventInstance.ROUTED);
+          }
+          return eventInstanceService.save(event).map(ins -> list);
+        });
     return route.flatMap(instanceList -> {
       if (instanceList.isEmpty()) {
         PublishResult publishResult = builder.message("该事件没有订阅者").build();
@@ -69,30 +77,28 @@ public class EventExchanger {
     });
   }
 
+  @Nonnull
   private Mono<List<RouteInstance>> route(@Nonnull EventInstance event) {
     // 保存事件实例
-    return eventInstanceService.save(event)
-        .flatMap(ins -> {
-          String topic = event.getTopic();
-          List<SubscriptionDetails> subscription = localCache.getTopicSubscription(topic);
-          if (subscription.isEmpty()) {
-            return Mono.just(Collections.emptyList());
-          }
-          EventHeaders headers = event.getHeaders();
-          List<RouteInstance> routeInstanceList = new ArrayList<>();
-          for (SubscriptionDetails details : subscription) {
-            List<Set<String>> group = details.getConditionGroup();
-            if (!ConditionMatcher.match(group, headers)) {
-              continue;
-            }
-            RouteInstance instance = createRouteInstance(event, details);
-            routeInstanceList.add(instance);
-          }
-          if (routeInstanceList.isEmpty()) {
-            return Mono.just(Collections.emptyList());
-          }
-          return routeInstanceService.saveAll(routeInstanceList);
-        });
+    String topic = event.getTopic();
+    List<SubscriptionDetails> subscription = localCache.getTopicSubscription(topic);
+    if (subscription.isEmpty()) {
+      return Mono.just(Collections.emptyList());
+    }
+    EventHeaders headers = event.getHeaders();
+    List<RouteInstance> routeInstanceList = new ArrayList<>();
+    for (SubscriptionDetails details : subscription) {
+      List<Set<String>> group = details.getConditionGroup();
+      if (!ConditionMatcher.match(group, headers)) {
+        continue;
+      }
+      RouteInstance instance = createRouteInstance(event, details);
+      routeInstanceList.add(instance);
+    }
+    if (routeInstanceList.isEmpty()) {
+      return Mono.just(Collections.emptyList());
+    }
+    return routeInstanceService.saveAll(routeInstanceList);
   }
 
   @Nonnull

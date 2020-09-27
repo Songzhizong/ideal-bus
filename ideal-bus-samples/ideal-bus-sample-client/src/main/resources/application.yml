@@ -17,5 +17,5 @@ spring:
 ideal:
   bus:
     auto-subscribe: true
-    application-id: 1294996762263552
+    application-id: 3511651756154880
     broker-addresses: 127.0.0.1:13266,127.0.0.1:13267

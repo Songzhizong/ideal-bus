@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -71,7 +70,7 @@ public class SampleController {
   public void testDelay(@PathVariable("topic") String topic) {
     final long start = System.currentTimeMillis();
     final List<String> payload = ImmutableList.of("1", "2", "3");
-    publisher.publish(EventMessage.of(topic, payload).delay(Duration.ofSeconds(10)))
+    publisher.publish(EventMessage.of(topic, payload).delaySeconds(10))
         .map(JsonUtils::toJsonString)
         .doOnNext(log::info)
         .block();
@@ -88,8 +87,6 @@ public class SampleController {
           final List<String> payload = ImmutableList.of(j + 1 + "", j + 1 + "", j + 1 + "");
           EventMessage<List<String>> message = EventMessage.of(topic, payload);
           list.add(message);
-//      publisher.publish(EventMessage.of(topic, payload).delay(Duration.ofSeconds(10)))
-//          .block();
         }
         publisher.batchPublish(list).collectList().block();
         log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);

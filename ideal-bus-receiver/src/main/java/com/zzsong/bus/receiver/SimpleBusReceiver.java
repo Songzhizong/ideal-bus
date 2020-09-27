@@ -4,7 +4,6 @@ import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
 import com.zzsong.bus.receiver.deliver.EventDeliverer;
 import com.zzsong.bus.receiver.deliver.EventDelivererImpl;
-import com.zzsong.bus.receiver.listener.ListenerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import reactor.core.publisher.Mono;
@@ -12,7 +11,6 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,7 +22,6 @@ public class SimpleBusReceiver implements BusReceiver {
   private final int maximumPoolSize;
   private final EventDeliverer eventDeliverer;
   private final ThreadPoolExecutor primary;
-  private ThreadPoolExecutor spareTire;
   private final AtomicBoolean primaryBusy = new AtomicBoolean(false);
 
   public SimpleBusReceiver(int corePoolSize, int maximumPoolSize) {
@@ -35,10 +32,12 @@ public class SimpleBusReceiver implements BusReceiver {
         (r, e) -> {
           log.warn("任务执行线程池资源不足, 请尝试修改线程数配置, 当前核心线程数: {}, 最大线程数: {}",
               corePoolSize, maximumPoolSize);
-          spareTire.execute(r);
           primaryBusy.set(true);
           // 主线程池资源耗尽了, 发布忙碌通知
           busyNotice();
+          if (!e.isShutdown()) {
+            r.run();
+          }
         });
     Scheduler primaryScheduler = Schedulers.fromExecutor(primary);
     this.eventDeliverer = new EventDelivererImpl(primaryScheduler);
@@ -71,27 +70,9 @@ public class SimpleBusReceiver implements BusReceiver {
 
   public void startReceiver() {
     initEventListeners();
-    initSpareTire();
   }
 
   protected void initEventListeners() {
 
-  }
-
-  private void initSpareTire() {
-    int processors = Runtime.getRuntime().availableProcessors();
-    // 获取监听器总数
-    int maxListener = ListenerFactory.getAll().values().stream().mapToInt(Map::size).sum();
-    // 备用线程池大小上限 max(监听器总数x4, cpu核心数x4)
-    int spareTireSize = Math.max(maxListener << 2, processors << 2);
-    this.spareTire = new ThreadPoolExecutor(0, spareTireSize,
-        60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-        new BasicThreadFactory.Builder().namingPattern("spare-pool-%d").build(),
-        (r, executor) -> {
-          log.error("备用线程池已满: {}", spareTireSize);
-          if (!executor.isShutdown()) {
-            r.run();
-          }
-        });
   }
 }

@@ -1,5 +1,7 @@
 package com.zzsong.bus.client.spring.boot.starter;
 
+import com.zzsong.bus.client.BusClient;
+import com.zzsong.bus.client.DefaultBusClient;
 import com.zzsong.bus.client.SpringBusClient;
 import com.zzsong.common.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -33,17 +35,22 @@ public class BusClientAutoConfig {
   }
 
   @Bean
-  public SpringBusClient springBusClient() {
-    final int corePoolSize = receiveProperties.getCorePoolSize();
-    final int maximumPoolSize = receiveProperties.getMaximumPoolSize();
-    final SpringBusClient busClient = new SpringBusClient(corePoolSize, maximumPoolSize);
-    busClient.setApplicationId(clientProperties.getApplicationId());
-    busClient.setBrokerAddresses(clientProperties.getBrokerAddresses());
-    busClient.setAccessToken(clientProperties.getAccessToken());
-    final String ip = IpUtil.getIp();
-    final int port = serverPort == null ? 8080 : serverPort;
-    busClient.setClientIpPort(ip + ":" + port);
-    busClient.setAutoSubscribe(clientProperties.isAutoSubscribe());
-    return busClient;
+  public BusClient busCLient() {
+    if (clientProperties.isEnabled()) {
+      final int corePoolSize = receiveProperties.getCorePoolSize();
+      final int maximumPoolSize = receiveProperties.getMaximumPoolSize();
+      final SpringBusClient busClient = new SpringBusClient(corePoolSize, maximumPoolSize);
+      busClient.setApplicationId(clientProperties.getApplicationId());
+      busClient.setBrokerAddresses(clientProperties.getBrokerAddresses());
+      busClient.setAccessToken(clientProperties.getAccessToken());
+      final String ip = IpUtil.getIp();
+      final int port = serverPort == null ? 8080 : serverPort;
+      busClient.setClientIpPort(ip + ":" + port);
+      busClient.setAutoSubscribe(clientProperties.isAutoSubscribe());
+      return busClient;
+    } else {
+      log.warn("ideal bus is disabled");
+      return new DefaultBusClient();
+    }
   }
 }

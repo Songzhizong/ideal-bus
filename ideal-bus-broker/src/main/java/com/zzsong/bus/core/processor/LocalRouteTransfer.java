@@ -200,7 +200,11 @@ public class LocalRouteTransfer implements RouteTransfer, InitializingBean, Disp
   }
 
   @Override
-  public void afterPropertiesSet() {
+  public void afterPropertiesSet() throws Exception {
+    // 本地缓存必须完成初始化才能进行下一步的操作
+    while (!localCache.isInitialized()) {
+      TimeUnit.MILLISECONDS.sleep(10);
+    }
     // 为每个订阅关系创建队列, 并设置为暂不可用状态
     final Collection<SubscriptionDetails> subscription = localCache.getAllSubscription();
     log.info("存在订阅关系 {}条", subscription.size());

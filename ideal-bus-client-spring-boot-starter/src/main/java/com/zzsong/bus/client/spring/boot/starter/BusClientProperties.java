@@ -11,6 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "ideal.bus")
 public class BusClientProperties {
+  private boolean enabled = true;
+
   private long applicationId;
 
   private String brokerAddresses = "";

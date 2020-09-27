@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = "com.zzsong.bus")
 public class BrokerApplication {
   public static void main(String[] args) {
-    System.setProperty("reactor.netty.ioWorkerCount", "64");
     SpringApplication.run(BrokerApplication.class, args);
   }
 }
