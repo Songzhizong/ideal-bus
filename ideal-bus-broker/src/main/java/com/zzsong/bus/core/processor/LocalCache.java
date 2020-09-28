@@ -170,7 +170,7 @@ public class LocalCache implements DisposableBean {
                 }
                 SubscriptionDetails details = SubscriptionConverter.toSubscriptionDetails(s);
                 details.setApplicationType(application.getApplicationType());
-                details.setExternalId(application.getExternalId());
+                details.setExternalApp(application.getExternalApp());
                 details.setReceiveUrl(application.getReceiveUrl());
                 subscriptionMapping.put(s.getSubscriptionId(), details);
                 return details;

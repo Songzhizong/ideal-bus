@@ -41,7 +41,7 @@ public class EventMessage<T> {
    * 可通过该字段判断event归属哪个应用
    */
   @Nonnull
-  private String externalId = "";
+  private String externalApp = "";
   /**
    * 事件主题
    */
@@ -113,8 +113,11 @@ public class EventMessage<T> {
     return this;
   }
 
-  public EventMessage<T> application(@Nonnull String application) {
-    this.externalId = application;
+  /**
+   * 可通过该字段判断event归属哪个应用
+   */
+  public EventMessage<T> externalApp(@Nonnull String externalApp) {
+    this.externalApp = externalApp;
     return this;
   }
 

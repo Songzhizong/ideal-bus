@@ -98,13 +98,13 @@ public class MongoApplicationStorage implements ApplicationStorage {
     Criteria criteria = new Criteria();
     if (args != null) {
       String title = args.getTitle();
-      String externalId = args.getExternalId();
+      String externalApp = args.getExternalApp();
       ApplicationTypeEnum applicationType = args.getApplicationType();
       if (StringUtils.isNotBlank(title)) {
         criteria.and("title").regex("^" + title);
       }
-      if (StringUtils.isNotBlank(externalId)) {
-        criteria.and("externalId").is(externalId);
+      if (StringUtils.isNotBlank(externalApp)) {
+        criteria.and("externalApp").is(externalApp);
       }
       if (applicationType != null) {
         criteria.and("applicationType").is(applicationType);

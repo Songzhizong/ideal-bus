@@ -158,10 +158,13 @@ public class EventGenerator {
     return this;
   }
 
+  /**
+   * 可通过该字段判断event归属哪个外部应用
+   */
   @Nonnull
-  public EventGenerator application(@Nonnull String application) {
+  public EventGenerator externalApp(@Nonnull String externalApp) {
     EventMessage<?> message = messages.get(cursor);
-    message.application(application);
+    message.externalApp(externalApp);
     return this;
   }
 

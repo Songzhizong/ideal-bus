@@ -20,7 +20,7 @@ public final class ApplicationConverter {
     application.setAccessToken(args.getAccessToken());
     application.setApplicationType(args.getApplicationType());
     application.setAppName(args.getAppName());
-    application.setExternalId(args.getExternalId());
+    application.setExternalApp(args.getExternalApp());
     application.setReceiveUrl(args.getReceiveUrl());
     return application;
   }

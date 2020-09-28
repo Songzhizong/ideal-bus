@@ -59,8 +59,8 @@ public class ApplicationDo {
    * 应用编码, 外部应用拥有此属性
    */
   @NonNull
-  @Indexed(name = "app_externalId")
-  private String externalId = DBDefaults.STRING_VALUE;
+  @Indexed(name = "app_externalApp")
+  private String externalApp = DBDefaults.STRING_VALUE;
 
   /**
    * 接收推送的地址, 外部应用拥有此属性

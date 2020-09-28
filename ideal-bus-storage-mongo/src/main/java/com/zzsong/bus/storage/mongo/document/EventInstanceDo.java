@@ -33,7 +33,7 @@ public class EventInstanceDo {
    * 可通过该字段判断event归属哪个外部应用
    */
   @Nonnull
-  private String externalId;
+  private String externalApp;
   /**
    * 事件主题
    */
