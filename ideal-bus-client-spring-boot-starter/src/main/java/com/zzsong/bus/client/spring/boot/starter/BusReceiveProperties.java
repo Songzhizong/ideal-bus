@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "ideal.receive")
+@ConfigurationProperties(prefix = "ideal.bus.receive")
 public class BusReceiveProperties {
   /**
    * 核心线程数
