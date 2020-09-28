@@ -10,7 +10,6 @@ import com.zzsong.bus.abs.storage.EventStorage;
 import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.config.BusProperties;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
@@ -41,9 +40,6 @@ public class LocalCache implements DisposableBean {
   @Nonnull
   private final SubscriptionStorage subscriptionService;
 
-  @Getter
-  private volatile boolean initialized = false;
-
   public LocalCache(@Nonnull BusProperties properties,
                     @Nonnull EventStorage eventStorage,
                     @Nonnull ApplicationStorage applicationService,
@@ -52,7 +48,6 @@ public class LocalCache implements DisposableBean {
     this.eventStorage = eventStorage;
     this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
-    afterPropertiesSet();
   }
 
   private Thread refreshCacheThread;
@@ -114,13 +109,9 @@ public class LocalCache implements DisposableBean {
     return applicationMapping.get(applicationId);
   }
 
-  private void afterPropertiesSet() {
+  public void init() {
     log.info("Init local cache...");
-    refreshLocalCache()
-        .subscribe(b -> {
-          initialized = true;
-          log.info("Init local cache completed.");
-        });
+    refreshLocalCache().block();
     Duration duration = properties.getRefreshLocalCacheInterval();
     // 自动更新本地缓存的间隔时间至少1分钟
     long intervalSeconds = Math.max(duration.getSeconds(), 60);
@@ -144,6 +135,7 @@ public class LocalCache implements DisposableBean {
     });
     refreshCacheThread.setDaemon(true);
     refreshCacheThread.start();
+    log.info("Init local cache completed.");
   }
 
   @Nonnull

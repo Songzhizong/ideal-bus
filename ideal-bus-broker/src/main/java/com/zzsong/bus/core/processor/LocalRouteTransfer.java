@@ -12,7 +12,6 @@ import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
@@ -27,8 +26,7 @@ import java.util.concurrent.*;
  * @author 宋志宗 on 2020/9/19 8:08 下午
  */
 @Slf4j
-@SuppressWarnings("SpringJavaAutowiredMembersInspection")
-public class LocalRouteTransfer implements RouteTransfer, InitializingBean, DisposableBean {
+public class LocalRouteTransfer implements RouteTransfer, DisposableBean {
   /**
    * 单个队列上限
    */
@@ -199,12 +197,16 @@ public class LocalRouteTransfer implements RouteTransfer, InitializingBean, Disp
     }
   }
 
-  @Override
-  public void afterPropertiesSet() throws Exception {
+  public void init() {
+    log.debug("Init LocalRouteTransfer ...");
     // 本地缓存必须完成初始化才能进行下一步的操作
-    while (!localCache.isInitialized()) {
-      TimeUnit.MILLISECONDS.sleep(10);
-    }
+//    while (!localCache.isInitialized()) {
+//      try {
+//        TimeUnit.MILLISECONDS.sleep(10);
+//      } catch (InterruptedException e) {
+//        e.printStackTrace();
+//      }
+//    }
     // 为每个订阅关系创建队列, 并设置为暂不可用状态
     final Collection<SubscriptionDetails> subscription = localCache.getAllSubscription();
     log.info("存在订阅关系 {}条", subscription.size());
@@ -214,10 +216,12 @@ public class LocalRouteTransfer implements RouteTransfer, InitializingBean, Disp
       pollTimeMap.put(subscriptionId, 0);
       noSpaceMarkMap.put(subscriptionId, true);
     }
+    log.debug("Init LocalRouteTransfer completed.");
   }
 
   @Override
   public void destroy() {
     this.startThread = false;
   }
+
 }

@@ -9,6 +9,7 @@ import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
+import com.zzsong.bus.core.config.BusConfig;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.bus.core.processor.EventExchanger;
 import com.zzsong.bus.core.processor.pusher.DelivererChannel;
@@ -35,6 +36,8 @@ import java.util.concurrent.ConcurrentMap;
 @Controller
 public class RSocketServer {
   @Nonnull
+  private final BusConfig busConfig;
+  @Nonnull
   private final LocalCache localCache;
   @Nonnull
   private final EventExchanger eventExchanger;
@@ -45,10 +48,12 @@ public class RSocketServer {
   @Nonnull
   private final ConcurrentMap<String, DelivererChannel> channelMap = new ConcurrentHashMap<>();
 
-  public RSocketServer(@Nonnull LocalCache localCache,
+  public RSocketServer(@Nonnull BusConfig busConfig,
+                       @Nonnull LocalCache localCache,
                        @Nonnull EventExchanger eventExchanger,
                        @Nonnull SubscriptionService subscriptionService,
                        @Nonnull LbFactory<DelivererChannel> lbFactory) {
+    this.busConfig = busConfig;
     this.localCache = localCache;
     this.eventExchanger = eventExchanger;
     this.subscriptionService = subscriptionService;
@@ -69,22 +74,18 @@ public class RSocketServer {
     requester.rsocket()
         .onClose()
         .doFirst(() -> {
-          if (application == null ||
-              (StringUtils.isNotBlank(application.getAccessToken())
-                  && Objects.equals(application.getAccessToken(), accessToken))) {
-            String errMsg;
-            if (application == null) {
-              errMsg = "此应用不存在";
-              log.info("应用: {} 不存在", applicationId);
-            } else {
-              errMsg = "accessToken不合法";
-              log.info("{} 客户端: {}-{} accessToken不合法", applicationId, instanceId, socketType);
-            }
-            requester.route(RSocketRoute.INTERRUPT)
-                .data(errMsg)
-                .retrieveMono(String.class)
-                .doOnNext(log::info)
-                .subscribe();
+          String errMsg = null;
+          if (application == null) {
+            errMsg = "此应用不存在";
+            log.info("应用: {} 不存在", applicationId);
+          } else if (StringUtils.isNotBlank(application.getAccessToken())
+              && Objects.equals(application.getAccessToken(), accessToken)) {
+            errMsg = "accessToken不合法";
+            log.info("{} 客户端: {}-{} accessToken不合法", applicationId, instanceId, socketType);
+          } else if (!busConfig.isInitialized()) {
+            errMsg = "broker尚未准备就绪";
+            log.info("{} 客户端: {}-{} 建立连接失败, broker尚未准备就绪",
+                applicationId, instanceId, socketType);
           } else {
             log.info("{} 客户端: {}-{} 建立连接.", applicationId, instanceId, socketType);
             if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
@@ -95,6 +96,13 @@ public class RSocketServer {
               channelMap.put(channelKey, channel);
               lbFactory.addServers(appName, ImmutableList.of(channel));
             }
+          }
+          if (errMsg != null) {
+            requester.route(RSocketRoute.INTERRUPT)
+                .data(errMsg)
+                .retrieveMono(String.class)
+                .doOnNext(log::info)
+                .subscribe();
           }
         })
         .doOnError(error -> {

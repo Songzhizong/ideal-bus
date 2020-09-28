@@ -8,9 +8,7 @@
 
 ### 🐞 Bug Fixes
 
-- 修复循环依赖导致的启动失败问题
-
-
+- 修复broker启动过程中卡主的问题
 
 ### 🔨 Dependency Upgrades
 
