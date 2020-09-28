@@ -1,5 +1,6 @@
 package com.zzsong.bus.storage.mongo;
 
+import com.mongodb.client.result.UpdateResult;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.generator.IDGenerator;
 import com.zzsong.bus.abs.generator.IDGeneratorFactory;
@@ -92,7 +93,7 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
               .collect(Collectors.toList());
           Query updateQuery = Query.query(Criteria.where("instanceId").in(instanceIds));
           Update update = new Update();
-          update.set("nextPushTime", null);
+          update.set("nextPushTime", -1);
           return template.updateMulti(updateQuery, update, RouteInstanceDo.class)
               .map(r -> instanceList);
         });
@@ -112,5 +113,16 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
         .map(RouteInstanceDoConverter::toRouteInstance)
         .collectList()
         .defaultIfEmpty(Collections.emptyList());
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
+    Query updateQuery = Query.query(Criteria.where("instanceId").is(instanceId));
+    Update update = new Update();
+    update.set("status", status);
+    update.set("message", message);
+    return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
+        .map(UpdateResult::getModifiedCount);
   }
 }

@@ -105,8 +105,8 @@ public class EventExchanger {
   private RouteInstance createRouteInstance(@Nonnull EventInstance event,
                                             @Nonnull SubscriptionDetails details) {
     RouteInstance instance = new RouteInstance();
-    instance.setEventId(event.getEventId());
     instance.setNodeId(properties.getNodeId());
+    instance.setEventId(event.getEventId());
     instance.setKey(event.getKey());
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
@@ -116,6 +116,8 @@ public class EventExchanger {
       long nextPushTime = System.currentTimeMillis() + delaySeconds * 1000L;
       instance.setNextPushTime(nextPushTime);
     }
+    instance.setStatus(RouteInstance.STATUS_WAITING);
+    instance.setMessage("waiting");
     return instance;
   }
 }

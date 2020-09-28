@@ -19,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveredEvent {
+  private long routeInstanceId;
   /**
    * 事件唯一id
    */

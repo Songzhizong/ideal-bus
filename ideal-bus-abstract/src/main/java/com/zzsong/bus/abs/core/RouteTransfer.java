@@ -10,6 +10,7 @@ import java.util.List;
  * @author 宋志宗 on 2020/9/19 8:04 下午
  */
 public interface RouteTransfer {
+  void init();
 
   Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstanceList, boolean force);
 

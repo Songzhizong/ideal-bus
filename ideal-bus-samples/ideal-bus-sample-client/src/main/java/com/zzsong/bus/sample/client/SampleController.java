@@ -62,7 +62,6 @@ public class SampleController {
         .doOnNext(log::info)
         .doFinally(s -> log.info("发布耗时: {}", System.currentTimeMillis() - start))
         .subscribe();
-    System.out.println(JsonUtils.toJsonString(message));
     log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);
   }
 

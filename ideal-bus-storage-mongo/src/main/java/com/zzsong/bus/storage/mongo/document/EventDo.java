@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,13 +26,13 @@ public class EventDo {
    * 主题, 也是事件的唯一id
    */
   @NonNull
-  @Indexed(name = "event_topic", unique = true)
+  @Indexed(unique = true)
   private String topic;
 
   /**
    * 归属模块
    */
-  @Indexed(name = "event_moduleId")
+  @HashIndexed
   private long moduleId = DBDefaults.LONG_VALUE;
 
   /**

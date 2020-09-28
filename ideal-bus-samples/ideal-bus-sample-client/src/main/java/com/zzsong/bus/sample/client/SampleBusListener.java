@@ -21,8 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SampleBusListener {
   private final AtomicInteger counter = new AtomicInteger();
 
-  @EventListener(topic = "testUnAck", autoAck = true)
-  public void testUnAck(@Nonnull EventContext<List<String>> context) {
+  @EventListener(topic = "testUnAck", autoAck = false)
+  public void testUnAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
+    TimeUnit.SECONDS.sleep(5);
     log.info("testUnAck 接收到消息: {}, 序号: {}",
         JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
   }
@@ -30,9 +31,9 @@ public class SampleBusListener {
   @EventListener(topic = "testAutoAck", autoAck = true)
   public void testAutoAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
     int incrementAndGet = counter.incrementAndGet();
-//    TimeUnit.SECONDS.sleep(1);
-//    log.info("testAutoAck 接收到消息: {}, 接收到消息序号: {}",
-//        JsonUtils.toJsonString(context.getPayload()), incrementAndGet);
+    TimeUnit.SECONDS.sleep(10);
+    log.info("testAutoAck 接收到消息: {}, 接收到消息序号: {}",
+        JsonUtils.toJsonString(context.getPayload()), incrementAndGet);
   }
 
   @EventListener(topic = "broadcast")

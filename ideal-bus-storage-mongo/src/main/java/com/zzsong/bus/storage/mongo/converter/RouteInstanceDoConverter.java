@@ -27,6 +27,7 @@ public final class RouteInstanceDoConverter {
     }
     routeInstanceDo.setStatus(routeInstance.getStatus());
     routeInstanceDo.setRetryCount(routeInstance.getRetryCount());
+    routeInstanceDo.setMessage(routeInstance.getMessage());
     routeInstanceDo.setUnAckListeners(routeInstance.getUnAckListeners());
     return routeInstanceDo;
   }
@@ -44,6 +45,7 @@ public final class RouteInstanceDoConverter {
     routeInstance.setNextPushTime(nextPushTime);
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
+    routeInstance.setMessage(routeInstanceDo.getMessage());
     routeInstance.setUnAckListeners(routeInstanceDo.getUnAckListeners());
     return routeInstance;
   }

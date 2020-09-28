@@ -26,7 +26,7 @@ import java.util.concurrent.*;
  * @author 宋志宗 on 2020/9/19 8:08 下午
  */
 @Slf4j
-public class LocalRouteTransfer implements RouteTransfer, DisposableBean {
+public class BlockingDequeRouteTransfer implements RouteTransfer, DisposableBean {
   /**
    * 单个队列上限
    */
@@ -66,10 +66,10 @@ public class LocalRouteTransfer implements RouteTransfer, DisposableBean {
   @Nonnull
   private final RouteInstanceService routeInstanceService;
 
-  public LocalRouteTransfer(@Nonnull LocalCache localCache,
-                            @Nonnull BusProperties properties,
-                            @Nonnull LbFactory<DelivererChannel> lbFactory,
-                            @Nonnull RouteInstanceService routeInstanceService) {
+  public BlockingDequeRouteTransfer(@Nonnull LocalCache localCache,
+                                    @Nonnull BusProperties properties,
+                                    @Nonnull LbFactory<DelivererChannel> lbFactory,
+                                    @Nonnull RouteInstanceService routeInstanceService) {
     this.localCache = localCache;
     this.properties = properties;
     this.lbFactory = lbFactory;
@@ -197,16 +197,9 @@ public class LocalRouteTransfer implements RouteTransfer, DisposableBean {
     }
   }
 
+  @Override
   public void init() {
-    log.debug("Init LocalRouteTransfer ...");
-    // 本地缓存必须完成初始化才能进行下一步的操作
-//    while (!localCache.isInitialized()) {
-//      try {
-//        TimeUnit.MILLISECONDS.sleep(10);
-//      } catch (InterruptedException e) {
-//        e.printStackTrace();
-//      }
-//    }
+    log.debug("Init BlockingDequeRouteTransfer ...");
     // 为每个订阅关系创建队列, 并设置为暂不可用状态
     final Collection<SubscriptionDetails> subscription = localCache.getAllSubscription();
     log.info("存在订阅关系 {}条", subscription.size());
@@ -216,12 +209,11 @@ public class LocalRouteTransfer implements RouteTransfer, DisposableBean {
       pollTimeMap.put(subscriptionId, 0);
       noSpaceMarkMap.put(subscriptionId, true);
     }
-    log.debug("Init LocalRouteTransfer completed.");
+    log.debug("Init BlockingDequeRouteTransfer completed.");
   }
 
   @Override
   public void destroy() {
     this.startThread = false;
   }
-
 }

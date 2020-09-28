@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -31,7 +32,7 @@ public class ApplicationDo {
    * 订阅者名称
    */
   @NonNull
-  @Indexed(name = "app_title")
+  @Indexed
   private String title = DBDefaults.STRING_VALUE;
 
   /**
@@ -59,7 +60,7 @@ public class ApplicationDo {
    * 应用编码, 外部应用拥有此属性
    */
   @NonNull
-  @Indexed(name = "app_externalApp")
+  @HashIndexed
   private String externalApp = DBDefaults.STRING_VALUE;
 
   /**

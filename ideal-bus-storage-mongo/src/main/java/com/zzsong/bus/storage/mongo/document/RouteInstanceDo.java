@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -29,7 +30,7 @@ public class RouteInstanceDo {
   /**
    * broker nodeId
    */
-  @Indexed(name = "route_nodeId")
+  @HashIndexed
   private int nodeId;
   /**
    * 事件唯一id
@@ -54,16 +55,21 @@ public class RouteInstanceDo {
   /**
    * 下次推送时间
    */
-  @Indexed(name = "route_nextPushTime")
+  @Indexed
   private long nextPushTime = -1;
   /**
    * 状态: 0 丢弃, 1 等待执行
    */
+  @HashIndexed
   private int status = RouteInstance.STATUS_WAITING;
   /**
    * 已重试次数
    */
   private int retryCount = -1;
+  /**
+   * 描述信息
+   */
+  private String message;
   /**
    * 没有ack的监听器列表
    */

@@ -23,4 +23,7 @@ public interface RouteInstanceStorage {
 
   @Nonnull
   Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId);
+
+  @Nonnull
+  Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message);
 }

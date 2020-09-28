@@ -81,16 +81,22 @@ public class MessagePusherImpl implements MessagePusher {
       int currentRetryCount = routeInstance.getRetryCount() + 1;
       routeInstance.setRetryCount(currentRetryCount);
       routeInstance.setStatus(RouteInstance.STATUS_SUCCESS);
+      routeInstance.setMessage("success");
       routeInstance.setNextPushTime(-1L);
+
+      // 还有没ack的, 尝试重试
       if (!unAckList.isEmpty()) {
-        // 还有没ack的, 尝试重试
         routeInstance.setUnAckListeners(unAckList);
         int maxRetryCount = subscription.getRetryCount();
         if (currentRetryCount < maxRetryCount) {
+          // 没有达到重试上限, 标记为等待状态
           routeInstance.setStatus(RouteInstance.STATUS_WAITING);
+          routeInstance.setMessage("waiting");
           routeInstance.setNextPushTime(System.currentTimeMillis() + retryInterval);
         } else {
-          routeInstance.setStatus(RouteInstance.STATUS_DISCARD);
+          // 达到重试上限, 标记为失败状态
+          routeInstance.setStatus(RouteInstance.STATUS_FAILURE);
+          routeInstance.setMessage("Reach the retry limit");
         }
       }
       return routeInstanceService.save(routeInstance);
@@ -115,7 +121,15 @@ public class MessagePusherImpl implements MessagePusher {
         .flatMap(deliveredEvent -> {
           ApplicationTypeEnum applicationType = application.getApplicationType();
           if (applicationType == ApplicationTypeEnum.EXTERNAL) {
-            return externalDelivererChannel.deliver(deliveredEvent);
+            return Mono.just(deliveredEvent)
+                .flatMap(d -> {
+                  // 交付前将状态修改为RUNNING
+                  Long instanceId = routeInstance.getInstanceId();
+                  int status = RouteInstance.STATUS_RUNNING;
+                  return routeInstanceService
+                      .updateStatus(instanceId, status, "running").map(l -> d);
+                })
+                .flatMap(externalDelivererChannel::deliver);
           } else {
             boolean broadcast = subscription.isBroadcast();
             if (broadcast) {
@@ -125,14 +139,22 @@ public class MessagePusherImpl implements MessagePusher {
                 log.warn("应用: {} 可用通道列表为空", applicationId);
                 return Mono.error(new VisibleException("可用channel列表为空"));
               }
-              return Flux.fromIterable(channels)
-                  .flatMap(channel -> channel.deliver(deliveredEvent))
-                  .collectList()
-                  .map(list -> {
-                    DeliveredResult deliveredResult = new DeliveredResult();
-                    deliveredEvent.setEventId(deliveredEvent.getEventId());
-                    return deliveredResult;
-                  });
+              return Mono.just(deliveredEvent)
+                  .flatMap(d -> {
+                    // 交付前将状态修改为RUNNING
+                    Long instanceId = routeInstance.getInstanceId();
+                    int status = RouteInstance.STATUS_RUNNING;
+                    return routeInstanceService
+                        .updateStatus(instanceId, status, "running").map(l -> d);
+                  })
+                  .flatMap(d -> Flux.fromIterable(channels)
+                      .flatMap(channel -> channel.deliver(deliveredEvent))
+                      .collectList()
+                      .map(list -> {
+                        DeliveredResult deliveredResult = new DeliveredResult();
+                        deliveredResult.setEventId(deliveredEvent.getEventId());
+                        return deliveredResult;
+                      }));
             } else {
               String key = routeInstance.getKey();
               String topic = routeInstance.getTopic();
@@ -141,13 +163,21 @@ public class MessagePusherImpl implements MessagePusher {
                 channel = lbFactory.chooseServer(applicationId + "",
                     key, LbStrategyEnum.CONSISTENT_HASH);
               } else {
-                channel = lbFactory.chooseServer(applicationId + "", topic, LbStrategyEnum.ROUND_ROBIN);
+                channel = lbFactory.chooseServer(applicationId + "",
+                    topic, LbStrategyEnum.ROUND_ROBIN);
               }
               if (channel == null) {
 //                return Mono.error(new VisibleException("选取DelivererChannel为空"));
                 return routeTransfer.giveBack(routeInstance).then(Mono.empty());
               }
-              return channel.deliver(deliveredEvent);
+              return Mono.just(deliveredEvent)
+                  .flatMap(d -> {
+                    // 交付前将状态修改为RUNNING
+                    long instanceId = routeInstance.getInstanceId();
+                    int status = RouteInstance.STATUS_RUNNING;
+                    return routeInstanceService
+                        .updateStatus(instanceId, status, "running").map(l -> d);
+                  }).flatMap(channel::deliver);
             }
           }
         });
@@ -163,6 +193,7 @@ public class MessagePusherImpl implements MessagePusher {
           }
           EventInstance instance = opt.get();
           DeliveredEvent deliveredEvent = new DeliveredEvent();
+          deliveredEvent.setRouteInstanceId(routeInstance.getInstanceId());
           deliveredEvent.setEventId(instance.getEventId());
           deliveredEvent.setBizId(instance.getBizId());
           deliveredEvent.setTopic(instance.getTopic());

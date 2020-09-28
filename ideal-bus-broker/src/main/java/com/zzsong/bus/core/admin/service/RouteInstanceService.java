@@ -56,4 +56,9 @@ public class RouteInstanceService {
   public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId) {
     return storage.loadWaiting(count, nodeId, subscriptionId);
   }
+
+  @Nonnull
+  public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
+    return storage.updateStatus(instanceId, status, message);
+  }
 }

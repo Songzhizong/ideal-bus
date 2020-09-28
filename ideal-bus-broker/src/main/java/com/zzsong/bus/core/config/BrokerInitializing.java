@@ -1,7 +1,7 @@
 package com.zzsong.bus.core.config;
 
 import com.zzsong.bus.core.processor.LocalCache;
-import com.zzsong.bus.core.processor.LocalRouteTransfer;
+import com.zzsong.bus.core.processor.BlockingDequeRouteTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,18 +28,18 @@ public class BrokerInitializing implements DisposableBean, InitializingBean, App
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
-  private final LocalRouteTransfer localRouteTransfer;
+  private final BlockingDequeRouteTransfer blockingDequeRouteTransfer;
   @Nonnull
   private final ReactiveStringRedisTemplate redisTemplate;
 
   public BrokerInitializing(@Nonnull BusConfig busConfig,
                             @Nonnull LocalCache localCache,
                             @Nonnull BusProperties busProperties,
-                            @Nonnull LocalRouteTransfer localRouteTransfer,
+                            @Nonnull BlockingDequeRouteTransfer blockingDequeRouteTransfer,
                             @Nonnull ReactiveStringRedisTemplate redisTemplate) {
     this.busConfig = busConfig;
     this.localCache = localCache;
-    this.localRouteTransfer = localRouteTransfer;
+    this.blockingDequeRouteTransfer = blockingDequeRouteTransfer;
     this.redisTemplate = redisTemplate;
     this.nodeId = busProperties.getNodeId();
     this.key = "ideal:register:bus:broker:node:" + nodeId;
@@ -81,7 +81,7 @@ public class BrokerInitializing implements DisposableBean, InitializingBean, App
   @Override
   public void run(ApplicationArguments args) {
     localCache.init();
-    localRouteTransfer.init();
+    blockingDequeRouteTransfer.init();
     busConfig.setInitialized(true);
   }
 }

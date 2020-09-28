@@ -1,5 +1,6 @@
 package com.zzsong.bus.abs.domain;
 
+import com.zzsong.bus.abs.constants.DBDefaults;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.redis.core.index.Indexed;
@@ -26,9 +27,17 @@ public class RouteInstance {
    */
   public static final int STATUS_WAITING = 0;
   /**
+   * 执行中
+   */
+  public static final int STATUS_RUNNING = 1;
+  /**
    * 执行成功
    */
-  public static final int STATUS_SUCCESS = 1;
+  public static final int STATUS_SUCCESS = 2;
+  /**
+   * 执行失败
+   */
+  public static final int STATUS_FAILURE = 3;
 
   /**
    * 实例id
@@ -77,6 +86,10 @@ public class RouteInstance {
    * 已重试次数
    */
   private int retryCount = -1;
+  /**
+   * 描述信息
+   */
+  private String message = DBDefaults.STRING_VALUE;
   /**
    * 没有ack的监听器列表
    */

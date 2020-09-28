@@ -3,7 +3,7 @@ package com.zzsong.bus.core.config;
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.processor.LocalCache;
-import com.zzsong.bus.core.processor.LocalRouteTransfer;
+import com.zzsong.bus.core.processor.BlockingDequeRouteTransfer;
 import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.loadbalancer.SimpleLbFactory;
@@ -45,11 +45,11 @@ public class BusConfig {
 
   @Bean
   @ConditionalOnMissingBean
-  public LocalRouteTransfer localRouteTransfer(@Nonnull LocalCache localCache,
-                                               @Nonnull BusProperties properties,
-                                               @Nonnull LbFactory<DelivererChannel> lbFactory,
-                                               @Nonnull RouteInstanceService routeInstanceService) {
-    return new LocalRouteTransfer(
+  public BlockingDequeRouteTransfer localRouteTransfer(@Nonnull LocalCache localCache,
+                                                       @Nonnull BusProperties properties,
+                                                       @Nonnull LbFactory<DelivererChannel> lbFactory,
+                                                       @Nonnull RouteInstanceService routeInstanceService) {
+    return new BlockingDequeRouteTransfer(
         localCache, properties, lbFactory, routeInstanceService);
   }
 
