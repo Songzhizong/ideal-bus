@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @author 宋志宗 on 2020/9/17
  */
 @Component
-public class EventExchanger {
+public class EventExchange {
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -36,11 +36,11 @@ public class EventExchanger {
   @Nonnull
   private final EventInstanceService eventInstanceService;
 
-  public EventExchanger(@Nonnull LocalCache localCache,
-                        @Nonnull BusProperties properties,
-                        @Nonnull RouteTransfer routeTransfer,
-                        @Nonnull RouteInstanceService routeInstanceService,
-                        @Nonnull EventInstanceService eventInstanceService) {
+  public EventExchange(@Nonnull LocalCache localCache,
+                       @Nonnull BusProperties properties,
+                       @Nonnull RouteTransfer routeTransfer,
+                       @Nonnull RouteInstanceService routeInstanceService,
+                       @Nonnull EventInstanceService eventInstanceService) {
     this.localCache = localCache;
     this.properties = properties;
     this.routeTransfer = routeTransfer;

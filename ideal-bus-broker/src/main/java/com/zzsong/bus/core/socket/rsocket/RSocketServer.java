@@ -11,7 +11,7 @@ import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
 import com.zzsong.bus.core.config.BusConfig;
 import com.zzsong.bus.core.processor.LocalCache;
-import com.zzsong.bus.core.processor.EventExchanger;
+import com.zzsong.bus.core.processor.EventExchange;
 import com.zzsong.bus.core.processor.pusher.DelivererChannel;
 import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.utils.JsonUtils;
@@ -40,7 +40,7 @@ public class RSocketServer {
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
-  private final EventExchanger eventExchanger;
+  private final EventExchange eventExchange;
   @Nonnull
   private final SubscriptionService subscriptionService;
   @Nonnull
@@ -50,12 +50,12 @@ public class RSocketServer {
 
   public RSocketServer(@Nonnull BusConfig busConfig,
                        @Nonnull LocalCache localCache,
-                       @Nonnull EventExchanger eventExchanger,
+                       @Nonnull EventExchange eventExchange,
                        @Nonnull SubscriptionService subscriptionService,
                        @Nonnull LbFactory<DelivererChannel> lbFactory) {
     this.busConfig = busConfig;
     this.localCache = localCache;
-    this.eventExchanger = eventExchanger;
+    this.eventExchange = eventExchange;
     this.subscriptionService = subscriptionService;
     this.lbFactory = lbFactory;
   }
@@ -122,7 +122,7 @@ public class RSocketServer {
 
   @MessageMapping(RSocketRoute.PUBLISH)
   public Mono<PublishResult> publish(@Nonnull EventInstance message) {
-    return eventExchanger.publish(message);
+    return eventExchange.publish(message);
   }
 
   @MessageMapping(RSocketRoute.AUTO_SUBSCRIBE)
