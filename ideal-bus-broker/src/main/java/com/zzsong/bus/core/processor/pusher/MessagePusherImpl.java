@@ -15,6 +15,7 @@ import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.common.loadbalancer.LbFactory;
 import com.zzsong.common.loadbalancer.LbStrategyEnum;
+import com.zzsong.common.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,27 +70,34 @@ public class MessagePusherImpl implements MessagePusher {
     }
     final Mono<DeliveredResult> resultMono = deliverEvent(routeInstance);
     return resultMono.flatMap(deliveredResult -> {
-      final Map<String, Boolean> ackMap = deliveredResult.getAckMap();
-      List<String> unAckList = new ArrayList<>();
-      if (ackMap != null) {
-        ackMap.forEach((listener, ack) -> {
-          if (!ack) {
-            unAckList.add(listener);
-          }
-        });
-      }
       int currentRetryCount = routeInstance.getRetryCount() + 1;
       routeInstance.setRetryCount(currentRetryCount);
       routeInstance.setStatus(RouteInstance.STATUS_SUCCESS);
       routeInstance.setMessage("success");
       routeInstance.setNextPushTime(-1L);
 
-      // 还有没ack的, 尝试重试
-      if (!unAckList.isEmpty()) {
-        routeInstance.setUnAckListeners(unAckList);
+      // 判断是否执行成功
+      final Map<String, Boolean> ackMap = deliveredResult.getAckMap();
+      if (!ackMap.isEmpty()) {
+        List<String> unAckList = new ArrayList<>();
+        ackMap.forEach((listener, ack) -> {
+          if (!ack) {
+            unAckList.add(listener);
+          }
+        });
+        // 存在未ack的, 说明没有执行成功
+        if (!unAckList.isEmpty()) {
+          if (log.isDebugEnabled()) {
+            log.debug("消费端未执行成功: {}", JsonUtils.toJsonString(unAckList));
+          }
+          routeInstance.setUnAckListeners(unAckList);
+        }
+      }
+
+      if (!deliveredResult.isSuccess() || !routeInstance.getUnAckListeners().isEmpty()) {
         int maxRetryCount = subscription.getRetryCount();
         if (currentRetryCount < maxRetryCount) {
-          // 没有达到重试上限, 标记为等待状态
+          // 没有达到重试上限, 标记为等待状态并计算下次执行时间
           routeInstance.setStatus(RouteInstance.STATUS_WAITING);
           routeInstance.setMessage("waiting");
           routeInstance.setNextPushTime(System.currentTimeMillis() + retryInterval);

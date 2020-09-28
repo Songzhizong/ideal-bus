@@ -35,54 +35,24 @@ public class EventDelivererImpl implements EventDeliverer {
   public Mono<DeliveredResult> deliver(@Nonnull DeliveredEvent event) {
     DeliveredResult deliveredResult = new DeliveredResult();
     deliveredResult.setEventId(event.getEventId());
+    deliveredResult.setSuccess(true);
 
-    String topic = event.getTopic();
-    Map<String, IEventListener> listenerMap = ListenerFactory.get(topic);
-    if (listenerMap.isEmpty()) {
-      log.warn("topic: {} 没有事件监听器", topic);
-      return Mono.just(deliveredResult);
-    }
-    EventHeaders headers = event.getHeaders();
-    Object payload = event.getPayload();
-    String payloadString = JsonUtils.toJsonString(payload);
-    List<String> listeners = event.getListeners();
-
-    // 存储待调用的监听器列表
-    List<IEventListener> invokeListeners = new ArrayList<>();
-    if (listeners != null && listeners.size() > 0) {
-      // 指定的监听器不为空, 直接交给该监听器执行
-      for (String listenerName : listeners) {
-        IEventListener listener = listenerMap.get(listenerName);
-        if (listener == null) {
-          // 上一轮投递的事件某些监听器没有ack, 下一轮才会指定监听器.
-          // 这里找不到指定的监听器属于异常情况, 可能是客户端各个节点的代码版本不一致导致的
-          log.error("topic: {} 没有名称为: {} 的监听器", topic, listenerName);
-          deliveredResult.markAck(listenerName, false);
-        } else {
-          invokeListeners.add(listener);
-        }
-      }
-    } else {
-      // 没有指定监听器, 则根据监听条件筛选出准备执行的监听器列表
-      Collection<IEventListener> eventListeners = listenerMap.values();
-      for (IEventListener eventListener : eventListeners) {
-        List<Set<String>> conditionsGroup = eventListener.getConditionsGroup();
-        // 没有通过条件判断的直接跳过
-        if (!ConditionMatcher.match(conditionsGroup, headers)) {
-          if (log.isDebugEnabled()) {
-            String conditions = JsonUtils.toJsonString(conditionsGroup);
-            log.debug("条件不匹配 -> event: {} listener: {} conditions: {}",
-                event.getEventId(), eventListener.getListenerName(), conditions);
-          }
-          continue;
-        }
-        invokeListeners.add(eventListener);
-      }
-    }
+    //  获取待执行的监听器列表
+    List<IEventListener> invokeListeners = getListeners(event, deliveredResult);
     // 待执行的监听器列表为空, 直接返回结果
     if (invokeListeners.isEmpty()) {
       return Mono.just(deliveredResult);
     }
+
+    if (log.isDebugEnabled()) {
+      String join = invokeListeners.stream()
+          .map(IEventListener::getListenerName)
+          .collect(Collectors.joining(", "));
+      log.debug("待执行的监听器列表: {}", join);
+    }
+
+    Object payload = event.getPayload();
+    String payloadString = JsonUtils.toJsonString(payload);
     List<Mono<EventContext<Object>>> monoList = invokeListeners.stream()
         .map(l -> Mono.just(l)
             .map(listener -> {
@@ -110,9 +80,76 @@ public class EventDelivererImpl implements EventDeliverer {
           for (EventContext<Object> eventContext : eventContexts) {
             String listenerName = eventContext.getListenerName();
             boolean ack = eventContext.isAck();
+            if (!ack) {
+              // 只要存在未ack的就说明执行失败了
+              deliveredResult.setSuccess(false);
+            }
             deliveredResult.markAck(listenerName, ack);
           }
           return deliveredResult;
         });
+  }
+
+  /**
+   * 根据event信息获取待通知的监听器列表
+   *
+   * @param event           event信息
+   * @param deliveredResult 响应结果
+   * @return 待通知的监听器列表
+   */
+  @Nonnull
+  private List<IEventListener> getListeners(@Nonnull DeliveredEvent event,
+                                            DeliveredResult deliveredResult) {
+    String topic = event.getTopic();
+    Map<String, IEventListener> listenerMap = ListenerFactory.get(topic);
+    if (listenerMap.isEmpty()) {
+      log.warn("topic: {} 没有事件监听器", topic);
+      return Collections.emptyList();
+    }
+
+    List<IEventListener> invokeListeners = null;
+    EventHeaders headers = event.getHeaders();
+    List<String> listeners = event.getListeners();
+    if (listeners != null && listeners.size() > 0) {
+      // 指定的监听器不为空, 直接交给该监听器执行
+      for (String listenerName : listeners) {
+        IEventListener listener = listenerMap.get(listenerName);
+        if (listener == null) {
+          // 上一轮投递的事件某些监听器没有ack, 下一轮才会指定监听器.
+          // 这里找不到指定的监听器属于异常情况, 可能是客户端各个节点的代码版本不一致导致的
+          log.error("topic: {} 没有名称为: {} 的监听器", topic, listenerName);
+          deliveredResult.setSuccess(false);
+          deliveredResult.markAck(listenerName, false);
+        } else {
+          if (invokeListeners == null) {
+            invokeListeners = new ArrayList<>();
+          }
+          invokeListeners.add(listener);
+        }
+      }
+    } else {
+      // 没有指定监听器, 则根据监听条件筛选出准备执行的监听器列表
+      Collection<IEventListener> eventListeners = listenerMap.values();
+      for (IEventListener eventListener : eventListeners) {
+        List<Set<String>> conditionsGroup = eventListener.getConditionsGroup();
+        // 没有通过条件判断的直接跳过
+        if (!ConditionMatcher.match(conditionsGroup, headers)) {
+          if (log.isDebugEnabled()) {
+            String conditions = JsonUtils.toJsonString(conditionsGroup);
+            log.debug("条件不匹配 -> event: {} listener: {} conditions: {}",
+                event.getEventId(), eventListener.getListenerName(), conditions);
+          }
+          continue;
+        }
+        if (invokeListeners == null) {
+          invokeListeners = new ArrayList<>();
+        }
+        invokeListeners.add(eventListener);
+      }
+    }
+    if (invokeListeners == null) {
+      invokeListeners = Collections.emptyList();
+    }
+    return invokeListeners;
   }
 }

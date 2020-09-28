@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DeliveredEvent {
   private long routeInstanceId;
+  private long subscriptionId;
   /**
    * 事件唯一id
    */

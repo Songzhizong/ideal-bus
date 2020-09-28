@@ -3,7 +3,6 @@ package com.zzsong.bus.abs.domain;
 import com.zzsong.bus.abs.constants.DBDefaults;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.redis.core.index.Indexed;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +61,6 @@ public class RouteInstance {
    * 订阅关系id
    */
   @Nonnull
-  @Indexed
   private Long subscriptionId;
   /**
    * 订阅者id

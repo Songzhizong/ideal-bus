@@ -13,8 +13,8 @@ import java.util.List;
  *
  * @author 宋志宗 on 2020/9/17
  */
-public class EventGenerator {
-  private int cursor = -1;
+public final class EventGenerator {
+  private transient int cursor = -1;
   private final List<EventMessage<?>> messages = new ArrayList<>();
 
   @Nonnull
