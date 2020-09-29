@@ -28,10 +28,7 @@ public @interface EventListener {
    * 延迟表达式, 单位秒
    * <pre>
    * - 固定延迟时间: "120" (事件产生后延迟120秒消费)
-   * - 基于事件头的固定值: "cycle" (cycle是EventHeader中的key,
-   *   通过该key对应的value确定一个固定时间)
-   * - 基于事件头的计算值: "cycle * 3" (对事件头中的数值进行运算得到延迟时间,
-   *   运算符前后必须添加空格, 支持  + - * / %)
+   * - 基于事件头的固定值: "cycle" (cycle是EventHeader中的key, 通过该key对应的value确定一个固定时间)
    * </pre>
    */
   String delayExp() default "";
