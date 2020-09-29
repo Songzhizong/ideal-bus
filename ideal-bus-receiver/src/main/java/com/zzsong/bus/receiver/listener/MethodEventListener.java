@@ -1,8 +1,10 @@
 package com.zzsong.bus.receiver.listener;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.bus.receiver.deliver.EventContext;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,10 +19,16 @@ public class MethodEventListener implements IEventListener {
 
   @Getter
   private final boolean autoAck;
+  @Getter
+  @Nonnull
+  private final String delayExp;
   @Nonnull
   private final Object target;
   @Nonnull
   private final Method method;
+  @Getter
+  @Nonnull
+  private final String condition;
   @Getter
   @Nonnull
   private final String listenerName;
@@ -32,18 +40,26 @@ public class MethodEventListener implements IEventListener {
   private final List<Set<String>> conditionsGroup;
 
   public MethodEventListener(boolean autoAck,
+                             @Nonnull String delayExp,
                              @Nonnull Object target,
                              @Nonnull Method method,
-                             @Nonnull JavaType payloadType,
-                             @Nonnull List<Set<String>> conditionsGroup) {
+                             @Nonnull String condition,
+                             @Nonnull String listenerName,
+                             @Nonnull JavaType payloadType) {
     this.autoAck = autoAck;
+    this.delayExp = delayExp;
     this.target = target;
     this.method = method;
+    this.condition = condition;
+    if (StringUtils.isNotBlank(listenerName)) {
+      this.listenerName = listenerName;
+    } else {
+      String className = target.getClass().getName();
+      String methodName = method.getName();
+      this.listenerName = className + "#" + methodName;
+    }
     this.payloadType = payloadType;
-    this.conditionsGroup = conditionsGroup;
-    String className = target.getClass().getName();
-    String methodName = method.getName();
-    this.listenerName = className + "#" + methodName;
+    this.conditionsGroup = ConditionMatcher.parseConditionString(condition);
   }
 
   @Nullable

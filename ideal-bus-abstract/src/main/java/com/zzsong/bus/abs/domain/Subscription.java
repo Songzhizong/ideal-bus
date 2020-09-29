@@ -36,14 +36,20 @@ public class Subscription {
   @Nonnull
   private String topic;
   /**
+   * 监听器名称
+   */
+  @Nonnull
+  private String listenerName;
+  /**
+   * 延迟表达式
+   */
+  @Nonnull
+  private String delayExp = DBDefaults.STRING_VALUE;
+  /**
    * 订阅条件表达式
    */
   @Nonnull
   private String condition = DBDefaults.STRING_VALUE;
-  /**
-   * 消费模式, 默认并行
-   */
-  private int consumeType = CONSUME_TYPE_PARALLEL;
   /**
    * 是否广播
    */
@@ -52,6 +58,10 @@ public class Subscription {
    * 失败重试次数, 默认重试3次
    */
   private int retryCount = 3;
+  /**
+   * 消费模式, 默认并行
+   */
+  private int consumeType = CONSUME_TYPE_PARALLEL;
   /**
    * 订阅状态
    */

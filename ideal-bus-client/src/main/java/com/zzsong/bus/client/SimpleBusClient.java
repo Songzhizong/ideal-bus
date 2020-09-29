@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author 宋志宗 on 2020/9/19 11:43 下午
@@ -93,13 +92,15 @@ public class SimpleBusClient extends SimpleBusReceiver implements BusClient {
     final Map<String, Map<String, IEventListener>> all = ListenerFactory.getAll();
     final AutoSubscribeArgs autoSubscribeArgs = new AutoSubscribeArgs();
     autoSubscribeArgs.setApplicationId(applicationId);
-    Set<String> topicSet = all.keySet();
-    final List<SubscriptionArgs> subscriptionArgsList = topicSet.stream()
-        .map(topic -> {
-          final SubscriptionArgs subscriptionArgs = new SubscriptionArgs();
-          subscriptionArgs.setTopic(topic);
-          return subscriptionArgs;
-        }).collect(Collectors.toList());
+    final List<SubscriptionArgs> subscriptionArgsList = new ArrayList<>();
+    all.forEach((topic, map) -> map.forEach((name, listener) -> {
+      SubscriptionArgs args = new SubscriptionArgs();
+      args.setTopic(topic);
+      args.setListenerName(name);
+      args.setDelayExp(listener.getDelayExp());
+      args.setCondition(listener.getCondition());
+      subscriptionArgsList.add(args);
+    }));
     autoSubscribeArgs.setSubscriptionArgsList(subscriptionArgsList);
     while (!busChannel.heartbeat()) {
       try {

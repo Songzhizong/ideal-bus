@@ -18,7 +18,7 @@ import java.util.List;
 @BusListenerBean
 public class SampleBusListener {
 
-  @EventListener(topic = "test", autoAck = false)
+  @EventListener(name = "test", topic = "test", autoAck = false)
   public void test(@Nonnull EventContext<List<String>> context) {
     log.info("接收到消息: {}", JsonUtils.toJsonString(context.getPayload()));
   }

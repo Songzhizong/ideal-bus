@@ -65,17 +65,6 @@ public class SampleController {
     log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);
   }
 
-  @GetMapping("/testDelay/{topic}")
-  public void testDelay(@PathVariable("topic") String topic) {
-    final long start = System.currentTimeMillis();
-    final List<String> payload = ImmutableList.of("1", "2", "3");
-    publisher.publish(EventMessage.of(topic, payload).delaySeconds(10))
-        .map(JsonUtils::toJsonString)
-        .doOnNext(log::info)
-        .block();
-    log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);
-  }
-
   @GetMapping("/testHttp/{topic}/{loop}/{times}")
   public void testHttp(@PathVariable("topic") String topic, @PathVariable("loop") int loop, @PathVariable("times") int times) {
     for (int i = 0; i < loop; i++) {

@@ -17,10 +17,12 @@ public final class SubscriptionDoConverter {
     subscription.setSubscriptionId(mongoDo.getSubscriptionId());
     subscription.setApplicationId(mongoDo.getApplicationId());
     subscription.setTopic(mongoDo.getTopic());
+    subscription.setListenerName(mongoDo.getListenerName());
+    subscription.setDelayExp(mongoDo.getDelayExp());
     subscription.setCondition(mongoDo.getCondition());
-    subscription.setConsumeType(mongoDo.getConsumeType());
     subscription.setBroadcast(mongoDo.isBroadcast());
     subscription.setRetryCount(mongoDo.getRetryCount());
+    subscription.setConsumeType(mongoDo.getConsumeType());
     subscription.setStatus(mongoDo.getStatus());
     return subscription;
   }
@@ -31,10 +33,12 @@ public final class SubscriptionDoConverter {
     subscriptionDo.setSubscriptionId(subscription.getSubscriptionId());
     subscriptionDo.setApplicationId(subscription.getApplicationId());
     subscriptionDo.setTopic(subscription.getTopic());
+    subscriptionDo.setListenerName(subscription.getListenerName());
+    subscriptionDo.setDelayExp(subscription.getDelayExp());
     subscriptionDo.setCondition(subscription.getCondition());
-    subscriptionDo.setConsumeType(subscription.getConsumeType());
     subscriptionDo.setBroadcast(subscription.isBroadcast());
     subscriptionDo.setRetryCount(subscription.getRetryCount());
+    subscriptionDo.setConsumeType(subscription.getConsumeType());
     subscriptionDo.setStatus(subscription.getStatus());
     return subscriptionDo;
   }

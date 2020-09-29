@@ -19,7 +19,6 @@ public final class EventInstanceDoConverter {
     eventInstanceDo.setExternalApp(eventInstance.getExternalApp());
     eventInstanceDo.setTopic(eventInstance.getTopic());
     eventInstanceDo.setHeaders(eventInstance.getHeaders());
-    eventInstanceDo.setDelaySeconds(eventInstance.getDelaySeconds());
     eventInstanceDo.setPayload(eventInstance.getPayload());
     eventInstanceDo.setTimestamp(eventInstance.getTimestamp());
     eventInstanceDo.setStatus(eventInstance.getStatus());
@@ -34,7 +33,6 @@ public final class EventInstanceDoConverter {
     eventInstance.setExternalApp(eventInstanceDo.getExternalApp());
     eventInstance.setTopic(eventInstanceDo.getTopic());
     eventInstance.setHeaders(eventInstanceDo.getHeaders());
-    eventInstance.setDelaySeconds(eventInstanceDo.getDelaySeconds());
     eventInstance.setPayload(eventInstanceDo.getPayload());
     eventInstance.setTimestamp(eventInstanceDo.getTimestamp());
     eventInstance.setStatus(eventInstanceDo.getStatus());

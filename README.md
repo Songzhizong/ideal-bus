@@ -12,7 +12,7 @@
 
 ideal-bus是一款用于构建事件驱动微服务的中间件。它会为事件的发起者和使用者构建起传输通道，将每一个事件准确交付给对其感兴趣的使用者。
 
-ideal-bus的设计目标是轻量、简单、可靠、易于扩展，其拥有"水平扩展、高可用、海量数据堆积、失败重试、事件重播、延迟发布"等特性。
+ideal-bus的设计目标是轻量、简单、可靠、易于扩展，其拥有"水平扩展、高可用、海量数据堆积、失败重试、事件重播、延迟消费"等特性。
 
 
 
@@ -20,17 +20,17 @@ ideal-bus的设计目标是轻量、简单、可靠、易于扩展，其拥有"�
 
 ```
 ideal-bus
-    ├── ideal-bus-abstract               	      -- 接口/数据定义模块
-    ├── ideal-bus-broker                          -- 核心处理模块
-    ├── ideal-bus-broker-server            	      -- 核心处理模块可启动服务
-    ├── ideal-bus-client                          -- 客户端SDK，包含事件发布和接收
-    ├── ideal-bus-client-spring-boot-starter      -- client starter
-    ├── ideal-bus-common                          -- 公共依赖模块
-    ├── ideal-bus-receiver                        -- 接收事件的客户端SDK
-    ├── ideal-bus-receiver-spring-boot-starter    -- receiver starter
-    ├── ideal-bus-samples                         -- 示例
-    ├── ideal-bus-storage-mongo                   -- MongoDB存储库
-    └── ideal-bus-storage-r2dbc                   -- 关系型数据库存储库
+    ├── ideal-bus-abstract               	     -- 接口/数据定义模块
+    ├── ideal-bus-broker                       -- 核心处理模块
+    ├── ideal-bus-broker-server            	   -- 核心处理模块可启动服务
+    ├── ideal-bus-client                       -- 客户端SDK，包含事件发布和接收
+    ├── ideal-bus-client-spring-boot-starter   -- client starter
+    ├── ideal-bus-common                       -- 公共依赖模块
+    ├── ideal-bus-receiver                     -- 接收事件的客户端SDK
+    ├── ideal-bus-receiver-spring-boot-starter -- receiver starter
+    ├── ideal-bus-samples                      -- 示例
+    ├── ideal-bus-storage-mongo                -- MongoDB存储库
+    └── ideal-bus-storage-r2dbc                -- 关系型数据库存储库
 ```
 
 

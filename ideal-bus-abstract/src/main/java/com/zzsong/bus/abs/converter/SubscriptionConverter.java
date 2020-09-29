@@ -31,6 +31,11 @@ public final class SubscriptionConverter {
 //    subscription.setSubscriptionId();
 //    subscription.setApplicationId();
     subscription.setTopic(args.getTopic());
+    subscription.setListenerName(args.getListenerName());
+    String delayExp = args.getDelayExp();
+    if (delayExp != null) {
+      subscription.setCondition(delayExp);
+    }
     String condition = args.getCondition();
     if (condition != null) {
       subscription.setCondition(condition);

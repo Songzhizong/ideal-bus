@@ -111,11 +111,6 @@ public class EventExchange {
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
     instance.setTopic(event.getTopic());
-    int delaySeconds = event.getDelaySeconds();
-    if (delaySeconds > 0) {
-      long nextPushTime = System.currentTimeMillis() + delaySeconds * 1000L;
-      instance.setNextPushTime(nextPushTime);
-    }
     instance.setStatus(RouteInstance.STATUS_WAITING);
     instance.setMessage("waiting");
     return instance;

@@ -32,7 +32,7 @@ public class SubscriptionService {
   private ApplicationService applicationService;
   @Nonnull
   @Autowired
-  private  CacheService cacheService;
+  private CacheService cacheService;
   @Nonnull
   private final SubscriptionStorage storage;
 
@@ -103,21 +103,24 @@ public class SubscriptionService {
             return Mono.error(new VisibleException("订阅者不存在"));
           }
           return getSubscription(applicationId).flatMap(subscriptions -> {
-            // 存储新的订阅, topic -> SubscriptionArgs
-            Set<String> newTopics = new HashSet<>();
-            // 存储现有的订阅关系, topic -> Subscription
-            Map<String, Subscription> currentSubMap = subscriptions.stream()
-                .collect(Collectors.toMap(Subscription::getTopic, s -> s));
+            // 存储新的订阅关系, topic_listenerName
+            Set<String> newRelation = new HashSet<>();
+            // 存储现有的订阅关系, topic_listenerName -> Subscription
+            Map<String, Subscription> currentRelationMap = subscriptions.stream()
+                .collect(Collectors.toMap(s -> s.getTopic() + "_" + s.getListenerName(), s -> s));
             List<SubscriptionArgs> argsList = autoSubscribeArgs.getSubscriptionArgsList();
             // 计算出变更列表
             List<Subscription> changeList = new ArrayList<>();
             for (SubscriptionArgs args : argsList) {
               String topic = args.getTopic();
-              if (newTopics.contains(topic)) {
-                return Mono.error(new VisibleException("topic: " + topic + " 重复订阅"));
+              String listenerName = args.getListenerName();
+              String relation = topic + "_" + listenerName;
+              if (newRelation.contains(relation)) {
+                String message = "topic: " + topic + "listenerName: " + listenerName + " 重复订阅";
+                return Mono.error(new VisibleException(message));
               }
-              newTopics.add(topic);
-              Subscription subscription = currentSubMap.get(topic);
+              newRelation.add(relation);
+              Subscription subscription = currentRelationMap.get(relation);
               if (subscription == null) {
                 // 之前没有这个主题的订阅关系 -> 新增
                 Subscription newSubs = SubscriptionConverter.fromSubscriptionArgs(args);
@@ -135,7 +138,10 @@ public class SubscriptionService {
             List<Long> unsubscribeList = new ArrayList<>();
             for (Subscription subscription : subscriptions) {
               // 新的订阅关系列表中没有这个主题 -> 解除该订阅关系
-              if (!newTopics.contains(subscription.getTopic())) {
+              String topic = subscription.getTopic();
+              String listenerName = subscription.getListenerName();
+              String relation = topic + "_" + listenerName;
+              if (!newRelation.contains(relation)) {
                 unsubscribeList.add(subscription.getSubscriptionId());
               }
             }
@@ -177,6 +183,11 @@ public class SubscriptionService {
   private Subscription calculateChange(@Nonnull Subscription subscription,
                                        @Nonnull SubscriptionArgs subscriptionArgs) {
     boolean changed = false;
+    String delayExp = subscriptionArgs.getDelayExp();
+    if (delayExp != null && !delayExp.equals(subscription.getDelayExp())) {
+      changed = true;
+      subscription.setDelayExp(delayExp);
+    }
     String condition = subscriptionArgs.getCondition();
     if (condition != null && !condition.equals(subscription.getCondition())) {
       changed = true;
@@ -223,5 +234,4 @@ public class SubscriptionService {
   public Mono<List<Subscription>> findAllEnabled() {
     return storage.findAllEnabled();
   }
-
 }

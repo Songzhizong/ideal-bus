@@ -1,5 +1,8 @@
 package com.zzsong.bus.receiver.listener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +12,7 @@ import java.util.Map;
  * @author 宋志宗 on 2020/9/17
  */
 public class ListenerFactory {
+  private static final Logger log = LoggerFactory.getLogger(ListenerFactory.class);
   /**
    * topic -> listenerName -> IEventListener
    */
@@ -34,7 +38,11 @@ public class ListenerFactory {
     if (listenerMap.containsKey(listenerName)) {
       return false;
     }
-    listenerMap.put(listenerName, listener);
+    IEventListener previous = listenerMap.put(listenerName, listener);
+    if (previous != null) {
+      log.error("监听器名称: {} 重复", listenerName);
+      System.exit(0);
+    }
     return true;
   }
 

@@ -45,11 +45,6 @@ public class EventInstanceDo {
    */
   @Nonnull
   private EventHeaders headers;
-
-  /**
-   * 延迟时间,默认不延迟
-   */
-  private int delaySeconds;
   /**
    * 消息内容
    */

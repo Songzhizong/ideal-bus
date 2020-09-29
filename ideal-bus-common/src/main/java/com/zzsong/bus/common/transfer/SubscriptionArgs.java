@@ -23,6 +23,16 @@ public class SubscriptionArgs {
   @Nonnull
   private String topic;
   /**
+   * 监听器名称
+   */
+  @Nonnull
+  private String listenerName;
+  /**
+   * 延迟表达式
+   */
+  @Nullable
+  private String delayExp;
+  /**
    * 订阅条件表达式
    * <pre>
    *

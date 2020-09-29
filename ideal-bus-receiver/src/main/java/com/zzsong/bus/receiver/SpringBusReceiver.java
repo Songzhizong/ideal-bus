@@ -1,7 +1,6 @@
 package com.zzsong.bus.receiver;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.zzsong.bus.common.util.ConditionMatcher;
 import com.zzsong.common.utils.JsonUtils;
 import com.zzsong.bus.receiver.annotation.BusListenerBean;
 import com.zzsong.bus.receiver.annotation.EventListener;
@@ -21,7 +20,6 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author 宋志宗 on 2020/9/18
@@ -41,11 +39,13 @@ public class SpringBusReceiver extends SimpleBusReceiver
   }
 
   @Override
-  public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+  public void setApplicationContext(@Nonnull ApplicationContext applicationContext)
+      throws BeansException {
     this.applicationContext = applicationContext;
   }
 
   @Override
+  @SuppressWarnings("DuplicatedCode")
   protected void initEventListeners() {
     Map<String, Object> beanMapping = applicationContext
         .getBeansWithAnnotation(BusListenerBean.class);
@@ -66,12 +66,14 @@ public class SpringBusReceiver extends SimpleBusReceiver
           Parameter[] parameters = method.getParameters();
           if (parameters.length == 1) {
             Parameter parameter = parameters[0];
-            ParameterizedType parameterizedType = (ParameterizedType) parameter.getParameterizedType();
+            ParameterizedType parameterizedType = (ParameterizedType) parameter
+                .getParameterizedType();
             Class<?> typeClass = (Class<?>) parameterizedType.getRawType();
             if (typeClass != EventContext.class) {
               String className = bean.getClass().getName();
               String methodName = method.getName();
-              log.error("{}#{} 入参必须是 com.zzsong.bus.receiver.deliver.EventContext类型", className, methodName);
+              log.error("{}#{} 入参必须是 com.zzsong.bus.receiver.deliver.EventContext类型",
+                  className, methodName);
               continue;
             }
             Type[] typeArguments = parameterizedType.getActualTypeArguments();
@@ -82,12 +84,13 @@ public class SpringBusReceiver extends SimpleBusReceiver
               continue;
             }
             JavaType javaType = JsonUtils.getJavaType(typeArguments[0]);
+            String listenerName = annotation.name();
+            String condition = annotation.condition();
+            String delayExp = annotation.delayExp();
             boolean autoAck = annotation.autoAck();
-            String conditions = annotation.conditions();
-            List<Set<String>> sets = ConditionMatcher.parseConditionString(conditions);
-            MethodEventListener listener = new MethodEventListener(autoAck, bean, method, javaType, sets);
-            String listenerName = listener.getListenerName();
-            ListenerFactory.register(topic, listenerName, listener);
+            MethodEventListener listener = new MethodEventListener(autoAck, delayExp,
+                bean, method, condition, listenerName, javaType);
+            ListenerFactory.register(topic, listener.getListenerName(), listener);
           } else {
             String className = bean.getClass().getName();
             String methodName = method.getName();

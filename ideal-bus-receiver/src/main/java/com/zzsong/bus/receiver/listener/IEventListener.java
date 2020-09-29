@@ -21,6 +21,9 @@ public interface IEventListener {
   @Nonnull
   JavaType getPayloadType();
 
+  @Nonnull
+  String getCondition();
+
   /**
    * @return 监听条件
    */
@@ -28,6 +31,12 @@ public interface IEventListener {
   List<Set<String>> getConditionsGroup();
 
   boolean isAutoAck();
+
+  /**
+   * @return 延迟消费表达式
+   */
+  @Nullable
+  String getDelayExp();
 
   @SuppressWarnings("UnusedReturnValue")
   @Nullable

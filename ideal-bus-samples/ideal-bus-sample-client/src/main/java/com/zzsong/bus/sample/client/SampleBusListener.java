@@ -21,14 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SampleBusListener {
   private final AtomicInteger counter = new AtomicInteger();
 
-  @EventListener(topic = "testUnAck", autoAck = false)
+  @EventListener(name = "testUnAck", topic = "testUnAck", autoAck = false)
   public void testUnAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
     TimeUnit.SECONDS.sleep(5);
     log.info("testUnAck 接收到消息: {}, 序号: {}",
         JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
   }
 
-  @EventListener(topic = "testAutoAck", autoAck = true)
+  @EventListener(name = "testAutoAck", topic = "testAutoAck", condition = "age>10", delayExp = "120")
   public void testAutoAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
     int incrementAndGet = counter.incrementAndGet();
     TimeUnit.SECONDS.sleep(10);
@@ -36,7 +36,7 @@ public class SampleBusListener {
         JsonUtils.toJsonString(context.getPayload()), incrementAndGet);
   }
 
-  @EventListener(topic = "broadcast")
+  @EventListener(name = "broadcast", topic = "broadcast")
   public void broadcast(@Nonnull EventContext<List<String>> context) {
     log.info("broadcast 接收到消息: {}, 序号: {}",
         JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
