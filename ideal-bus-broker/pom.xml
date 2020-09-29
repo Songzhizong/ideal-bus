@@ -21,6 +21,13 @@
       <artifactId>ideal-bus-storage-mongo</artifactId>
       <version>1.0.0M3</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/jep/jep -->
+    <dependency>
+      <groupId>jep</groupId>
+      <artifactId>jep</artifactId>
+      <version>2.24</version>
+    </dependency>
+
     <!-- reactor-netty -->
     <dependency>
       <groupId>io.projectreactor.netty</groupId>
