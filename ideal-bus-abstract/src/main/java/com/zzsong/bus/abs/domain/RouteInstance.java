@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class RouteInstance {
   /**
    * hash key
    */
-  @Nullable
+  @Nonnull
   private String key;
   /**
    * 订阅关系id
@@ -77,7 +76,7 @@ public class RouteInstance {
    */
   private long nextPushTime = -1;
   /**
-   * 状态: -1 丢弃, 0 等待执行, 1 完成
+   * 状态: -1 丢弃, 0 等待执行, 1 执行中, 2 完成, 3 失败
    */
   private int status = STATUS_WAITING;
   /**
@@ -89,7 +88,13 @@ public class RouteInstance {
    */
   private String message = DBDefaults.STRING_VALUE;
   /**
+   * 消费该事件的监听器名称列表
+   */
+  @Nonnull
+  private List<String> listeners = Collections.emptyList();
+  /**
    * 没有ack的监听器列表
    */
+  @Nonnull
   private List<String> unAckListeners = Collections.emptyList();
 }

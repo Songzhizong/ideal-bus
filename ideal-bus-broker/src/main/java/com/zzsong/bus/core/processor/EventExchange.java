@@ -1,5 +1,6 @@
 package com.zzsong.bus.core.processor;
 
+import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.RouteInstance;
@@ -16,10 +17,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,7 +65,7 @@ public class EventExchange {
           } else {
             event.setStatus(EventInstance.ROUTED);
           }
-          return eventInstanceService.save(event).map(ins -> list);
+          return eventInstanceService.save(event).thenReturn(list);
         });
     return route.flatMap(instanceList -> {
       if (instanceList.isEmpty()) {
@@ -77,7 +75,8 @@ public class EventExchange {
       List<RouteInstance> collect = instanceList.stream()
           .filter(instance -> instance.getNextPushTime() < 1L)
           .collect(Collectors.toList());
-      return routeTransfer.submit(collect, false).map(b -> builder.message("success").build());
+      return routeTransfer.submit(collect, false)
+          .thenReturn(builder.message("success").build());
     });
   }
 
@@ -94,6 +93,8 @@ public class EventExchange {
     for (SubscriptionDetails details : subscription) {
       List<Set<String>> group = details.getConditionGroup();
       if (!ConditionMatcher.match(group, headers)) {
+        log.debug("event: {} subscription: {} 订阅条件不匹配: {}",
+            event.getEventId(), details.getSubscriptionId(), details.getCondition());
         continue;
       }
       RouteInstance instance = createRouteInstance(event, details);
@@ -111,31 +112,45 @@ public class EventExchange {
     RouteInstance instance = new RouteInstance();
     instance.setNodeId(properties.getNodeId());
     instance.setEventId(event.getEventId());
-    instance.setKey(event.getKey());
+    String key = event.getKey();
+    if (key == null) {
+      key = DBDefaults.STRING_VALUE;
+    }
+    instance.setKey(key);
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
     instance.setTopic(event.getTopic());
     instance.setStatus(RouteInstance.STATUS_WAITING);
     instance.setMessage("waiting");
+    // 延迟消费事件
     String delayExp = details.getDelayExp();
-    long delaySeconds = 0;
-    try {
-      delaySeconds = Integer.parseInt(delayExp);
-    } catch (NumberFormatException e) {
-      String one = event.getHeaders().getOne(delayExp);
-      if (StringUtils.isBlank(one)) {
-        log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 为空",
-            event.getEventId(), details.getSubscriptionId(), delayExp);
-      } else {
-        try {
-          delaySeconds = Integer.parseInt(one);
-        } catch (NumberFormatException numberFormatException) {
-          log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 对应的值: {} 非数字类型",
-              event.getEventId(), details.getSubscriptionId(), delayExp, one);
+    if (StringUtils.isNotBlank(delayExp)) {
+      long delaySeconds = 0;
+      try {
+        delaySeconds = Integer.parseInt(delayExp);
+      } catch (NumberFormatException e) {
+        String one = event.getHeaders().getOne(delayExp);
+        if (StringUtils.isBlank(one)) {
+          log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 为空",
+              event.getEventId(), details.getSubscriptionId(), delayExp);
+        } else {
+          try {
+            delaySeconds = Integer.parseInt(one);
+          } catch (NumberFormatException numberFormatException) {
+            log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 对应的值: {} 非数字类型",
+                event.getEventId(), details.getSubscriptionId(), delayExp, one);
+          }
         }
       }
+      if (delaySeconds > 0) {
+        instance.setNextPushTime(System.currentTimeMillis() + (delaySeconds * 1000));
+      }
     }
-    instance.setNextPushTime(System.currentTimeMillis() + (delaySeconds * 1000));
+    String listenerName = details.getListenerName();
+    // 指定的监听器列表
+    if (StringUtils.isNotBlank(listenerName)) {
+      instance.setListeners(Collections.singletonList(listenerName));
+    }
     return instance;
   }
 }

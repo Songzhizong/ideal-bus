@@ -208,7 +208,11 @@ public class MessagePusherImpl implements MessagePusher {
           deliveredEvent.setHeaders(instance.getHeaders());
           deliveredEvent.setPayload(instance.getPayload());
           deliveredEvent.setTimestamp(instance.getTimestamp());
-          deliveredEvent.setListeners(routeInstance.getUnAckListeners());
+          if (routeInstance.getRetryCount() == -1) {
+            deliveredEvent.setListeners(routeInstance.getListeners());
+          } else {
+            deliveredEvent.setListeners(routeInstance.getUnAckListeners());
+          }
           return deliveredEvent;
         });
   }

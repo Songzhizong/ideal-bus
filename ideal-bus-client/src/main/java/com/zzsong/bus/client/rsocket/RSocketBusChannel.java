@@ -236,7 +236,8 @@ public class RSocketBusChannel extends Thread implements BusChannel {
         .retrieveMono(PUBLISH_RESULT_RES)
         .doOnNext(res -> {
           if (log.isDebugEnabled()) {
-            log.debug("Publish result: {}", JsonUtils.toJsonString(res));
+            log.debug("\nPublish result: \n{}",
+                JsonUtils.toJsonString(res, true, true));
           }
         }).subscribeOn(Schedulers.elastic());
   }

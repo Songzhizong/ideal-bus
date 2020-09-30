@@ -38,6 +38,11 @@ public class RouteInstanceDo {
   @Nonnull
   private String eventId;
   /**
+   * hash key
+   */
+  @Nonnull
+  private String key;
+  /**
    * 订阅关系id
    */
   @Nonnull
@@ -69,9 +74,16 @@ public class RouteInstanceDo {
   /**
    * 描述信息
    */
+  @Nonnull
   private String message;
+  /**
+   * 消费该事件的监听器列表
+   */
+  @Nonnull
+  private List<String> listeners = Collections.emptyList();
   /**
    * 没有ack的监听器列表
    */
+  @Nonnull
   private List<String> unAckListeners = Collections.emptyList();
 }

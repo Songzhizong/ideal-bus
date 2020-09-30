@@ -56,7 +56,8 @@ public class SampleController {
   public void testAsync(@PathVariable("topic") String topic) {
     final long start = System.currentTimeMillis();
     final List<String> payload = ImmutableList.of("1", "2", "3");
-    EventMessage<List<String>> message = EventMessage.of(topic, payload);
+    EventMessage<List<String>> message = EventMessage.of(topic, payload)
+        .addHeader("age", "20");
     publisher.publish(message)
         .map(JsonUtils::toJsonString)
         .doOnNext(log::info)
@@ -80,12 +81,5 @@ public class SampleController {
         log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);
       });
     }
-  }
-
-  public static void main(String[] args) {
-    final List<String> payload = ImmutableList.of("1", "2", "3");
-    EventMessage<List<String>> message = EventMessage.of("testAutoAck", payload);
-    final String jsonString = JsonUtils.toJsonString(message);
-    System.out.println(jsonString);
   }
 }
