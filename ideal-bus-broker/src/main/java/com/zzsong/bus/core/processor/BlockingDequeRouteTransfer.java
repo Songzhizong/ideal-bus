@@ -9,7 +9,7 @@ import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.config.BusProperties;
 import com.zzsong.bus.core.processor.pusher.DelivererChannel;
-import com.zzsong.common.loadbalancer.LbFactory;
+import com.zzsong.bus.common.share.loadbalancer.LbFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;

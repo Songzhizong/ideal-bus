@@ -7,7 +7,7 @@ import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.common.transfer.SubscriptionArgs;
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

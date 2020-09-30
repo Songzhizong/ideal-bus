@@ -1,4 +1,4 @@
-package com.zzsong.common.utils;
+package com.zzsong.bus.common.share.utils;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;

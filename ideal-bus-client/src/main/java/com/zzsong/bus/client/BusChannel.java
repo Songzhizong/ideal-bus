@@ -1,11 +1,10 @@
 package com.zzsong.bus.client;
 
-import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.EventMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.receiver.BusReceiver;
-import com.zzsong.common.loadbalancer.LbServer;
+import com.zzsong.bus.common.share.loadbalancer.LbServer;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;

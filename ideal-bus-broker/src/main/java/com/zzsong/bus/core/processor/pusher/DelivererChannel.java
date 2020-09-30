@@ -2,7 +2,7 @@ package com.zzsong.bus.core.processor.pusher;
 
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
-import com.zzsong.common.loadbalancer.LbServer;
+import com.zzsong.bus.common.share.loadbalancer.LbServer;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;

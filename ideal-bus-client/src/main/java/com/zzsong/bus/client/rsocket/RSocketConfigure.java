@@ -2,7 +2,7 @@ package com.zzsong.bus.client.rsocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.cbor.Jackson2CborDecoder;
 import org.springframework.http.codec.cbor.Jackson2CborEncoder;

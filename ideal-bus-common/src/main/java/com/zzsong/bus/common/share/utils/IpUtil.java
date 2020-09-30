@@ -1,4 +1,4 @@
-package com.zzsong.common.utils;
+package com.zzsong.bus.common.share.utils;
 
 import lombok.extern.slf4j.Slf4j;
 

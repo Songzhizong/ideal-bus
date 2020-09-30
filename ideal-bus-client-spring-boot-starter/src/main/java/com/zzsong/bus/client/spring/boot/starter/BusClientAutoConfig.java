@@ -3,7 +3,7 @@ package com.zzsong.bus.client.spring.boot.starter;
 import com.zzsong.bus.client.BusClient;
 import com.zzsong.bus.client.DefaultBusClient;
 import com.zzsong.bus.client.SpringBusClient;
-import com.zzsong.common.utils.IpUtil;
+import com.zzsong.bus.common.share.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

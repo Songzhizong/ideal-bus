@@ -1,4 +1,4 @@
-package com.zzsong.common.loadbalancer;
+package com.zzsong.bus.common.share.loadbalancer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

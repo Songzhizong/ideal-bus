@@ -3,7 +3,7 @@ package com.zzsong.bus.sample.client;
 import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.client.Publisher;
 import com.zzsong.bus.common.message.EventMessage;
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

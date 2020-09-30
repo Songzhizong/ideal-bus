@@ -6,7 +6,7 @@ import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
 import com.zzsong.bus.common.message.EventHeaders;
 import com.zzsong.bus.common.util.ConditionMatcher;
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

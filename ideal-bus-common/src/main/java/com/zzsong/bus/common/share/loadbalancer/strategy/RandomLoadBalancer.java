@@ -1,7 +1,7 @@
-package com.zzsong.common.loadbalancer.strategy;
+package com.zzsong.bus.common.share.loadbalancer.strategy;
 
-import com.zzsong.common.loadbalancer.LbServer;
-import com.zzsong.common.loadbalancer.LoadBalancer;
+import com.zzsong.bus.common.share.loadbalancer.LbServer;
+import com.zzsong.bus.common.share.loadbalancer.LoadBalancer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

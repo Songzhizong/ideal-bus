@@ -1,6 +1,6 @@
 package com.zzsong.bus.common.message;
 
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.Getter;
 import lombok.Setter;
 

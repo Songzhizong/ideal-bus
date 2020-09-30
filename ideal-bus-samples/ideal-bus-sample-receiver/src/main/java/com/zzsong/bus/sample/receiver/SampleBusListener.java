@@ -1,6 +1,6 @@
 package com.zzsong.bus.sample.receiver;
 
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import com.zzsong.bus.receiver.annotation.BusListenerBean;
 import com.zzsong.bus.receiver.annotation.EventListener;
 import com.zzsong.bus.receiver.deliver.EventContext;

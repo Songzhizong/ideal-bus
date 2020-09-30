@@ -1,4 +1,4 @@
-package com.zzsong.common.utils;
+package com.zzsong.bus.common.share.utils;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;

@@ -1,4 +1,4 @@
-package com.zzsong.common.utils;
+package com.zzsong.bus.common.share.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;

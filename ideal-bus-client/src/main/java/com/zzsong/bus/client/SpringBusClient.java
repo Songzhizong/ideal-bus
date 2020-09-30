@@ -6,7 +6,7 @@ import com.zzsong.bus.receiver.annotation.EventListener;
 import com.zzsong.bus.receiver.deliver.EventContext;
 import com.zzsong.bus.receiver.listener.ListenerFactory;
 import com.zzsong.bus.receiver.listener.MethodEventListener;
-import com.zzsong.common.utils.JsonUtils;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;

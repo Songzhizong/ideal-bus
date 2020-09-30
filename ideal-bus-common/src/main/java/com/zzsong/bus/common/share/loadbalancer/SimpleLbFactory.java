@@ -1,6 +1,6 @@
-package com.zzsong.common.loadbalancer;
+package com.zzsong.bus.common.share.loadbalancer;
 
-import com.zzsong.common.loadbalancer.strategy.*;
+import com.zzsong.bus.common.share.loadbalancer.strategy.*;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;

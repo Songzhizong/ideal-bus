@@ -1,4 +1,4 @@
-package com.zzsong.common.loadbalancer;
+package com.zzsong.bus.common.share.loadbalancer;
 
 import lombok.Getter;
 import lombok.Setter;
