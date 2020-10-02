@@ -69,6 +69,16 @@ ideal-bus
 
 ## 软件架构
 
+### 技术架构
+
+![architecture-1](assets/ideal-bus-architecture-1.png)
+
+ideal-bus架构上主要分为三个部分，如上图所示：
+
+- Publisher：事件的发布者，支持集群方式部署。Publisher通过负载均衡模块选择相应的Broker进行事件发布，支持reactive或block的方式进行发布。
+- Subscriber：事件的订阅者，支持集群方式部署。一个事件可以被多个Subscriber订阅，同时支持集群和广播的消费方式。
+- Broker Server：负责消息的接收、存储、投递、查询等功能，支持集群部署保证高可用，支持水平扩展提升系统性能。
+
 
 
 ## 特性
