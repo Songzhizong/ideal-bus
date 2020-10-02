@@ -20,9 +20,9 @@ ideal-bus的设计目标是轻量、简单、可靠、易于扩展，其拥有"�
 
 ```
 ideal-bus
-    ├── ideal-bus-abstract               	     -- 接口/数据定义模块
+    ├── ideal-bus-abstract                     -- 接口/数据定义模块
     ├── ideal-bus-broker                       -- 核心处理模块
-    ├── ideal-bus-broker-server            	   -- 核心处理模块可启动服务
+    ├── ideal-bus-broker-server                -- 核心处理模块可启动服务
     ├── ideal-bus-client                       -- 客户端SDK，包含事件发布和接收
     ├── ideal-bus-client-spring-boot-starter   -- client starter
     ├── ideal-bus-common                       -- 公共依赖模块
