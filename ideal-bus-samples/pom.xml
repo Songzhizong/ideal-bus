@@ -13,7 +13,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>ideal-bus-sample-client</module>
-    <module>ideal-bus-sample-receiver</module>
   </modules>
 
 

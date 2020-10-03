@@ -1,4 +1,4 @@
-package com.zzsong.bus.receiver.deliver;
+package com.zzsong.bus.client.deliver;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
 package com.zzsong.bus.sample.client;
 
 import com.google.common.collect.ImmutableList;
-import com.zzsong.bus.client.Publisher;
+import com.zzsong.bus.client.EventPublisher;
 import com.zzsong.bus.common.message.EventMessage;
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +24,11 @@ import java.util.concurrent.Executors;
 @RequestMapping("/client")
 public class SampleController {
   @Nonnull
-  private final Publisher publisher;
+  private final EventPublisher eventPublisher;
   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
 
-  public SampleController(@Nonnull Publisher publisher) {
-    this.publisher = publisher;
+  public SampleController(@Nonnull EventPublisher eventPublisher) {
+    this.eventPublisher = eventPublisher;
   }
 
   /**
@@ -38,7 +38,7 @@ public class SampleController {
   public void testBlock(@PathVariable("topic") String topic) {
     final long start = System.currentTimeMillis();
     final List<String> payload = ImmutableList.of("1", "2", "3");
-    publisher.publish(EventMessage.of(topic, payload))
+    eventPublisher.publish(EventMessage.of(topic, payload))
         .map(JsonUtils::toJsonString)
         .doOnNext(log::info)
         .block(); // block终结符会以阻塞当前线程的方式执行事件发布
@@ -58,7 +58,7 @@ public class SampleController {
     final List<String> payload = ImmutableList.of("1", "2", "3");
     EventMessage<List<String>> message = EventMessage.of(topic, payload)
         .addHeader("age", "20");
-    publisher.publish(message)
+    eventPublisher.publish(message)
         .map(JsonUtils::toJsonString)
         .doOnNext(log::info)
         .doFinally(s -> log.info("发布耗时: {}", System.currentTimeMillis() - start))
@@ -77,7 +77,7 @@ public class SampleController {
           EventMessage<List<String>> message = EventMessage.of(topic, payload);
           list.add(message);
         }
-        publisher.batchPublish(list).collectList().block();
+        eventPublisher.batchPublish(list).collectList().block();
         log.info("完成发布, 当前线程耗时: {}", System.currentTimeMillis() - start);
       });
     }

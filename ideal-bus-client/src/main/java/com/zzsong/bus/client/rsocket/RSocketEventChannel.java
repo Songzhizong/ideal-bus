@@ -1,7 +1,7 @@
 package com.zzsong.bus.client.rsocket;
 
 import com.google.common.collect.ImmutableList;
-import com.zzsong.bus.client.BusChannel;
+import com.zzsong.bus.client.EventChannel;
 import com.zzsong.bus.client.BusClient;
 import com.zzsong.bus.client.SimpleBusClient;
 import com.zzsong.bus.common.constants.RSocketRoute;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @author 宋志宗 on 2020/9/19 11:45 下午
  */
 @Slf4j
-public class RSocketBusChannel extends Thread implements BusChannel {
+public class RSocketEventChannel extends Thread implements EventChannel {
   private static final int RESTART_DELAY = 10;
   private static final ParameterizedTypeReference<PublishResult> PUBLISH_RESULT_RES
       = new ParameterizedTypeReference<PublishResult>() {
@@ -50,7 +50,7 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   @Nonnull
   private final BusClient busClient;
   @Nonnull
-  private final LbFactory<BusChannel> lbFactory;
+  private final LbFactory<EventChannel> lbFactory;
   @Setter
   private String accessToken;
 
@@ -60,11 +60,11 @@ public class RSocketBusChannel extends Thread implements BusChannel {
   private RSocketRequester sendSocket;
   private RSocketRequester receiveSocket;
 
-  public RSocketBusChannel(@Nonnull String brokerIp,
-                           int brokerPort, long applicationId,
-                           @Nonnull String clientIpPort,
-                           @Nonnull BusClient busClient,
-                           @Nonnull LbFactory<BusChannel> lbFactory) {
+  public RSocketEventChannel(@Nonnull String brokerIp,
+                             int brokerPort, long applicationId,
+                             @Nonnull String clientIpPort,
+                             @Nonnull BusClient busClient,
+                             @Nonnull LbFactory<EventChannel> lbFactory) {
     this.brokerIp = brokerIp;
     this.brokerPort = brokerPort;
     this.applicationId = applicationId;

@@ -1,11 +1,11 @@
 package com.zzsong.bus.client;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.zzsong.bus.receiver.annotation.BusListenerBean;
-import com.zzsong.bus.receiver.annotation.EventListener;
-import com.zzsong.bus.receiver.deliver.EventContext;
-import com.zzsong.bus.receiver.listener.ListenerFactory;
-import com.zzsong.bus.receiver.listener.MethodEventListener;
+import com.zzsong.bus.client.annotation.BusListenerBean;
+import com.zzsong.bus.client.annotation.EventListener;
+import com.zzsong.bus.client.deliver.EventContext;
+import com.zzsong.bus.client.listener.ListenerFactory;
+import com.zzsong.bus.client.listener.MethodEventListener;
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -74,6 +74,7 @@ public class SpringBusClient extends SimpleBusClient
             if (typeClass != EventContext.class) {
               String className = bean.getClass().getName();
               String methodName = method.getName();
+              //noinspection SpellCheckingInspection
               log.error("{}#{} 入参必须是 com.zzsong.bus.receiver.deliver.EventContext类型",
                   className, methodName);
               continue;

@@ -26,8 +26,6 @@ ideal-bus
     ├── ideal-bus-client                       -- 客户端SDK，包含事件发布和接收
     ├── ideal-bus-client-spring-boot-starter   -- client starter
     ├── ideal-bus-common                       -- 公共依赖模块
-    ├── ideal-bus-receiver                     -- 接收事件的客户端SDK
-    ├── ideal-bus-receiver-spring-boot-starter -- receiver starter
     ├── ideal-bus-samples                      -- 示例
     ├── ideal-bus-storage-mongo                -- MongoDB存储库
     └── ideal-bus-storage-r2dbc                -- 关系型数据库存储库

@@ -11,7 +11,7 @@ import java.util.Collection;
 /**
  * @author 宋志宗 on 2020/9/17
  */
-public interface Publisher {
+public interface EventPublisher {
   /**
    * 单条发布
    */
@@ -19,7 +19,7 @@ public interface Publisher {
   Mono<PublishResult> publish(@Nonnull EventMessage<?> message);
 
   /**
-   * 批量发布, 单次上限100
+   * 批量发布
    */
   @Nonnull
   Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages);

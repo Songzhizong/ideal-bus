@@ -1,4 +1,4 @@
-package com.zzsong.bus.receiver.listener;
+package com.zzsong.bus.client.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

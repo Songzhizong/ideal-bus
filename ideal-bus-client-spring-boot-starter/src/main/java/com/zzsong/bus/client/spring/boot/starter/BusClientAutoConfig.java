@@ -35,7 +35,7 @@ public class BusClientAutoConfig {
   }
 
   @Bean
-  public BusClient busCLient() {
+  public BusClient busClient() {
     if (clientProperties.isEnabled()) {
       final int corePoolSize = receiveProperties.getCorePoolSize();
       final int maximumPoolSize = receiveProperties.getMaximumPoolSize();

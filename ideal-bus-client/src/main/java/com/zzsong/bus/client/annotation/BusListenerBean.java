@@ -1,4 +1,4 @@
-package com.zzsong.bus.receiver.annotation;
+package com.zzsong.bus.client.annotation;
 
 import java.lang.annotation.*;
 

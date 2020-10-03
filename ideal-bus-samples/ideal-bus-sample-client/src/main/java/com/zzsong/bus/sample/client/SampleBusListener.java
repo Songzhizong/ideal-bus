@@ -1,8 +1,8 @@
 package com.zzsong.bus.sample.client;
 
-import com.zzsong.bus.receiver.annotation.BusListenerBean;
-import com.zzsong.bus.receiver.annotation.EventListener;
-import com.zzsong.bus.receiver.deliver.EventContext;
+import com.zzsong.bus.client.annotation.BusListenerBean;
+import com.zzsong.bus.client.annotation.EventListener;
+import com.zzsong.bus.client.deliver.EventContext;
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

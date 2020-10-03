@@ -14,8 +14,6 @@
     <module>ideal-bus-client</module>
     <module>ideal-bus-client-spring-boot-starter</module>
     <module>ideal-bus-common</module>
-    <module>ideal-bus-receiver</module>
-    <module>ideal-bus-receiver-spring-boot-starter</module>
     <module>ideal-bus-samples</module>
     <module>ideal-bus-broker-server</module>
     <module>ideal-bus-storage-mongo</module>

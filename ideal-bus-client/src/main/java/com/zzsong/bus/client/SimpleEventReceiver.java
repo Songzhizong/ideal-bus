@@ -1,9 +1,9 @@
-package com.zzsong.bus.receiver;
+package com.zzsong.bus.client;
 
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
-import com.zzsong.bus.receiver.deliver.EventDeliverer;
-import com.zzsong.bus.receiver.deliver.EventDelivererImpl;
+import com.zzsong.bus.client.deliver.EventDeliverer;
+import com.zzsong.bus.client.deliver.EventDelivererImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import reactor.core.publisher.Mono;
@@ -18,13 +18,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author 宋志宗 on 2020/9/18
  */
 @Slf4j
-public class SimpleBusReceiver implements BusReceiver {
+public class SimpleEventReceiver implements EventReceiver {
   private final int maximumPoolSize;
   private final EventDeliverer eventDeliverer;
   private final ThreadPoolExecutor primary;
   private final AtomicBoolean primaryBusy = new AtomicBoolean(false);
 
-  public SimpleBusReceiver(int corePoolSize, int maximumPoolSize) {
+  public SimpleEventReceiver(int corePoolSize, int maximumPoolSize) {
     this.maximumPoolSize = maximumPoolSize;
     this.primary = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
