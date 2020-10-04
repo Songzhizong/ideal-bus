@@ -22,7 +22,7 @@ public class DefaultBusClient implements BusClient {
 
   @Nonnull
   @Override
-  public Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages) {
+  public Flux<PublishResult> publish(@Nonnull Collection<EventMessage<?>> messages) {
     return Flux.empty();
   }
 

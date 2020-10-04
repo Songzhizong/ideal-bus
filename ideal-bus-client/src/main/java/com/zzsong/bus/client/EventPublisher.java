@@ -22,5 +22,5 @@ public interface EventPublisher {
    * 批量发布
    */
   @Nonnull
-  Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages);
+  Flux<PublishResult> publish(@Nonnull Collection<EventMessage<?>> messages);
 }

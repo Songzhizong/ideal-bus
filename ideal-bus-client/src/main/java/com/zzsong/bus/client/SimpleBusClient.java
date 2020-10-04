@@ -153,13 +153,7 @@ public class SimpleBusClient extends SimpleEventReceiver implements BusClient {
 
   @Nonnull
   @Override
-  public Flux<PublishResult> batchPublish(@Nonnull Collection<EventMessage<?>> messages) {
-//    int batchSize = messages.size();
-//    if (batchSize > 100) {
-//      String message = String.format("超过批量发布上限100 -> %s", batchSize);
-//      log.error(message);
-//      return Flux.error(new RuntimeException(message));
-//    }
+  public Flux<PublishResult> publish(@Nonnull Collection<EventMessage<?>> messages) {
     return Flux.fromIterable(messages).flatMap(this::publish);
   }
 }

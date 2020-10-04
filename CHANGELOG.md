@@ -2,7 +2,9 @@
 
 ### ⭐ New Features
 
+- 移除receiver模块
 
+- batchPublish方法名修改为publish
 
 ### 🐞 Bug Fixes
 

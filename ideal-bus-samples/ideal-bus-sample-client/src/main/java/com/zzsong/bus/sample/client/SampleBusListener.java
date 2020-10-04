@@ -28,12 +28,15 @@ public class SampleBusListener {
         JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
   }
 
-  @EventListener(name = "testAutoAck", topic = "testAutoAck", condition = "age>10", delayExp = "120")
-  public void testAutoAck(@Nonnull EventContext<List<String>> context) throws InterruptedException {
-    int incrementAndGet = counter.incrementAndGet();
-    TimeUnit.SECONDS.sleep(10);
-    log.info("testAutoAck 接收到消息: {}, 接收到消息序号: {}",
-        JsonUtils.toJsonString(context.getPayload()), incrementAndGet);
+  @EventListener(
+      name = "testAutoAck",
+      topic = "example_topic",
+      condition = "age>10",
+      delayExp = "120",
+      autoAck = true
+  )
+  public void testAutoAck(@Nonnull EventContext<List<String>> context) {
+    System.out.println(String.join(", ", context.getPayload()));
   }
 
   @EventListener(name = "broadcast", topic = "broadcast")

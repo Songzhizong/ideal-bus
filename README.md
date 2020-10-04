@@ -67,8 +67,6 @@ ideal-bus
 
 ## 软件架构
 
-### 技术架构
-
 ![architecture-1](assets/ideal-bus-architecture-1.png)
 
 ideal-bus架构上主要分为三个部分，如上图所示：
@@ -88,4 +86,103 @@ ideal-bus架构上主要分为三个部分，如上图所示：
 
 
 ## 使用说明
+
+### 发布示例
+
+```java
+// 单条发布
+List<String> payload = ImmutableList.of("1", "2", "3");
+EventMessage<List<String>> message = EventMessage.of("test_topic", payload)
+    .bizId("123456") // 可选，业务唯一id，支持通过业务id查询事件的发布和订阅信息。
+    .key("key") // 可选，相同的key会尽可能的投递到同一个消费队列。
+    .externalApp("externalApp") // 可选，外部应用编码，外部应用可通过此编码订阅到属于自己的消息。
+    .addHeader("age", "20"); // 可选，事件头，可用于消息过滤、延迟消费。
+eventPublisher.publish(message).block(); // .block() 以阻塞的方式发布事件
+eventPublisher.publish(message).subscribe(); // .subscribe() 以异步的方式发布事件
+
+// 批量发布
+EventMessage<String> messageA = EventMessage.of("test_topic_a", "eventA");
+EventMessage<Integer> messageB = EventMessage.of("test_topic_b", 200);
+List<EventMessage<?>> list = ImmutableList.of(messageA, messageB);
+List<PublishResult> results = eventPublisher.publish(list)
+    .collectList() // 
+    .block(); // 以阻塞的方式发布事件并获取发布结果
+eventPublisher.publish(list).subscribe(); // 以异步的方式发布事件
+
+// 通过EventGenerator构建事件列表并发布
+EventGenerator generator = EventGenerator
+    .of("test_topic_a", "eventA")
+      .addHeader("age", "20")
+      .addHeader("expire", "1800")
+      .externalApp("app1")
+    .then("test_topic_b", 200)
+      .externalApp("app1")
+    .then("test_topic_c", ImmutableList.of("a", "b"))
+      .externalApp("app1");
+eventPublisher.publish(generator.get()).subscribe();
+```
+
+### 订阅示例
+
+```java
+@EventListener(
+    name = "testAutoAck", // listener名称，同一个应用下保证唯一
+    topic = "example_topic", // 事件的主题
+    condition = "age>10", // 订阅条件，订阅Header中的age大于10的事件
+    delayExp = "expire", // 延迟表达式，单位秒。这里从Header中动态获取expire的值，也可填写固定值。
+    autoAck = true // 是否自动ack，默认true
+)
+public void testAutoAck(EventContext<List<String>> context) {
+  // 参数类型必须是EventContext，泛型为Event中payload参数类型
+  System.out.println(String.join(", ", context.getPayload()));
+}
+```
+
+## 配置说明
+
+### Broker
+
+**ideal.bus.node-id**
+
+必填，Broker实例在集群中的编号，也是该实例下存储消息的分片键。需要保证集群内唯一，建议从1开始递增。
+
+
+
+**ideal.bus.refresh-local-cache-interval**
+
+选填，自动更新本地缓存的间隔时间，至少1分钟，默认10分钟。
+
+
+
+### Client
+
+**ideal.bus.enabled**
+
+选填，是否开启发布订阅功能，默认true。
+
+
+
+**ideal.bus.auto-subscribe**
+
+选填，是否开启自动订阅功能，默认true。
+
+
+
+**ideal.bus.application-id**
+
+必填，应用在broker注册的应用ID，必填且保证唯一。
+
+
+
+**ideal.bus.broker-addresses**
+
+必填，broker的地址列表，通过逗号连接，如：`127.0.0.1:13266,127.0.0.1:13276`
+
+**注意：** 地址中的端口号为broker的rsocket监听端口。
+
+
+
+**选填 ideal.bus.access-token**
+
+选填，应用的连接密钥，如果新增应用时没有分配密钥则不填。
 

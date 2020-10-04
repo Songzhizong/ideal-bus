@@ -19,5 +19,5 @@ public class BusClientProperties {
 
   private String accessToken = "";
 
-  private boolean autoSubscribe = false;
+  private boolean autoSubscribe = true;
 }
