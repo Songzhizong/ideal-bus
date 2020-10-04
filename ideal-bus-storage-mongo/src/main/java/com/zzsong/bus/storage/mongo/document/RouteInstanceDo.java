@@ -1,9 +1,7 @@
 package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -16,7 +14,8 @@ import java.util.List;
 /**
  * @author 宋志宗 on 2020/9/17
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_route_info")

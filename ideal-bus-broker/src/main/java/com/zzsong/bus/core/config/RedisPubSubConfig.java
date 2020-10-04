@@ -29,7 +29,7 @@ public class RedisPubSubConfig {
         = new RedisMessageListenerContainer();
     assert connectionFactory != null;
     container.setConnectionFactory(connectionFactory);
-    container.addMessageListener(cacheService, new ChannelTopic(CacheService.refreshCacheTopic));
+    container.addMessageListener(cacheService, new ChannelTopic(CacheService.BUS_REFRESH_CACHE));
     return container;
   }
 }

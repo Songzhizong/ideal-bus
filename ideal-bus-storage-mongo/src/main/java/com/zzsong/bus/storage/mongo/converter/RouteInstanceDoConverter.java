@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("DuplicatedCode")
 public final class RouteInstanceDoConverter {
+  private RouteInstanceDoConverter() {
+  }
 
   @Nonnull
   public static RouteInstanceDo fromRouteInstance(@Nonnull RouteInstance routeInstance) {

@@ -29,34 +29,37 @@ import java.util.Locale;
  * @author 宋志宗 on 2020/8/20
  */
 public class JsonUtils {
-  private static final DateTimeFormatter dateTimeFormatter
-      = DateTimeFormatter.ofPattern(DateTimes.yyyy_MM_dd_HH_mm_ss, Locale.SIMPLIFIED_CHINESE);
-  private static final DateTimeFormatter dateFormatter
-      = DateTimeFormatter.ofPattern(DateTimes.yyyy_MM_dd, Locale.SIMPLIFIED_CHINESE);
-  private static final DateTimeFormatter timeFormatter
-      = DateTimeFormatter.ofPattern(DateTimes.HH_mm_ss, Locale.SIMPLIFIED_CHINESE);
+  private JsonUtils() {
+  }
 
-  private static final SimpleModule javaTimeModule = new JavaTimeModule()
-      .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter))
-      .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTimeFormatter))
-      .addSerializer(LocalDate.class, new LocalDateSerializer(dateFormatter))
-      .addDeserializer(LocalDate.class, new LocalDateDeserializer(dateFormatter))
-      .addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter))
-      .addDeserializer(LocalTime.class, new LocalTimeDeserializer(timeFormatter));
+  private static final DateTimeFormatter DATE_TIME_FORMATTER
+      = DateTimeFormatter.ofPattern(DateTimes.YYYY_MM_DD_HH_MM_SS, Locale.SIMPLIFIED_CHINESE);
+  private static final DateTimeFormatter DATE_FORMATTER
+      = DateTimeFormatter.ofPattern(DateTimes.YYYY_MM_DD, Locale.SIMPLIFIED_CHINESE);
+  private static final DateTimeFormatter TIME_FORMATTER
+      = DateTimeFormatter.ofPattern(DateTimes.HH_MM_SS, Locale.SIMPLIFIED_CHINESE);
 
-  public static final ObjectMapper mapper = new ObjectMapper()
+  private static final SimpleModule JAVA_TIME_MODULE = new JavaTimeModule()
+      .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DATE_TIME_FORMATTER))
+      .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DATE_TIME_FORMATTER))
+      .addSerializer(LocalDate.class, new LocalDateSerializer(DATE_FORMATTER))
+      .addDeserializer(LocalDate.class, new LocalDateDeserializer(DATE_FORMATTER))
+      .addSerializer(LocalTime.class, new LocalTimeSerializer(TIME_FORMATTER))
+      .addDeserializer(LocalTime.class, new LocalTimeDeserializer(TIME_FORMATTER));
+
+  public static final ObjectMapper MAPPER = new ObjectMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .registerModule(javaTimeModule)
+      .registerModule(JAVA_TIME_MODULE)
       .findAndRegisterModules();
 
-  public static final ObjectMapper ignoreNullMapper = new ObjectMapper()
+  public static final ObjectMapper IGNORE_NULL_MAPPER = new ObjectMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-      .registerModule(javaTimeModule)
+      .registerModule(JAVA_TIME_MODULE)
       .findAndRegisterModules();
 
   public static SimpleModule getJavaTimeModule() {
-    return javaTimeModule;
+    return JAVA_TIME_MODULE;
   }
 
   @Nonnull
@@ -71,9 +74,9 @@ public class JsonUtils {
 
   @Nonnull
   public static <T> String toJsonString(@Nonnull T t, boolean ignoreNull, boolean pretty) {
-    ObjectMapper writer = JsonUtils.mapper;
+    ObjectMapper writer = JsonUtils.MAPPER;
     if (ignoreNull) {
-      writer = JsonUtils.ignoreNullMapper;
+      writer = JsonUtils.IGNORE_NULL_MAPPER;
     }
     try {
       if (pretty) {
@@ -89,7 +92,7 @@ public class JsonUtils {
   @Nonnull
   public static <T> T parseJson(@Nonnull String jsonString, @Nonnull Class<T> clazz) {
     try {
-      return ignoreNullMapper.readValue(jsonString, clazz);
+      return IGNORE_NULL_MAPPER.readValue(jsonString, clazz);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
@@ -98,7 +101,7 @@ public class JsonUtils {
   @Nonnull
   public static <T> T parseJson(@Nonnull String jsonString, JavaType javaType) {
     try {
-      return ignoreNullMapper.readValue(jsonString, javaType);
+      return IGNORE_NULL_MAPPER.readValue(jsonString, javaType);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
@@ -107,7 +110,7 @@ public class JsonUtils {
   @Nonnull
   public static <T> T parseJson(@Nonnull String jsonString, @Nonnull TypeReference<T> type) {
     try {
-      return ignoreNullMapper.readValue(jsonString, type);
+      return IGNORE_NULL_MAPPER.readValue(jsonString, type);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }

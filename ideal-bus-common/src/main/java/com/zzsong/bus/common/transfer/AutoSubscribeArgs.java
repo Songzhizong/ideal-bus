@@ -1,6 +1,5 @@
 package com.zzsong.bus.common.transfer;
 
-import com.google.common.collect.ImmutableList;
 import lombok.*;
 
 import javax.annotation.Nonnull;
@@ -28,6 +27,7 @@ public class AutoSubscribeArgs {
   @Nonnull
   private List<SubscriptionArgs> subscriptionArgsList = Collections.emptyList();
 
+  @Nonnull
   public AutoSubscribeArgs checkAndGet() {
     //noinspection ConstantConditions
     if (applicationId == null) {

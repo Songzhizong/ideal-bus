@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class TimingScheduler implements SmartInitializingSingleton {
-  private static final int preReadCount = 1000;
-  private static final long preReadMills = 5000L;
+  private static final int PRE_READ_COUNT = 1000;
+  private static final long PRE_READ_MILLS = 5000L;
 
   private final ConcurrentMap<Integer, List<RouteInstance>> ringData
       = new ConcurrentHashMap<>();
@@ -62,11 +62,11 @@ public class TimingScheduler implements SmartInitializingSingleton {
       while (!scheduleThreadToStop) {
         long start = System.currentTimeMillis();
         long nowTime = System.currentTimeMillis();
-        long maxNextTime = nowTime + preReadMills;
+        long maxNextTime = nowTime + PRE_READ_MILLS;
         int nodeId = busProperties.getNodeId();
         boolean preReadSuc = true;
         List<RouteInstance> routeInstanceList = routeInstanceService
-            .loadDelayed(maxNextTime, preReadCount, nodeId)
+            .loadDelayed(maxNextTime, PRE_READ_COUNT, nodeId)
             .block();
         if (routeInstanceList != null && routeInstanceList.size() > 0) {
           log.debug("loadDelayed: {}", routeInstanceList.size());
@@ -89,7 +89,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
         long cost = System.currentTimeMillis() - start;
         if (cost < 1000) {
           // 如果未来preReadMills秒都没有数据, 那就休眠最多preReadMills秒, 反之最多休眠1秒
-          long sleepMills = (preReadSuc ? 1000 : preReadMills)
+          long sleepMills = (preReadSuc ? 1000 : PRE_READ_MILLS)
               - (System.currentTimeMillis() % 1000);
           try {
             TimeUnit.MILLISECONDS.sleep(sleepMills);

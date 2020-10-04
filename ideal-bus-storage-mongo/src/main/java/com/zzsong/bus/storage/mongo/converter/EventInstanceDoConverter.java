@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("DuplicatedCode")
 public final class EventInstanceDoConverter {
+  private EventInstanceDoConverter() {
+  }
 
   @Nonnull
   public static EventInstanceDo fromEventInstance(@Nonnull EventInstance eventInstance) {

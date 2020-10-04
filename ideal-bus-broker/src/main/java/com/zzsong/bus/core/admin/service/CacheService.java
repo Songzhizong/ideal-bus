@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 @Service
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class CacheService implements MessageListener {
-  public static final String refreshCacheTopic = "bus_refresh_cache";
+  public static final String BUS_REFRESH_CACHE = "bus_refresh_cache";
 
   @Nonnull
   @Autowired
@@ -34,7 +34,7 @@ public class CacheService implements MessageListener {
    * 通知各个节点更新缓存
    */
   public Mono<Long> notificationRefreshCache() {
-    return template.convertAndSend(refreshCacheTopic, "1");
+    return template.convertAndSend(BUS_REFRESH_CACHE, "1");
   }
 
   public Mono<Boolean> refreshLocalCache() {

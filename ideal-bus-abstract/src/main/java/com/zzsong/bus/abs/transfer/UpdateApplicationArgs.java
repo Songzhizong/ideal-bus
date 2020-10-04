@@ -2,7 +2,6 @@ package com.zzsong.bus.abs.transfer;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
-import com.zzsong.bus.abs.share.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;

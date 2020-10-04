@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("DuplicatedCode")
 public final class ApplicationDoConverter {
+  private ApplicationDoConverter() {
+  }
 
   @Nonnull
   public static ApplicationDo fromApp(@Nonnull Application application) {

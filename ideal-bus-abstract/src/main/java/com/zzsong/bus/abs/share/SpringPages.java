@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
  * @author 宋志宗 on 2020/5/15
  */
 public final class SpringPages {
+  private SpringPages() {
+  }
 
   /**
    * 将{@link Page}转换为带分页相关数据的{@link Res}对象

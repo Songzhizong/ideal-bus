@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
  * @author 宋志宗 on 2020/8/21
  */
 public final class ReactorUtils {
-
+  private ReactorUtils() {
+  }
 
   @Nonnull
   public static WebClient createWebClient(int connectTimeOut,

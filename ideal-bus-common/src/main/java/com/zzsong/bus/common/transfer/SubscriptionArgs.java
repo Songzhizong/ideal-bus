@@ -1,9 +1,6 @@
 package com.zzsong.bus.common.transfer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -12,7 +9,8 @@ import javax.annotation.Nullable;
 /**
  * @author 宋志宗 on 2020/9/18 10:58 下午
  */
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -12,6 +12,8 @@ import java.util.*;
  */
 @Slf4j
 public class ConditionMatcher {
+  private ConditionMatcher() {
+  }
 
   /**
    * 将条件表达式解析为条件组
@@ -20,6 +22,7 @@ public class ConditionMatcher {
    * @return 条件组
    * @author 宋志宗 on 2020/7/11 3:46 下午
    */
+  @Nonnull
   public static List<Set<String>> parseConditionString(@Nonnull String conditionExpression) {
     if (StringUtils.isBlank(conditionExpression)) {
       return Collections.emptyList();

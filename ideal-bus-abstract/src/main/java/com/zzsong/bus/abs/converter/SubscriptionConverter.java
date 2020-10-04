@@ -12,6 +12,8 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("DuplicatedCode")
 public final class SubscriptionConverter {
+  private SubscriptionConverter() {
+  }
 
   @Nonnull
   public static Subscription fromSubscribeArgs(@Nonnull SubscribeArgs subscribeArgs) {

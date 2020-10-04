@@ -73,14 +73,16 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int nodeId) {
+    String nextPushTime = "nextPushTime";
+    String instanceId = "instanceId";
     Criteria criteria = Criteria
         .where("nodeId").is(nodeId)
         .andOperator(
-            Criteria.where("nextPushTime").gt(SnowFlake.START_TIMESTAMP),
-            Criteria.where("nextPushTime").lte(maxNextTime)
+            Criteria.where(nextPushTime).gt(SnowFlake.START_TIMESTAMP),
+            Criteria.where(nextPushTime).lte(maxNextTime)
         );
     Query query = Query.query(criteria).limit(count)
-        .with(Sort.by(Sort.Direction.ASC, "instanceId"));
+        .with(Sort.by(Sort.Direction.ASC, instanceId));
     return template.find(query, RouteInstanceDo.class)
         .map(RouteInstanceDoConverter::toRouteInstance)
         .collectList()
@@ -91,9 +93,9 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
           List<Long> instanceIds = instanceList.stream()
               .map(RouteInstance::getInstanceId)
               .collect(Collectors.toList());
-          Query updateQuery = Query.query(Criteria.where("instanceId").in(instanceIds));
+          Query updateQuery = Query.query(Criteria.where(instanceId).in(instanceIds));
           Update update = new Update();
-          update.set("nextPushTime", -1);
+          update.set(nextPushTime, -1);
           return template.updateMulti(updateQuery, update, RouteInstanceDo.class)
               .map(r -> instanceList);
         });

@@ -35,7 +35,7 @@ import java.util.Map;
 @Component
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class MessagePusherImpl implements MessagePusher {
-  private static final long retryInterval = 10 * 1000L;
+  private static final long RETRY_INTERVAL = 10 * 1000L;
   @Autowired
   private RouteTransfer routeTransfer;
   @Nonnull
@@ -100,7 +100,7 @@ public class MessagePusherImpl implements MessagePusher {
           // 没有达到重试上限, 标记为等待状态并计算下次执行时间
           routeInstance.setStatus(RouteInstance.STATUS_WAITING);
           routeInstance.setMessage("waiting");
-          routeInstance.setNextPushTime(System.currentTimeMillis() + retryInterval);
+          routeInstance.setNextPushTime(System.currentTimeMillis() + RETRY_INTERVAL);
         } else {
           // 达到重试上限, 标记为失败状态
           routeInstance.setStatus(RouteInstance.STATUS_FAILURE);

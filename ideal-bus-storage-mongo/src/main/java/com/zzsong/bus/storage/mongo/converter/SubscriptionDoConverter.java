@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("DuplicatedCode")
 public final class SubscriptionDoConverter {
+  private SubscriptionDoConverter() {
+  }
 
   @Nonnull
   public static Subscription toSubscription(@Nonnull SubscriptionDo mongoDo) {

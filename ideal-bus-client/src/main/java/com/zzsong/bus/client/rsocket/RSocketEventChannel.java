@@ -107,8 +107,8 @@ public class RSocketEventChannel extends Thread implements EventChannel {
    * @param socketType 0 发送消息通道, 1 接收消息通道
    */
   private boolean connect(int socketType) {
-    RSocketStrategies rSocketStrategies = RSocketConfigure.rsocketStrategies;
-    RSocketRequester.Builder requesterBuilder = RSocketConfigure.rSocketRequesterBuilder;
+    RSocketStrategies rSocketStrategies = RSocketConfigure.R_SOCKET_STRATEGIES;
+    RSocketRequester.Builder requesterBuilder = RSocketConfigure.R_SOCKET_REQUESTER_BUILDER;
     SocketAcceptor responder
         = RSocketMessageHandler.responder(rSocketStrategies, this);
     final LoginMessage message = new LoginMessage();

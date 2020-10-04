@@ -2,10 +2,7 @@ package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.constants.DBDefaults;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -16,7 +13,8 @@ import javax.annotation.Nonnull;
 /**
  * @author 宋志宗 on 2020/9/16
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_subscription")

@@ -1,9 +1,7 @@
 package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.common.message.EventHeaders;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,7 +11,8 @@ import javax.annotation.Nonnull;
 /**
  * @author 宋志宗 on 2020/9/17
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_event_inst")

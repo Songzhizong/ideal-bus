@@ -2,10 +2,7 @@ package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.constants.EventTypeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -14,7 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * @author 宋志宗 on 2020/9/16
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_event")

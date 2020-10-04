@@ -18,27 +18,27 @@ public final class DateTimes {
   /**
    * 2020-12-12
    */
-  public static final String yyyy_MM_dd = "yyyy-MM-dd";
+  public static final String YYYY_MM_DD = "yyyy-MM-dd";
   /**
    * 2020-12-12 19
    */
-  public static final String yyyy_MM_dd_HH = "yyyy-MM-dd HH";
+  public static final String YYYY_MM_DD_HH = "yyyy-MM-dd HH";
   /**
    * 2020-12-12 19:21
    */
-  public static final String yyyy_MM_dd_HH_mm = "yyyy-MM-dd HH:mm";
+  public static final String YYYY_MM_DD_HH_MM = "yyyy-MM-dd HH:mm";
   /**
    * 2020-12-12 19:21:56
    */
-  public static final String yyyy_MM_dd_HH_mm_ss = "yyyy-MM-dd HH:mm:ss";
+  public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
   /**
    * 2020-12-12 19:21:56.555
    */
-  public static final String yyyy_MM_dd_HH_mm_ss_SSS = "yyyy-MM-dd HH:mm:ss.SSS";
+  public static final String YYYY_MM_DD_HH_MM_SS_SSS = "yyyy-MM-dd HH:mm:ss.SSS";
   /**
    * 12-12 19:21:56
    */
-  public static final String MM_dd_HH_mm_ss = "MM-dd HH:mm:ss";
+  public static final String MM_DD_HH_MM_SS = "MM-dd HH:mm:ss";
   /**
    * 12-12 19
    */
@@ -46,11 +46,11 @@ public final class DateTimes {
   /**
    * 19:21:56
    */
-  public static final String HH_mm_ss = "HH:mm:ss";
+  public static final String HH_MM_SS = "HH:mm:ss";
   /**
    * 19:21
    */
-  public static final String HH_mm = "HH:mm";
+  public static final String HH_MM = "HH:mm";
 
   private static final ZoneOffset CHINA_ZONE_OFFSET = ZoneOffset.of("+8");
   private static final Locale CHINA_LOCAL = Locale.SIMPLIFIED_CHINESE;

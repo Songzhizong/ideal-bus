@@ -30,7 +30,7 @@ public class EventContext<T> {
 
   @Getter
   @Nonnull
-  private transient final String listenerName;
+  private final String listenerName;
 
   public EventContext(@Nonnull T payload,
                       @Nonnull String listenerName) {

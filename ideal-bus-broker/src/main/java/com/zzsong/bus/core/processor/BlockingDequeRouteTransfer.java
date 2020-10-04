@@ -125,68 +125,78 @@ public class BlockingDequeRouteTransfer implements RouteTransfer, DisposableBean
   private void createConsumeThread(long subscriptionId, BlockingDeque<RouteInstance> queue) {
     Thread customerThread = new Thread(() -> {
       while (startThread) {
+        RouteInstance routeInstance;
         try {
-          RouteInstance routeInstance = queue
+          routeInstance = queue
               .pollFirst(pollTimeMap.get(subscriptionId), TimeUnit.SECONDS);
-          // 是否需要从存储库读取读取未消费掉的消息
-          if (routeInstance == null) {
-            Boolean mark = noSpaceMarkMap.get(subscriptionId);
-            if (mark != null && mark) {
-              int nodeId = properties.getNodeId();
-              routeInstanceService.loadWaiting(QUEUE_SIZE, nodeId, subscriptionId)
-                  .flatMap(list -> {
-                    final int size = list.size();
-                    log.info("队列: {} 从存储库读取 {}条消息", subscriptionId, size);
-                    if (size < QUEUE_SIZE) {
-                      noSpaceMarkMap.remove(subscriptionId);
-                      log.info("队列: {} 进入对外可用状态", subscriptionId);
-                      pollTimeMap.put(subscriptionId, DEFAULT_POLL_TIMEOUT);
-                    } else {
-                      pollTimeMap.put(subscriptionId, 0);
-                    }
-                    return submit(list, true);
-                  }).block();
-            }
-          } else {
-            SubscriptionDetails subscription = localCache.getSubscription(subscriptionId);
-            if (subscription == null) {
-              log.error("订阅关系: {} 不存在", subscriptionId);
-              queue.offerFirst(routeInstance);
+        } catch (InterruptedException e) {
+          log.info("{} <- subscription queue Interrupted,", subscriptionId);
+          break;
+        }
+        // 是否需要从存储库读取读取未消费掉的消息
+        if (routeInstance == null) {
+          Boolean mark = noSpaceMarkMap.get(subscriptionId);
+          if (mark != null && mark) {
+            int nodeId = properties.getNodeId();
+            routeInstanceService.loadWaiting(QUEUE_SIZE, nodeId, subscriptionId)
+                .flatMap(list -> {
+                  final int size = list.size();
+                  log.info("队列: {} 从存储库读取 {}条消息", subscriptionId, size);
+                  if (size < QUEUE_SIZE) {
+                    noSpaceMarkMap.remove(subscriptionId);
+                    log.info("队列: {} 进入对外可用状态", subscriptionId);
+                    pollTimeMap.put(subscriptionId, DEFAULT_POLL_TIMEOUT);
+                  } else {
+                    pollTimeMap.put(subscriptionId, 0);
+                  }
+                  return submit(list, true);
+                }).block();
+          }
+        } else {
+          SubscriptionDetails subscription = localCache.getSubscription(subscriptionId);
+          if (subscription == null) {
+            log.error("订阅关系: {} 不存在", subscriptionId);
+            queue.offerFirst(routeInstance);
+            try {
               TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+            } catch (InterruptedException e) {
+              log.info("sleep Interrupted");
+            }
+            continue;
+          }
+          final long applicationId = subscription.getApplicationId();
+          final ApplicationTypeEnum applicationType = subscription.getApplicationType();
+          if (applicationType == ApplicationTypeEnum.INTERNAL) {
+            List<DelivererChannel> servers = lbFactory
+                .getReachableServers(applicationId + "");
+            if (servers.isEmpty()) {
+              int size = queue.size();
+              queue.offerFirst(routeInstance);
+              log.info("应用: {} 没有可用实例, 当前队列大小: {}", applicationId, size);
+              // 如果当前没有在线的服务, 先睡眠10秒然后重试
+              try {
+                TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+              } catch (InterruptedException e) {
+                log.info("sleep Interrupted");
+              }
               continue;
             }
-            final long applicationId = subscription.getApplicationId();
-            final ApplicationTypeEnum applicationType = subscription.getApplicationType();
-            if (applicationType == ApplicationTypeEnum.INTERNAL) {
-              List<DelivererChannel> servers = lbFactory
-                  .getReachableServers(applicationId + "");
-              if (servers.isEmpty()) {
-                int size = queue.size();
-                queue.offerFirst(routeInstance);
-                log.info("应用: {} 没有可用实例, 当前队列大小: {}", applicationId, size);
-                // 如果当前没有在线的服务, 先睡眠10秒然后重试
-                TimeUnit.SECONDS.sleep(WAIT_SECONDS);
-                continue;
-              }
-            }
-            if (subscription.getConsumeType() == Subscription.CONSUME_TYPE_SERIAL) {
-              // 串行消息以阻塞当前线程的方式执行推送
-              messagePusher.push(routeInstance).block();
-            } else {
-              // 并行消息异步推送
-              messagePusher.push(routeInstance)
-                  .onErrorResume(throwable -> {
-                    log.info("ex: ", throwable);
-                    if (throwable instanceof ClosedChannelException) {
-                      queue.offerFirst(routeInstance);
-                    }
-                    return Mono.empty();
-                  })
-                  .subscribe();
-            }
           }
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+          if (subscription.getConsumeType() == Subscription.CONSUME_TYPE_SERIAL) {
+            // 串行消息以阻塞当前线程的方式执行推送
+            messagePusher.push(routeInstance).block();
+          } else {
+            // 并行消息异步推送
+            messagePusher.push(routeInstance)
+                .onErrorResume(throwable -> {
+                  log.info("ex: ", throwable);
+                  if (throwable instanceof ClosedChannelException) {
+                    queue.offerFirst(routeInstance);
+                  }
+                  return Mono.empty();
+                })
+                .subscribe();
+          }
         }
       }
       Thread.currentThread().interrupt();

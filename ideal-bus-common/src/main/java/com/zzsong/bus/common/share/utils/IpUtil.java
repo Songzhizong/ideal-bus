@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 @Slf4j
 @SuppressWarnings({"unused", "RedundantSuppression", "SpellCheckingInspection"})
 public class IpUtil {
+  private IpUtil() {
+  }
 
   private static final String ANY_HOST_VALUE = "0.0.0.0";
   private static final String LOCALHOST_VALUE = "127.0.0.1";

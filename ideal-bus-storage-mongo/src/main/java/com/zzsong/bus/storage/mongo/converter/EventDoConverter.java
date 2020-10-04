@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
  * @author 宋志宗 on 2020/9/16
  */
 public final class EventDoConverter {
+  private EventDoConverter() {
+  }
 
   @Nonnull
   public static EventDo fromEvent(@Nonnull Event event) {

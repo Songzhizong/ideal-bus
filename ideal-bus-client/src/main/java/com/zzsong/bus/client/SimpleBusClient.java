@@ -76,7 +76,7 @@ public class SimpleBusClient extends SimpleEventReceiver implements BusClient {
         port = Integer.parseInt(split[1]);
       } catch (NumberFormatException e) {
         log.error("RSocket地址配置错误: {}", address);
-        throw new IllegalArgumentException("RSocket地址配置错误");
+        throw new IllegalArgumentException("RSocket地址配置错误", e);
       }
       RSocketEventChannel channel = new RSocketEventChannel(
           ip, port, applicationId, clientIpPort, this, lbFactory);
@@ -105,7 +105,7 @@ public class SimpleBusClient extends SimpleEventReceiver implements BusClient {
       try {
         TimeUnit.SECONDS.sleep(1);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        log.info("sleep Interrupted");
       }
     }
     busChannel.autoSubscribe(autoSubscribeArgs).block();
