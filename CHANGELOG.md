@@ -12,7 +12,9 @@
 
 ### 🔨 Dependency Upgrades
 
+- commons-pool2 2.9.0
 
+- jackson 2.11.3
 
 
 
