@@ -11,11 +11,11 @@
   <modules>
     <module>ideal-bus-abstract</module>
     <module>ideal-bus-broker</module>
+    <module>ideal-bus-broker-server</module>
     <module>ideal-bus-client</module>
     <module>ideal-bus-client-spring-boot-starter</module>
     <module>ideal-bus-common</module>
     <module>ideal-bus-samples</module>
-    <module>ideal-bus-broker-server</module>
     <module>ideal-bus-storage-mongo</module>
     <module>ideal-bus-storage-r2dbc</module>
   </modules>

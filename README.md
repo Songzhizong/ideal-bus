@@ -182,7 +182,7 @@ public void testAutoAck(EventContext<List<String>> context) {
 
 
 
-**选填 ideal.bus.access-token**
+**ideal.bus.access-token**
 
 选填，应用的连接密钥，如果新增应用时没有分配密钥则不填。
 
