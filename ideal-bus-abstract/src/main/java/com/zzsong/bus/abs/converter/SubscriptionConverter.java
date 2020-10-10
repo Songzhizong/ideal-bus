@@ -56,17 +56,22 @@ public final class SubscriptionConverter {
 
   @Nonnull
   public static SubscriptionDetails toSubscriptionDetails(@Nonnull Subscription subscription) {
-    SubscriptionDetails subscriptionDetails = new SubscriptionDetails();
-//    subscriptionDetails.setApplicationType();
-//    subscriptionDetails.setApplication();
-//    subscriptionDetails.setReceiveUrl();
-    subscriptionDetails.setSubscriptionId(subscription.getSubscriptionId());
-    subscriptionDetails.setApplicationId(subscription.getApplicationId());
-    subscriptionDetails.setTopic(subscription.getTopic());
-    subscriptionDetails.setCondition(subscription.getCondition());
-    subscriptionDetails.setBroadcast(subscription.isBroadcast());
-    subscriptionDetails.setRetryCount(subscription.getRetryCount());
-    subscriptionDetails.setStatus(subscription.getStatus());
-    return subscriptionDetails;
+      SubscriptionDetails subscriptionDetails = new SubscriptionDetails();
+      subscriptionDetails.setCondition(subscription.getCondition());
+//      subscriptionDetails.setApplicationType();
+//      subscriptionDetails.setExternalApp();
+//      subscriptionDetails.setReceiveUrl();
+//      subscriptionDetails.setConditionGroup();
+      subscriptionDetails.setSubscriptionId(subscription.getSubscriptionId());
+      subscriptionDetails.setApplicationId(subscription.getApplicationId());
+      subscriptionDetails.setTopic(subscription.getTopic());
+      subscriptionDetails.setListenerName(subscription.getListenerName());
+      subscriptionDetails.setDelayExp(subscription.getDelayExp());
+      subscriptionDetails.setCondition(subscription.getCondition());
+      subscriptionDetails.setBroadcast(subscription.isBroadcast());
+      subscriptionDetails.setRetryCount(subscription.getRetryCount());
+      subscriptionDetails.setConsumeType(subscription.getConsumeType());
+      subscriptionDetails.setStatus(subscription.getStatus());
+      return subscriptionDetails;
   }
 }
