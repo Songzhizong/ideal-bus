@@ -46,7 +46,7 @@ public class WeightRoundRobinLoadBalancer<Server extends LbServer> implements Lo
     ConcurrentMap<String, AtomicInteger> currentWeightMap = defaultCurrentWeightMap;
     if (key != null) {
       currentWeightMap = multiCurrentWeightMap
-          .computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
+          .computeIfAbsent(key, (k) -> new ConcurrentHashMap<>(16));
     }
     int total = 0;
     Server selected = null;

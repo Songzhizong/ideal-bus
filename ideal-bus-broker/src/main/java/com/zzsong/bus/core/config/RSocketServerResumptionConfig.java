@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
  * Make the socket capable of resumption.
  * By default, the Resume Session will have a duration of 120s, a timeout of
  * 10s, and use the In Memory (volatile, non-persistent) session store.
+ *
+ * @author 宋志宗 on 2020/10/10 4:21 下午
  */
 @Profile("resumption")
 @Component

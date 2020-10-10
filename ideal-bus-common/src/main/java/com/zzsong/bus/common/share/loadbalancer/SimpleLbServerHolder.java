@@ -36,8 +36,9 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
   public void addServers(@Nonnull List<Server> newServers) {
     try {
       allServersLock.lock();
-      Map<String, Integer> indexMap = new HashMap<>();
-      for (int i = 0; i < allServers.size(); i++) {
+      int size = allServers.size();
+      Map<String, Integer> indexMap = new HashMap<>(size);
+      for (int i = 0; i < size; i++) {
         final Server server = allServers.get(i);
         final String instanceId = server.getInstanceId();
         indexMap.put(instanceId, i);

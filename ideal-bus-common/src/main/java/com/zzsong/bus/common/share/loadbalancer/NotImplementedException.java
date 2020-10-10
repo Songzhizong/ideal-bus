@@ -16,6 +16,9 @@
  */
 package com.zzsong.bus.common.share.loadbalancer;
 
+/**
+ * @author 宋志宗 on 2020/10/10 4:21 下午
+ */
 public class NotImplementedException extends UnsupportedOperationException {
 
   private static final long serialVersionUID = 20131021L;

@@ -38,7 +38,7 @@ public class ListenerFactory {
                                  @Nonnull String listenerName,
                                  @Nonnull IEventListener listener) {
     Map<String, IEventListener> listenerMap
-        = LISTENER_MAPPING.computeIfAbsent(topic, k -> new HashMap<>());
+        = LISTENER_MAPPING.computeIfAbsent(topic, k -> new HashMap<>(4));
     if (listenerMap.containsKey(listenerName)) {
       return false;
     }

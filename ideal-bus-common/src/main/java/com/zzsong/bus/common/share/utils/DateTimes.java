@@ -42,7 +42,7 @@ public final class DateTimes {
   /**
    * 12-12 19
    */
-  public static final String MM_dd_HH = "MM-dd HH";
+  public static final String MM_DD_HH = "MM-dd HH";
   /**
    * 19:21:56
    */

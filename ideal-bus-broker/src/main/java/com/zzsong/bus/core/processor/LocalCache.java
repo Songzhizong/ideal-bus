@@ -152,7 +152,7 @@ public class LocalCache implements DisposableBean {
               .collect(Collectors.toMap(Event::getTopic, e -> e));
           this.applicationMapping = applications.stream()
               .collect(Collectors.toConcurrentMap(Application::getApplicationId, s -> s));
-          this.subscriptionMapping = new HashMap<>();
+          this.subscriptionMapping = new HashMap<>(subscriptions.size());
           this.topicSubscriptionMapping = subscriptions.stream()
               .map(s -> {
                 long applicationId = s.getApplicationId();

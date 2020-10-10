@@ -37,7 +37,7 @@ public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
     Long maxDifference = null;
     ConcurrentMap<String, Long> lruMap = defaultLruMap;
     if (key != null) {
-      multiLruMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
+      multiLruMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>(servers.size()));
     }
     for (Server server : servers) {
       final String instanceId = server.getInstanceId();

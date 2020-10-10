@@ -53,7 +53,7 @@ public class LFULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
 
     ConcurrentMap<String, AtomicLong> lfuMap = defaultLfuMap;
     if (key != null) {
-      lfuMap = multiLfuMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
+      lfuMap = multiLfuMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>(servers.size()));
     }
 
     Server selected = null;
