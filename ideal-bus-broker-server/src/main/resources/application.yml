@@ -13,7 +13,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: local
+    active: dev
   rsocket:
     server:
       port: 13266

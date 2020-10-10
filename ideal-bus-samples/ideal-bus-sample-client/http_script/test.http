@@ -3,4 +3,4 @@ GET http://localhost:13201/client/testDelay/testAutoAck
 ###
 GET http://localhost:13201/client/testBlock/broadcast
 ###
-GET http://localhost:13201/client/testAsync/testAutoAck
+GET http://localhost:13201/client/testAsync/example_topic

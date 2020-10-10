@@ -6,9 +6,13 @@
 
 - batchPublish方法名修改为publish
 
+- 单节点吞吐量提升到原来的3倍(测试机器: 2017 MBP PRO)
+
 ### 🐞 Bug Fixes
 
 - 修复延迟消费功能未生效的问题
+
+- 修复SnowFlake最大序列/最大数据中心id/最大机器码计算错误的问题
 
 ### 🔨 Dependency Upgrades
 

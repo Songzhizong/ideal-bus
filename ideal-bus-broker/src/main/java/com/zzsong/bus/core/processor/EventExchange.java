@@ -56,6 +56,7 @@ public class EventExchange {
         .eventId(event.getEventId())
         .bizId(event.getBizId())
         .topic(event.getTopic())
+        .message("success")
         .success(true);
     // 路由, 获取满足订阅条件的订阅者列表
     Mono<List<RouteInstance>> route = route(event)
@@ -76,7 +77,7 @@ public class EventExchange {
           .filter(instance -> instance.getNextPushTime() < 1L)
           .collect(Collectors.toList());
       return routeTransfer.submit(collect, false)
-          .thenReturn(builder.message("success").build());
+          .thenReturn(builder.build());
     });
   }
 

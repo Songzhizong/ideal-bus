@@ -23,15 +23,15 @@ public class SnowFlake implements IDGenerator {
   /**
    * 序列号最大值
    */
-  private static final int MAX_SEQUENCE_NUM = 1 << SEQUENCE_BIT - 1;
+  private static final int MAX_SEQUENCE_NUM = (1 << SEQUENCE_BIT) - 1;
   /**
    * 机器码最大值
    */
-  static final int MAX_MACHINE_NUM = 1 << MACHINE_BIT - 1;
+  static final int MAX_MACHINE_NUM = (1 << MACHINE_BIT) - 1;
   /**
    * 数据中心最大值
    */
-  static final int MAX_DATA_CENTER_NUM = 1 << DATA_CENTER_BIT - 1;
+  static final int MAX_DATA_CENTER_NUM = (1 << DATA_CENTER_BIT) - 1;
   /**
    * 机器码向左的位移
    */
