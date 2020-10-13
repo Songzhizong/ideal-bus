@@ -186,3 +186,46 @@ public void testAutoAck(EventContext<List<String>> context) {
 
 选填，应用的连接密钥，如果新增应用时没有分配密钥则不填。
 
+
+
+## 压力测试
+
+### 测试环境
+
+**OS：**macOS 10.15.3
+
+**CPU：**Intel Core i9 9900k 8核心16线程
+
+**Broker：**单节点部署
+
+**MongoDB：**单节点部署，内存限制16GB
+
+**压测工具：**Apache jmeter 5.3
+
+> Jmeter、Broker、MongoDB均在同一台机器上运行
+
+### 测试结果
+
+![pressure_test_1](assets/pressure_test_1.png)
+
+> MongoDB单表数据2000万左右，内存未耗尽的情况下性能表现稳定。
+>
+> 吞吐量：7000/sec
+>
+> MongoDB CPU占用率：400%+
+>
+> Broker CPU占用率：850%+
+
+
+
+
+
+![pressure_test_2](assets/pressure_test_2.png)
+
+> MongoDB单表数据达到1亿，此时MongoDB内存已耗尽，间歇性出现性能波动。
+>
+> 吞吐量：4900/sec
+>
+> MongoDB CPU占用率：600%+
+>
+> Broker CPU占用率：600%+
