@@ -1,3 +1,9 @@
+# 1.0.0.RC2
+
+### ⭐ New Features
+
+- 客户端新增`EventBus`接口, 该接口将作为客户端和服务端通讯的推荐接口.
+
 # 1.0.0.RC1
 
 ### ⭐ New Features
@@ -6,7 +12,7 @@
 
 - batchPublish方法名修改为publish
 
-- 单节点吞吐量提升到原来的3倍(测试机器: 2017 MBP PRO)
+- 单节点吞吐量大幅提升
 
 ### 🐞 Bug Fixes
 

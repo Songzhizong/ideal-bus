@@ -192,23 +192,25 @@ public void testAutoAck(EventContext<List<String>> context) {
 
 ### 测试环境
 
-**OS：**macOS 10.15.3
+**OS：** macOS 10.15.3
 
-**CPU：**Intel Core i9 9900k 8核心16线程
+**CPU：** Intel Core i9 9900k 8核心16线程
 
-**Broker：**单节点部署
+**Broker：** 单节点部署
 
-**MongoDB：**单节点部署，内存限制16GB
+**MongoDB：** 单节点部署，内存限制16GB
 
-**压测工具：**Apache jmeter 5.3
+**压测工具：** Apache jmeter 5.3
 
-> Jmeter、Broker、MongoDB均在同一台机器上运行
+> Jmeter、Broker、MongoDB均在同一台机器上运行。
+>
+> 单个主题持续发布，启动一个消费者订阅该主题并消费。
 
 ### 测试结果
 
 ![pressure_test_1](assets/pressure_test_1.png)
 
-> MongoDB单表数据2000万左右，内存未耗尽的情况下性能表现稳定。
+> MongoDB单表数据2000万左右:
 >
 > 吞吐量：7000/sec
 >
@@ -222,7 +224,7 @@ public void testAutoAck(EventContext<List<String>> context) {
 
 ![pressure_test_2](assets/pressure_test_2.png)
 
-> MongoDB单表数据达到1亿，此时MongoDB内存已耗尽，间歇性出现性能波动。
+> MongoDB单表数据达到1亿，MongoDB内存已耗尽:
 >
 > 吞吐量：4900/sec
 >
