@@ -32,22 +32,17 @@ public class ListenerFactory {
    * @param topic        监听的主题
    * @param listenerName 监听器名称
    * @param listener     监听器对象
-   * @return 同一个主题的监听器名称重复则返回false
    */
-  public static boolean register(@Nonnull String topic,
-                                 @Nonnull String listenerName,
-                                 @Nonnull IEventListener listener) {
+  public static void register(@Nonnull String topic,
+                              @Nonnull String listenerName,
+                              @Nonnull IEventListener listener) {
     Map<String, IEventListener> listenerMap
         = LISTENER_MAPPING.computeIfAbsent(topic, k -> new HashMap<>(4));
-    if (listenerMap.containsKey(listenerName)) {
-      return false;
-    }
     IEventListener previous = listenerMap.put(listenerName, listener);
     if (previous != null) {
       log.error("监听器名称: {} 重复", listenerName);
       System.exit(0);
     }
-    return true;
   }
 
   /**
