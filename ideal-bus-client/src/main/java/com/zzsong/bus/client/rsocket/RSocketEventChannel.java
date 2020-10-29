@@ -238,7 +238,7 @@ public class RSocketEventChannel extends Thread implements EventChannel {
             log.debug("\nPublish result: \n{}",
                 JsonUtils.toJsonString(res, true, true));
           }
-        }).subscribeOn(Schedulers.elastic());
+        }).subscribeOn(Schedulers.boundedElastic());
   }
 
   @Override

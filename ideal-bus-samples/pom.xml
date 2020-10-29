@@ -8,6 +8,7 @@
     <version>1.0.0.RC2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <description>使用示例</description>
 
   <artifactId>ideal-bus-samples</artifactId>
   <packaging>pom</packaging>

@@ -60,6 +60,10 @@ public class EventDelivererImpl implements EventDeliverer {
               JavaType payloadType = listener.getPayloadType();
               Object param = JsonUtils.parseJson(payloadString, payloadType);
               EventContext<Object> context = new EventContext<>(param, listenerName);
+              context.setEventId(event.getEventId());
+              context.setBizId(event.getBizId());
+              context.setHeaders(event.getHeaders());
+              context.setTimestamp(event.getTimestamp());
               try {
                 listener.invoke(context);
                 if (listener.isAutoAck()) {
@@ -68,7 +72,7 @@ public class EventDelivererImpl implements EventDeliverer {
               } catch (Exception e) {
                 String errMessage = e.getClass().getName() + ":" + e.getMessage();
                 log.info("event处理异常: ", e);
-                context.setMessage(errMessage);
+                context.reject(errMessage);
               }
               return context;
             })

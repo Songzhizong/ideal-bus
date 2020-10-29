@@ -8,8 +8,8 @@
     <version>1.0.0.RC2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>ideal-bus-storage-mongo</artifactId>
+  <description>MongoDB存储库</description>
 
   <dependencies>
     <dependency>

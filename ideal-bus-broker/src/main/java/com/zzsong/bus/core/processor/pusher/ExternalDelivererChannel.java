@@ -13,14 +13,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.time.Duration;
 
 /**
  * @author 宋志宗 on 2020/9/20 11:48 上午
  */
 @Component
 public class ExternalDelivererChannel implements DelivererChannel {
-  private final WebClient webClient = ReactorUtils
-      .createWebClient(500, 500, 120_000);
+  /** 2分钟超时时间 */
+  private final WebClient webClient = ReactorUtils.createWebClient(Duration.ofMinutes(2));
 
   @Nonnull
   private final LocalCache localCache;
