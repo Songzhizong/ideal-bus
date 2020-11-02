@@ -13,6 +13,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.ClassUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -53,7 +54,7 @@ public class SpringBusClient extends SimpleBusClient
         .getBeansWithAnnotation(BusListenerBean.class);
     Collection<Object> beans = beanMapping.values();
     for (Object bean : beans) {
-      Class<?> aClass = bean.getClass();
+      Class<?> aClass = ClassUtils.getUserClass(bean);
       Method[] methods = aClass.getMethods();
       for (Method method : methods) {
         EventListener annotation = method.getAnnotation(EventListener.class);
