@@ -6,7 +6,7 @@
   <groupId>com.zzsong</groupId>
   <artifactId>ideal-bus</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0.RC2</version>
+  <version>1.0.0.RC3</version>
 
   <modules>
     <module>ideal-bus-abstract</module>
