@@ -7,7 +7,7 @@
 
 ### 🐞 Bug Fixes
 
-
+- 修复cglib代理的情况下无法正确获取EventListener的问题
 
 ### 🔨 Dependency Upgrades
 
