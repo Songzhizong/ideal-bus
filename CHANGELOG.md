@@ -1,9 +1,20 @@
+# 1.0.0.RC4
+
+### ⭐ New Features
+
+- 为EventInstanceDo.timestamp 添加降序索引
+
+### 🐞 Bug Fixes
+
+### 🔨 Dependency Upgrades
+
+- spring-boot 2.3.5.RELEASE
+
 # 1.0.0.RC3
 
 ### ⭐ New Features
 
 - EventContext添加新属性
-
 
 ### 🐞 Bug Fixes
 
@@ -12,13 +23,14 @@
 ### 🔨 Dependency Upgrades
 
 - lombok 1.18.16
+
 - reactor 2020.0.0
 
 # 1.0.0.RC2
 
 ### ⭐ New Features
 
-- 客户端新增`EventBus`接口, 该接口将作为客户端和服务端通讯的推荐接口.
+- 客户端新增`EventBus`接口.
 
 # 1.0.0.RC1
 
@@ -41,8 +53,6 @@
 - commons-pool2 2.9.0
 
 - jackson 2.11.3
-
-
 
 # 1.0.0.M3
 

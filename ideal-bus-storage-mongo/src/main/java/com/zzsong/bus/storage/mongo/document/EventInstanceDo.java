@@ -3,6 +3,7 @@ package com.zzsong.bus.storage.mongo.document;
 import com.zzsong.bus.common.message.EventHeaders;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -52,6 +53,7 @@ public class EventInstanceDo {
   /**
    * 事件产生时间戳
    */
+  @Indexed(direction = IndexDirection.DESCENDING)
   private long timestamp;
 
   /**
