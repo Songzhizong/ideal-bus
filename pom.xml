@@ -6,7 +6,7 @@
   <groupId>com.zzsong</groupId>
   <artifactId>ideal-bus</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0.RC3</version>
+  <version>1.0.0.RELEASE</version>
 
   <modules>
     <module>ideal-bus-abstract</module>
@@ -19,6 +19,23 @@
     <module>ideal-bus-storage-mongo</module>
     <module>ideal-bus-storage-r2dbc</module>
   </modules>
+
+  <repositories>
+    <repository>
+      <id>my_nexus</id>
+      <url>http://192.168.1.182:8081/repository/maven-public/</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <repository>
+      <id>my_nexus</id>
+      <url>http://192.168.1.182:8081/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>my_nexus</id>
+      <url>http://192.168.1.182:8081/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,4 +1,4 @@
-# 1.0.0.RC4
+# 1.0.0.RELEASE
 
 ### ⭐ New Features
 
