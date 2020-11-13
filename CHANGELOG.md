@@ -1,3 +1,17 @@
+# 1.0.1.RELEASE
+
+### ⭐ New Features
+
+### 🐞 Bug Fixes
+
+### 🔨 Dependency Upgrades
+
+- project reactor 2020.0.1
+
+- spring boot 2.4.0
+
+- spring cloud Hoxton.SR9
+
 # 1.0.0.RELEASE
 
 ### ⭐ New Features
