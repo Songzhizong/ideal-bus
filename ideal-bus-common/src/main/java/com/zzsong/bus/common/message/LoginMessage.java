@@ -37,6 +37,7 @@ public class LoginMessage {
     return JsonUtils.toJsonString(this);
   }
 
+  @Nonnull
   public static LoginMessage parseMessage(@Nonnull String message) {
     return JsonUtils.parseJson(message, LoginMessage.class);
   }
