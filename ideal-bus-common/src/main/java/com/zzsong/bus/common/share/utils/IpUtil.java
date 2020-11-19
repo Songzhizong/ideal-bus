@@ -2,6 +2,8 @@ package com.zzsong.bus.common.share.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -29,6 +31,7 @@ public class IpUtil {
 
   // ---------------------- valid ----------------------
 
+  @Nullable
   private static InetAddress toValidAddress(InetAddress address) {
     if (address instanceof Inet6Address) {
       Inet6Address v6Address = (Inet6Address) address;
@@ -75,7 +78,7 @@ public class IpUtil {
    * @param address the input address
    * @return the normalized address, with scope id converted to int
    */
-  private static InetAddress normalizeV6Address(Inet6Address address) {
+  private static InetAddress normalizeV6Address(@Nonnull Inet6Address address) {
     String addr = address.getHostAddress();
     int i = addr.lastIndexOf('%');
     if (i > 0) {
@@ -180,7 +183,8 @@ public class IpUtil {
     return ip.concat(":").concat(String.valueOf(port));
   }
 
-  public static Object[] parseIpPort(String address) {
+  @Nonnull
+  public static Object[] parseIpPort(@Nonnull String address) {
     String[] array = address.split(":");
 
     String host = array[0];
