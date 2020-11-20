@@ -196,7 +196,7 @@ public class MessagePusherImpl implements MessagePusher {
   private Mono<DeliveredEvent> loadDeliveredEvent(@Nonnull RouteInstance routeInstance) {
     return eventInstanceService.loadByEventId(routeInstance.getEventId())
         .map(opt -> {
-          if (!opt.isPresent()) {
+          if (opt.isEmpty()) {
             throw new VisibleException("event实例不存在");
           }
           EventInstance instance = opt.get();

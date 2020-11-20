@@ -71,7 +71,7 @@ public class RSocketServer {
     final String appName = applicationId + "";
     final Application application = localCache.getApplication(applicationId);
     DelivererChannel[] warp = new DelivererChannel[1];
-    requester.rsocket()
+    Objects.requireNonNull(requester.rsocket())
         .onClose()
         .doFirst(() -> {
           String errMsg = null;

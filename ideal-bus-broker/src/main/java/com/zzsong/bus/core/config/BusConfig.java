@@ -52,39 +52,4 @@ public class BusConfig {
     return new BlockingDequeRouteTransfer(
         localCache, properties, lbFactory, routeInstanceService);
   }
-
-//  @Bean
-//  public ExecutorService blockThreadPool(@Nonnull BusProperties busProperties) {
-//    int processors = Runtime.getRuntime().availableProcessors();
-//    ThreadPoolProperties properties = busProperties.getBlockPool();
-//    int corePoolSize = properties.getCorePoolSize();
-//    if (corePoolSize < 0) {
-//      corePoolSize = processors << 1;
-//    }
-//    int maximumPoolSize = properties.getMaximumPoolSize();
-//    if (maximumPoolSize < 1) {
-//      maximumPoolSize = processors << 4;
-//    }
-//    BlockingQueue<Runnable> workQueue;
-//    int workQueueSize = properties.getWorkQueueSize();
-//    if (workQueueSize < 1) {
-//      workQueue = new SynchronousQueue<>();
-//    } else {
-//      workQueue = new ArrayBlockingQueue<>(workQueueSize);
-//    }
-//    ThreadPoolExecutor pool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-//        60, TimeUnit.SECONDS, workQueue,
-//        new BasicThreadFactory.Builder().namingPattern("job-callback-pool-%d").build(),
-//        (r, executor) -> {
-//          throw new RejectedExecutionException("Task " + r.toString() +
-//              " rejected from jobCallbackThreadPool");
-//        });
-//    pool.allowCoreThreadTimeOut(true);
-//    return pool;
-//  }
-//
-//  @Bean
-//  public Scheduler blockScheduler(ExecutorService blockThreadPool) {
-//    return Schedulers.fromExecutorService(blockThreadPool, "blockScheduler");
-//  }
 }
