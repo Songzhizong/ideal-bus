@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -123,17 +124,15 @@ public class RSocketEventChannel extends Thread implements EventChannel {
     } else {
       tempSocket = sendSocket;
     }
-    if (tempSocket != null && !tempSocket.rsocket().isDisposed()) {
+    if (tempSocket != null && tempSocket.rsocket() != null
+        && !Objects.requireNonNull(tempSocket.rsocket()).isDisposed()) {
       try {
-        tempSocket.rsocket().dispose();
+        Objects.requireNonNull(tempSocket.rsocket()).dispose();
         tempSocket = requesterBuilder
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .connectTcp(brokerIp, brokerPort)
-            .doOnError(e -> log.warn("Broker {} Login fail: ", brokerAddress, e))
-            .doOnNext(r -> log.info("Broker {} login success.", brokerAddress))
-            .block();
+            .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         return false;
       }
@@ -143,21 +142,17 @@ public class RSocketEventChannel extends Thread implements EventChannel {
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .connectTcp(brokerIp, brokerPort)
-            .doOnError(e -> log.warn("Broker {}-{} Login fail: ", brokerAddress, socketType, e))
-            .doOnNext(r -> log.info("Broker {}-{} login success.", brokerAddress, socketType))
-            .block();
+            .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         return false;
       }
     }
-    assert tempSocket != null;
     if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
       receiveSocket = tempSocket;
     } else {
       sendSocket = tempSocket;
     }
-    tempSocket.rsocket()
+    Objects.requireNonNull(tempSocket.rsocket())
         .onClose()
         .doOnError(error -> {
           String errMessage = error.getClass().getSimpleName() +
@@ -210,10 +205,11 @@ public class RSocketEventChannel extends Thread implements EventChannel {
     return running
         && !destroyed
         && sendSocket != null
-        && !sendSocket.rsocket().isDisposed()
+        && sendSocket.rsocket() != null
+        && !Objects.requireNonNull(sendSocket.rsocket()).isDisposed()
         && receiveSocket != null
-        && !receiveSocket.rsocket().isDisposed()
-        ;
+        && receiveSocket.rsocket() != null
+        && !Objects.requireNonNull(receiveSocket.rsocket()).isDisposed();
   }
 
   @Override
@@ -222,8 +218,12 @@ public class RSocketEventChannel extends Thread implements EventChannel {
       return;
     }
     destroyed = true;
-    sendSocket.rsocket().dispose();
-    receiveSocket.rsocket().dispose();
+    if (sendSocket.rsocket() != null) {
+      Objects.requireNonNull(sendSocket.rsocket()).dispose();
+    }
+    if (receiveSocket.rsocket() != null) {
+      Objects.requireNonNull(receiveSocket.rsocket()).dispose();
+    }
     this.interrupt();
     log.info("RSocketBusChannel destroy, broker address: {}", brokerAddress);
   }
