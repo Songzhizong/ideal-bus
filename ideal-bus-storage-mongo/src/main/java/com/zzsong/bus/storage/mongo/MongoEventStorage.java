@@ -6,7 +6,6 @@ import com.zzsong.bus.storage.mongo.document.EventDo;
 import com.zzsong.bus.storage.mongo.repository.MongoEventRepository;
 import com.zzsong.bus.abs.storage.EventStorage;
 import com.zzsong.bus.abs.transfer.QueryEventArgs;
-import com.zzsong.bus.abs.constants.EventTypeEnum;
 import com.zzsong.bus.abs.generator.IDGenerator;
 import com.zzsong.bus.abs.generator.IDGeneratorFactory;
 import com.zzsong.bus.abs.share.Paging;
@@ -105,20 +104,12 @@ public class MongoEventStorage implements EventStorage {
     Criteria criteria = new Criteria();
     if (args != null) {
       String topic = args.getTopic();
-      Long moduleId = args.getModuleId();
       String eventName = args.getEventName();
-      EventTypeEnum eventType = args.getEventType();
       if (StringUtils.isNotBlank(topic)) {
         criteria.and("topic").is(topic);
       }
-      if (moduleId != null) {
-        criteria.and("moduleId").is(moduleId);
-      }
       if (StringUtils.isNotBlank(eventName)) {
         criteria.and("eventName").regex("^" + eventName);
-      }
-      if (eventType != null) {
-        criteria.and("eventType").is(eventType);
       }
     }
     Query query = Query.query(criteria);

@@ -55,7 +55,7 @@ public class ApplicationService {
           application.setAccessToken(args.getAccessToken());
           application.setApplicationType(args.getApplicationType());
           application.setAppName(args.getAppName());
-          application.setExternalApp(args.getExternalApp());
+          application.setExternalApplication(args.getExternalApplication());
           application.setReceiveUrl(args.getReceiveUrl());
           return applicationStorage.save(application);
         });

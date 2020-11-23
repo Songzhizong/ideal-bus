@@ -25,7 +25,11 @@ public class EventInstanceService {
     return storage.save(eventInstance);
   }
 
-  public Mono<Optional<EventInstance>> loadByEventId(@Nonnull String eventId) {
+  public Mono<Optional<EventInstance>> loadByEventId(long eventId) {
     return storage.findByEventId(eventId);
+  }
+
+  public Mono<Boolean> deleteAllByTopicAndTimestampLte(String topic, long time) {
+    return Mono.empty();
   }
 }

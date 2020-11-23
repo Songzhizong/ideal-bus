@@ -1,10 +1,12 @@
-# 1.0.1.RELEASE
+# 1.1.0.RELEASE
 
 ### ⭐ New Features
 
 ### 🐞 Bug Fixes
 
 ### 🔨 Dependency Upgrades
+
+- broker -> jdk 15
 
 - project reactor 2020.0.1
 

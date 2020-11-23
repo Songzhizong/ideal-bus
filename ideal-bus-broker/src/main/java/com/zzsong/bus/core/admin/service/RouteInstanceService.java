@@ -61,4 +61,8 @@ public class RouteInstanceService {
   public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
     return storage.updateStatus(instanceId, status, message);
   }
+
+  public Mono<Long> deleteAllSucceedByCreateTimeLessThan(long time) {
+    return storage.deleteAllSucceedByCreateTimeLessThan(time);
+  }
 }

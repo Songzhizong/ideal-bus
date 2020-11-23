@@ -53,21 +53,15 @@ public class EventExchange {
   @Nonnull
   public Mono<PublishResult> publish(@Nonnull EventInstance event) {
     PublishResult.PublishResultBuilder builder = PublishResult.builder()
-        .eventId(event.getEventId())
-        .bizId(event.getBizId())
+        .transactionId(event.getTransactionId())
         .topic(event.getTopic())
         .message("success")
         .success(true);
-    // 路由, 获取满足订阅条件的订阅者列表
-    Mono<List<RouteInstance>> route = route(event)
-        .flatMap(list -> {
-          if (list.isEmpty()) {
-            event.setStatus(EventInstance.NOT_ROUTED);
-          } else {
-            event.setStatus(EventInstance.ROUTED);
-          }
-          return eventInstanceService.save(event).thenReturn(list);
-        });
+    Mono<EventInstance> savedEvent = eventInstanceService.save(event);
+    Mono<List<RouteInstance>> route = savedEvent
+        .doOnNext(e -> builder.eventId(e.getEventId()))
+        // 路由, 获取满足订阅条件的订阅者列表
+        .flatMap(this::route);
     return route.flatMap(instanceList -> {
       if (instanceList.isEmpty()) {
         PublishResult publishResult = builder.message("该事件没有订阅者").build();
@@ -108,21 +102,28 @@ public class EventExchange {
   }
 
   @Nonnull
+  @SuppressWarnings("DuplicatedCode")
   private RouteInstance createRouteInstance(@Nonnull EventInstance event,
                                             @Nonnull SubscriptionDetails details) {
     RouteInstance instance = new RouteInstance();
-    instance.setNodeId(properties.getNodeId());
     instance.setEventId(event.getEventId());
-    String key = event.getKey();
-    if (key == null) {
-      key = DBDefaults.STRING_VALUE;
+    instance.setTransactionId(event.getTransactionId());
+    String aggregation = event.getAggregation();
+    if (aggregation == null) {
+      aggregation = DBDefaults.STRING_VALUE;
     }
-    instance.setKey(key);
+    instance.setAggregation(aggregation);
+    instance.setExternalApplication(event.getExternalApplication());
+    instance.setTopic(event.getTopic());
+    instance.setHeaders(event.getHeaders());
+    instance.setPayload(event.getPayload());
+    instance.setTimestamp(event.getTimestamp());
+    instance.setNodeId(properties.getNodeId());
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
-    instance.setTopic(event.getTopic());
     instance.setStatus(RouteInstance.STATUS_WAITING);
     instance.setMessage("waiting");
+
     // 延迟消费事件
     String delayExp = details.getDelayExp();
     if (StringUtils.isNotBlank(delayExp)) {
@@ -132,13 +133,13 @@ public class EventExchange {
       } catch (NumberFormatException e) {
         String one = event.getHeaders().getOne(delayExp);
         if (StringUtils.isBlank(one)) {
-          log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 为空",
+          log.info("event: {} subscription: {} 解析延迟表达式失败, 事件头: {} 为空",
               event.getEventId(), details.getSubscriptionId(), delayExp);
         } else {
           try {
             delaySeconds = Integer.parseInt(one);
           } catch (NumberFormatException numberFormatException) {
-            log.info("event: {} subscription: {} 接续延迟表达式失败, 事件头: {} 对应的值: {} 非数字类型",
+            log.info("event: {} subscription: {} 解析延迟表达式失败, 事件头: {} 对应的值: {} 非数字类型",
                 event.getEventId(), details.getSubscriptionId(), delayExp, one);
           }
         }

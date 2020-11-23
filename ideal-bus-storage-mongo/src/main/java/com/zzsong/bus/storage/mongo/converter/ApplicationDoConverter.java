@@ -22,7 +22,7 @@ public final class ApplicationDoConverter {
     applicationDo.setAccessToken(application.getAccessToken());
     applicationDo.setApplicationType(application.getApplicationType());
     applicationDo.setAppName(application.getAppName());
-    applicationDo.setExternalApp(application.getExternalApp());
+    applicationDo.setExternalApplication(application.getExternalApplication());
     applicationDo.setReceiveUrl(application.getReceiveUrl());
     return applicationDo;
   }
@@ -35,7 +35,7 @@ public final class ApplicationDoConverter {
     application.setAccessToken(applicationDo.getAccessToken());
     application.setApplicationType(applicationDo.getApplicationType());
     application.setAppName(applicationDo.getAppName());
-    application.setExternalApp(applicationDo.getExternalApp());
+    application.setExternalApplication(applicationDo.getExternalApplication());
     application.setReceiveUrl(applicationDo.getReceiveUrl());
     return application;
   }

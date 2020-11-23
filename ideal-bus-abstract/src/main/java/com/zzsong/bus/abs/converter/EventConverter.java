@@ -17,8 +17,6 @@ public final class EventConverter {
   public static Event fromCreateArgs(@Nonnull SaveEventArgs args) {
     Event event = new Event();
     event.setTopic(args.getTopic());
-    event.setModuleId(args.getModuleId());
-    event.setEventType(args.getEventType());
     event.setEventName(args.getEventName());
     event.setDesc(args.getDesc());
     return event;

@@ -61,7 +61,7 @@ public class EventDelivererImpl implements EventDeliverer {
               Object param = JsonUtils.parseJson(payloadString, payloadType);
               EventContext<Object> context = new EventContext<>(param, listenerName);
               context.setEventId(event.getEventId());
-              context.setBizId(event.getBizId());
+              context.setTransactionId(event.getTransactionId());
               context.setHeaders(event.getHeaders());
               context.setTimestamp(event.getTimestamp());
               try {

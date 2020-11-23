@@ -4,13 +4,11 @@ import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
 import com.zzsong.bus.abs.core.MessagePusher;
 import com.zzsong.bus.abs.core.RouteTransfer;
 import com.zzsong.bus.abs.domain.Application;
-import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.common.message.DeliveredEvent;
 import com.zzsong.bus.common.message.DeliveredResult;
-import com.zzsong.bus.core.admin.service.EventInstanceService;
 import com.zzsong.bus.core.admin.service.RouteInstanceService;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.bus.common.share.loadbalancer.LbFactory;
@@ -43,20 +41,16 @@ public class MessagePusherImpl implements MessagePusher {
   @Nonnull
   private final RouteInstanceService routeInstanceService;
   @Nonnull
-  private final EventInstanceService eventInstanceService;
-  @Nonnull
   private final LbFactory<DelivererChannel> lbFactory;
   @Nonnull
   private final ExternalDelivererChannel externalDelivererChannel;
 
   public MessagePusherImpl(@Nonnull LocalCache localCache,
                            @Nonnull RouteInstanceService routeInstanceService,
-                           @Nonnull EventInstanceService eventInstanceService,
                            @Nonnull LbFactory<DelivererChannel> lbFactory,
                            @Nonnull ExternalDelivererChannel externalDelivererChannel) {
     this.localCache = localCache;
     this.routeInstanceService = routeInstanceService;
-    this.eventInstanceService = eventInstanceService;
     this.lbFactory = lbFactory;
     this.externalDelivererChannel = externalDelivererChannel;
   }
@@ -164,7 +158,7 @@ public class MessagePusherImpl implements MessagePusher {
                         return deliveredResult;
                       }));
             } else {
-              String key = routeInstance.getKey();
+              String key = routeInstance.getAggregation();
               String topic = routeInstance.getTopic();
               DelivererChannel channel;
               if (StringUtils.isNotBlank(key)) {
@@ -191,29 +185,22 @@ public class MessagePusherImpl implements MessagePusher {
         });
   }
 
-
   @Nonnull
-  private Mono<DeliveredEvent> loadDeliveredEvent(@Nonnull RouteInstance routeInstance) {
-    return eventInstanceService.loadByEventId(routeInstance.getEventId())
-        .map(opt -> {
-          if (opt.isEmpty()) {
-            throw new VisibleException("event实例不存在");
-          }
-          EventInstance instance = opt.get();
-          DeliveredEvent deliveredEvent = new DeliveredEvent();
-          deliveredEvent.setRouteInstanceId(routeInstance.getInstanceId());
-          deliveredEvent.setEventId(instance.getEventId());
-          deliveredEvent.setBizId(instance.getBizId());
-          deliveredEvent.setTopic(instance.getTopic());
-          deliveredEvent.setHeaders(instance.getHeaders());
-          deliveredEvent.setPayload(instance.getPayload());
-          deliveredEvent.setTimestamp(instance.getTimestamp());
-          if (routeInstance.getRetryCount() == -1) {
-            deliveredEvent.setListeners(routeInstance.getListeners());
-          } else {
-            deliveredEvent.setListeners(routeInstance.getUnAckListeners());
-          }
-          return deliveredEvent;
-        });
+  private Mono<DeliveredEvent> loadDeliveredEvent(@Nonnull RouteInstance instance) {
+    DeliveredEvent deliveredEvent = new DeliveredEvent();
+    deliveredEvent.setRouteInstanceId(instance.getInstanceId());
+    deliveredEvent.setSubscriptionId(instance.getSubscriptionId());
+    deliveredEvent.setEventId(instance.getEventId());
+    deliveredEvent.setTransactionId(instance.getTransactionId());
+    deliveredEvent.setTopic(instance.getTopic());
+    deliveredEvent.setHeaders(instance.getHeaders());
+    deliveredEvent.setPayload(instance.getPayload());
+    deliveredEvent.setTimestamp(instance.getTimestamp());
+    if (instance.getRetryCount() == -1) {
+      deliveredEvent.setListeners(instance.getListeners());
+    } else {
+      deliveredEvent.setListeners(instance.getUnAckListeners());
+    }
+    return Mono.just(deliveredEvent);
   }
 }

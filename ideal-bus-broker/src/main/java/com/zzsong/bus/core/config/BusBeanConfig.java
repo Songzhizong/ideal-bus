@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
  */
 @Slf4j
 @Configuration
-public class BusConfig {
+public class BusBeanConfig {
 
   @Value("${spring.application.name}")
   private String applicationName;

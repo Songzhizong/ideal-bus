@@ -16,9 +16,5 @@ public interface EventInstanceStorage {
   Mono<EventInstance> save(@Nonnull EventInstance eventInstance);
 
   @Nonnull
-  Flux<EventInstance> saveAll(@Nonnull Flux<EventInstance> eventInstances);
-
-
-  @Nonnull
-  Mono<Optional<EventInstance>> findByEventId(@Nonnull String eventId);
+  Mono<Optional<EventInstance>> findByEventId(long eventId);
 }

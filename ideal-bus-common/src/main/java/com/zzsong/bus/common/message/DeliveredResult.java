@@ -15,8 +15,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class DeliveredResult {
 
-  @Nonnull
-  private String eventId;
+  private long eventId;
 
   private boolean success;
 

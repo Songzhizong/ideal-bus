@@ -46,6 +46,10 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Nonnull
   @Override
   public Mono<RouteInstance> save(@Nonnull RouteInstance routeInstance) {
+    //noinspection ConstantConditions
+    if (routeInstance.getInstanceId() == null) {
+      routeInstance.setInstanceId(idGenerator.generate());
+    }
     RouteInstanceDo routeInstanceDo = RouteInstanceDoConverter.fromRouteInstance(routeInstance);
     return repository.save(routeInstanceDo)
         .map(RouteInstanceDoConverter::toRouteInstance);
@@ -126,5 +130,24 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     update.set("message", message);
     return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
         .map(UpdateResult::getModifiedCount);
+  }
+
+  /**
+   * 删除创建时间小于或等于指定时间戳的成功推送数据
+   * <pre>
+   *   因为主键是通过SnowFlake生成的, 因此可用通过时间戳来计算出对应的最小id, 所以这里通过主键来删除过期的数据.
+   *   如果未来主键的生成策略发生了变更, 那这里应该重写.
+   * </pre>
+   *
+   * @param time 最小时间
+   * @return 删除数量
+   * @author 宋志宗 on 2020/11/23
+   */
+  @Nonnull
+  @Override
+  public Mono<Long> deleteAllSucceedByCreateTimeLessThan(long time) {
+    int status = RouteInstance.STATUS_SUCCESS;
+    long minId = SnowFlake.calculateMinId(time);
+    return repository.deleteAllByStatusAndInstanceIdLessThan(status, minId);
   }
 }

@@ -1,6 +1,5 @@
 package com.zzsong.bus.abs.transfer;
 
-import com.zzsong.bus.abs.constants.EventTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,18 +19,6 @@ public class QueryEventArgs {
    */
   @Nullable
   private String topic;
-
-  /**
-   * 归属模块
-   */
-  @Nullable
-  private Long moduleId;
-
-  /**
-   * 事件类型
-   */
-  @Nullable
-  private EventTypeEnum eventType;
 
   /**
    * 事件名称

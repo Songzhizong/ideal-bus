@@ -92,4 +92,33 @@ public class SnowFlake implements IDGenerator {
     }
     return mill;
   }
+
+  /**
+   * 给定一个时间戳来计算该时间戳对应的最小编号
+   *
+   * @param timestamp 时间戳
+   * @return 该时间戳计算出的最小编号
+   * @author 宋志宗 on 2020/11/23
+   */
+  public static long calculateMinId(long timestamp) {
+    if (timestamp <= START_TIMESTAMP) {
+      throw new RuntimeException("时间戳不合法, 最小应为: " + START_TIMESTAMP);
+    }
+    return (timestamp - START_TIMESTAMP) << TIMESTAMP_LEFT;
+  }
+
+  /**
+   * 通过id还原时间戳
+   *
+   * @param id snowflake生成的id
+   * @return 该id产生的时间戳
+   * @author 宋志宗 on 2020/11/23
+   */
+  public static long reductionTimestamp(long id) {
+    long difference = id >> TIMESTAMP_LEFT;
+    if (difference <= 0) {
+      throw new RuntimeException("非snowflake生成id");
+    }
+    return difference + START_TIMESTAMP;
+  }
 }

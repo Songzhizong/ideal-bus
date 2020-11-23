@@ -93,7 +93,7 @@ ideal-bus架构上主要分为三个部分，如上图所示：
 // 单条发布
 List<String> payload = ImmutableList.of("1", "2", "3");
 EventMessage<List<String>> message = EventMessage.of("test_topic", payload)
-    .bizId("123456") // 可选，业务唯一id，支持通过业务id查询事件的发布和订阅信息。
+    .transactionId("123456") // 可选，业务唯一id，支持通过业务id查询事件的发布和订阅信息。
     .key("key") // 可选，相同的key会尽可能的投递到同一个消费队列。
     .externalApp("externalApp") // 可选，外部应用编码，外部应用可通过此编码订阅到属于自己的消息。
     .addHeader("age", "20"); // 可选，事件头，可用于消息过滤、延迟消费。

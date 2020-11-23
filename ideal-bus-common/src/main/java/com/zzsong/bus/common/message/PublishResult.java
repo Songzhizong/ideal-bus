@@ -14,13 +14,21 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PublishResult {
-  @Nonnull
-  private String eventId;
+  /** 事件id */
+  private long eventId;
+
+  /** 业务方事务id */
   @Nullable
-  private String bizId;
+  private String transactionId;
+
+  /** 主题 */
   @Nonnull
   private String topic;
+
+  /** 执行结果 */
   private boolean success;
+
+  /** 描述信息 */
   @Nonnull
   private String message;
 }

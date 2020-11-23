@@ -3,11 +3,11 @@ package com.zzsong.bus.storage.mongo.document;
 import com.zzsong.bus.common.message.EventHeaders;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -18,46 +18,43 @@ import javax.annotation.Nonnull;
 @AllArgsConstructor
 @Document("ideal_bus_event_inst")
 public class EventInstanceDo {
-  /**
-   * 事件唯一id
-   */
+  /** 事件唯一id */
   @Id
   @Nonnull
-  private String eventId;
-  /**
-   * 业务方唯一id
-   */
+  private Long eventId;
+
+  /** 业务方唯一id */
   @Nonnull
-  private String bizId;
-  /**
-   * 可通过该字段判断event归属哪个外部应用
-   */
+  private String transactionId;
+
+  /** 聚合id */
+  @Nullable
+  @Indexed(background = true)
+  private String aggregation;
+
+  /** 可通过该字段判断event归属哪个外部应用 */
+  @Nullable
+  @Indexed(background = true, sparse = true)
+  private String externalApplication;
+
+  /** 事件主题 */
   @Nonnull
-  private String externalApp;
-  /**
-   * 事件主题
-   */
-  @Nonnull
-  @Indexed
+  @Indexed(background = true)
   private String topic;
-  /**
-   * 消息头,可用于条件匹配
-   */
+
+  /** 事件标签, 一个事件应该只有一个标签 */
+  @Nonnull
+  @Indexed(background = true)
+  private String tag;
+
+  /** 消息头,可用于条件匹配 */
   @Nonnull
   private EventHeaders headers;
-  /**
-   * 消息内容
-   */
+
+  /** 消息内容 */
   @Nonnull
   private Object payload;
-  /**
-   * 事件产生时间戳
-   */
-  @Indexed(direction = IndexDirection.DESCENDING)
-  private long timestamp;
 
-  /**
-   * 状态
-   */
-  private int status = 0;
+  /** 事件产生时间戳 */
+  private long timestamp;
 }

@@ -16,8 +16,6 @@ public final class EventDoConverter {
   public static EventDo fromEvent(@Nonnull Event event) {
     EventDo eventDo = new EventDo();
     eventDo.setTopic(event.getTopic());
-    eventDo.setModuleId(event.getModuleId());
-    eventDo.setEventType(event.getEventType());
     eventDo.setEventName(event.getEventName());
     eventDo.setDesc(event.getDesc());
     return eventDo;
@@ -27,8 +25,6 @@ public final class EventDoConverter {
   public static Event toEvent(@Nonnull EventDo eventDo) {
     Event event = new Event();
     event.setTopic(eventDo.getTopic());
-    event.setModuleId(eventDo.getModuleId());
-    event.setEventType(eventDo.getEventType());
     event.setEventName(eventDo.getEventName());
     event.setDesc(eventDo.getDesc());
     return event;

@@ -9,7 +9,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.UUID;
 
 /**
  * 事件信息
@@ -22,35 +21,26 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventMessage<T> {
-  /** 事件唯一id */
-  @Nonnull
-  private String eventId = UUID.randomUUID().toString();
 
   /** 业务方唯一id, 通常为业务方的事务编号 */
   @Nonnull
-  private String bizId = "";
+  private String transactionId = "";
 
-  /**
-   * 相同的key会尽可能的投递到同一个队列中
-   *
-   * @deprecated deprecated 1.2.x
-   */
+  /** 聚合id */
   @Nullable
-  @Deprecated
-  private String key;
+  private String aggregation;
 
-  /**
-   * 可通过该字段判断event归属哪个应用
-   *
-   * @deprecated deprecated 1.2.x
-   */
-  @Nonnull
-  @Deprecated
-  private String externalApp = "";
+  /** 可通过该字段判断event归属哪个应用 */
+  @Nullable
+  private String externalApplication;
 
-  /** 事件主题 */
+  /** 事件主题, 一个事件应该只有一个主题 */
   @Nonnull
   private String topic;
+
+  /** 事件标签, 一个事件应该只有一个标签 */
+  @Nonnull
+  private String tag;
 
   /** 消息头,可用于条件匹配 */
   @Nonnull
@@ -85,17 +75,11 @@ public class EventMessage<T> {
     return new EventMessage<>(topic, payload);
   }
 
-
-  /**
-   * @param key deprecated 1.2.x
-   * @deprecated 1.2.x
-   */
   @Nonnull
-  @Deprecated
   public static <T> EventMessage<T> of(@Nonnull String topic,
                                        @Nonnull T payload,
-                                       @Nonnull String key) {
-    return new EventMessage<T>(topic, payload).key(key);
+                                       @Nonnull String aggregation) {
+    return new EventMessage<T>(topic, payload).aggregation(aggregation);
   }
 
   @Nonnull
@@ -106,30 +90,23 @@ public class EventMessage<T> {
   }
 
   @Nonnull
-  public EventMessage<T> bizId(@Nonnull String bizId) {
-    this.bizId = bizId;
+  public EventMessage<T> transactionId(@Nonnull String transactionId) {
+    this.transactionId = transactionId;
     return this;
   }
 
-  /**
-   * @deprecated 1.2.x
-   */
   @Nonnull
-  @Deprecated
-  public EventMessage<T> key(@Nonnull String key) {
-    this.key = key;
+  public EventMessage<T> aggregation(@Nonnull String aggregation) {
+    this.aggregation = aggregation;
     return this;
   }
 
   /**
    * 可通过该字段判断event归属哪个应用
-   *
-   * @deprecated 1.2.x
    */
   @Nonnull
-  @Deprecated
-  public EventMessage<T> externalApp(@Nonnull String externalApp) {
-    this.externalApp = externalApp;
+  public EventMessage<T> externalApplication(@Nonnull String externalApplication) {
+    this.externalApplication = externalApplication;
     return this;
   }
 
@@ -148,12 +125,6 @@ public class EventMessage<T> {
   @Nonnull
   public EventMessage<T> addHeader(@Nonnull String name, @Nonnull String... values) {
     this.headers.addAll(name, Arrays.asList(values));
-    return this;
-  }
-
-  @Nonnull
-  public EventMessage<T> setHeader(@Nonnull String name, @Nonnull String value) {
-    this.headers.set(name, value);
     return this;
   }
 }

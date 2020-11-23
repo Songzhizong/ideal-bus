@@ -11,11 +11,17 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class ChannelInfo {
+  /** 忙碌 */
   public static final int STATUS_BUSY = 0;
+  /** 空闲 */
   public static final int STATUS_IDLE = 1;
+
+  /** 应用名称 */
   @Nonnull
   private String appName;
+  /** 应用实例id */
   @Nonnull
   private String instanceId;
+  /** 通道状态 */
   private int status;
 }

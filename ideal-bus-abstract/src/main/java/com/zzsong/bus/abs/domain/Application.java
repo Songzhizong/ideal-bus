@@ -13,48 +13,34 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class Application {
-  /**
-   * 应用ID
-   */
+  /** 应用ID */
   @Nonnull
   private Long applicationId;
 
-  /**
-   * 应用名称
-   */
+  /** 应用名称 */
   @Nonnull
   private String title = DBDefaults.STRING_VALUE;
 
-  /**
-   * 订阅者描述
-   */
+  /** 订阅者描述 */
   @Nonnull
   private String desc = DBDefaults.STRING_VALUE;
 
   @Nonnull
   private String accessToken = DBDefaults.STRING_VALUE;
 
-  /**
-   * 订阅者类型
-   */
+  /** 订阅者类型 */
   @Nonnull
   private ApplicationTypeEnum applicationType = ApplicationTypeEnum.INTERNAL;
 
-  /**
-   * 应用名称, 内部用
-   */
+  /** 应用名称, 内部用 */
   @Nonnull
   private String appName = DBDefaults.STRING_VALUE;
 
-  /**
-   * 应用编码, 外部应用拥有此属性
-   */
+  /** 应用编码, 外部应用拥有此属性 */
   @Nonnull
-  private String externalApp = DBDefaults.STRING_VALUE;
+  private String externalApplication = DBDefaults.STRING_VALUE;
 
-  /**
-   * 接收推送的地址, 外部应用拥有此属性
-   */
+  /** 接收推送的地址, 外部应用拥有此属性 */
   @Nonnull
   private String receiveUrl = DBDefaults.STRING_VALUE;
 }

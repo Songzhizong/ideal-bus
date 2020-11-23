@@ -49,9 +49,9 @@ public class SampleController {
     long start = System.currentTimeMillis();
     List<String> payload = ImmutableList.of("1", "2", "3");
     EventMessage<List<String>> message = EventMessage.of(topic, payload)
-        .bizId("123456")
-        .key("key")
-        .externalApp("externalApp")
+        .transactionId("123456")
+        .aggregation("key")
+        .externalApplication("externalApp")
         .addHeader("age", "20");
     eventPublisher.publish(message)
         .map(JsonUtils::toJsonString)

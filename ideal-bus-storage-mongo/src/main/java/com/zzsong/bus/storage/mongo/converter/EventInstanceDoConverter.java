@@ -2,6 +2,7 @@ package com.zzsong.bus.storage.mongo.converter;
 
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.storage.mongo.document.EventInstanceDo;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
@@ -17,13 +18,15 @@ public final class EventInstanceDoConverter {
   public static EventInstanceDo fromEventInstance(@Nonnull EventInstance eventInstance) {
     EventInstanceDo eventInstanceDo = new EventInstanceDo();
     eventInstanceDo.setEventId(eventInstance.getEventId());
-    eventInstanceDo.setBizId(eventInstance.getBizId());
-    eventInstanceDo.setExternalApp(eventInstance.getExternalApp());
+    eventInstanceDo.setTransactionId(eventInstance.getTransactionId());
+    String externalApplication = eventInstance.getExternalApplication();
+    if (StringUtils.isNotBlank(externalApplication)) {
+      eventInstanceDo.setExternalApplication(externalApplication);
+    }
     eventInstanceDo.setTopic(eventInstance.getTopic());
     eventInstanceDo.setHeaders(eventInstance.getHeaders());
     eventInstanceDo.setPayload(eventInstance.getPayload());
     eventInstanceDo.setTimestamp(eventInstance.getTimestamp());
-    eventInstanceDo.setStatus(eventInstance.getStatus());
     return eventInstanceDo;
   }
 
@@ -31,13 +34,12 @@ public final class EventInstanceDoConverter {
   public static EventInstance toEventInstance(@Nonnull EventInstanceDo eventInstanceDo) {
     EventInstance eventInstance = new EventInstance();
     eventInstance.setEventId(eventInstanceDo.getEventId());
-    eventInstance.setBizId(eventInstanceDo.getBizId());
-    eventInstance.setExternalApp(eventInstanceDo.getExternalApp());
+    eventInstance.setTransactionId(eventInstanceDo.getTransactionId());
+    eventInstance.setExternalApplication(eventInstanceDo.getExternalApplication());
     eventInstance.setTopic(eventInstanceDo.getTopic());
     eventInstance.setHeaders(eventInstanceDo.getHeaders());
     eventInstance.setPayload(eventInstanceDo.getPayload());
     eventInstance.setTimestamp(eventInstanceDo.getTimestamp());
-    eventInstance.setStatus(eventInstanceDo.getStatus());
     return eventInstance;
   }
 }

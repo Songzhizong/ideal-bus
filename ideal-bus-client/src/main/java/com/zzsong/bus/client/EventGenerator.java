@@ -100,9 +100,9 @@ public final class EventGenerator {
   }
 
   @Nonnull
-  public EventGenerator bizId(@Nonnull String bizId) {
+  public EventGenerator transactionId(@Nonnull String transactionId) {
     EventMessage<?> message = messages.get(cursor);
-    message.bizId(bizId);
+    message.transactionId(transactionId);
     return this;
   }
 
@@ -110,9 +110,9 @@ public final class EventGenerator {
    * 可通过该字段判断event归属哪个外部应用
    */
   @Nonnull
-  public EventGenerator externalApp(@Nonnull String externalApp) {
+  public EventGenerator externalApplication(@Nonnull String externalApplication) {
     EventMessage<?> message = messages.get(cursor);
-    message.externalApp(externalApp);
+    message.externalApplication(externalApplication);
     return this;
   }
 

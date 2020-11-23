@@ -1,10 +1,7 @@
 package com.zzsong.bus.storage.mongo.document;
 
-import com.zzsong.bus.abs.constants.DBDefaults;
-import com.zzsong.bus.abs.constants.EventTypeEnum;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,18 +25,6 @@ public class EventDo {
   private String topic;
 
   /**
-   * 归属模块
-   */
-  @HashIndexed
-  private long moduleId = DBDefaults.LONG_VALUE;
-
-  /**
-   * 事件类型
-   */
-  @NonNull
-  private EventTypeEnum eventType = EventTypeEnum.UNKNOWN;
-
-  /**
    * 事件名称
    */
   @NonNull
@@ -50,4 +35,9 @@ public class EventDo {
    */
   @NonNull
   private String desc;
+
+  /**
+   * 事件实例持久化存储的过期时间 单位 ms, 大于1天生效
+   */
+  private long expire;
 }

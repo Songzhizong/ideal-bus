@@ -1,8 +1,10 @@
 package com.zzsong.bus.storage.mongo.converter;
 
+import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.generator.SnowFlake;
 import com.zzsong.bus.storage.mongo.document.RouteInstanceDo;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
@@ -18,12 +20,24 @@ public final class RouteInstanceDoConverter {
   public static RouteInstanceDo fromRouteInstance(@Nonnull RouteInstance routeInstance) {
     RouteInstanceDo routeInstanceDo = new RouteInstanceDo();
     routeInstanceDo.setInstanceId(routeInstance.getInstanceId());
-    routeInstanceDo.setNodeId(routeInstance.getNodeId());
     routeInstanceDo.setEventId(routeInstance.getEventId());
-    routeInstanceDo.setKey(routeInstance.getKey());
+    routeInstanceDo.setTransactionId(routeInstance.getTransactionId());
+    String aggregation = routeInstance.getAggregation();
+    if (StringUtils.isBlank(aggregation)) {
+      aggregation = DBDefaults.STRING_VALUE;
+    }
+    routeInstanceDo.setAggregation(aggregation);
+    String externalApplication = routeInstance.getExternalApplication();
+    if (StringUtils.isNotBlank(externalApplication)) {
+      routeInstanceDo.setExternalApplication(externalApplication);
+    }
+    routeInstanceDo.setTopic(routeInstance.getTopic());
+    routeInstanceDo.setHeaders(routeInstance.getHeaders());
+    routeInstanceDo.setPayload(routeInstance.getPayload());
+    routeInstanceDo.setTimestamp(routeInstance.getTimestamp());
+    routeInstanceDo.setNodeId(routeInstance.getNodeId());
     routeInstanceDo.setSubscriptionId(routeInstance.getSubscriptionId());
     routeInstanceDo.setApplicationId(routeInstance.getApplicationId());
-    routeInstanceDo.setTopic(routeInstance.getTopic());
     long nextPushTime = routeInstance.getNextPushTime();
     if (nextPushTime > SnowFlake.START_TIMESTAMP) {
       routeInstanceDo.setNextPushTime(nextPushTime);
@@ -41,17 +55,26 @@ public final class RouteInstanceDoConverter {
     RouteInstance routeInstance = new RouteInstance();
     routeInstance.setInstanceId(routeInstanceDo.getInstanceId());
     routeInstance.setNodeId(routeInstanceDo.getNodeId());
-    routeInstance.setEventId(routeInstanceDo.getEventId());
-    routeInstance.setKey(routeInstanceDo.getKey());
     routeInstance.setSubscriptionId(routeInstanceDo.getSubscriptionId());
     routeInstance.setApplicationId(routeInstanceDo.getApplicationId());
-    routeInstance.setTopic(routeInstanceDo.getTopic());
-    routeInstance.setNextPushTime(routeInstanceDo.getNextPushTime());
+    Long nextPushTime = routeInstanceDo.getNextPushTime();
+    if (nextPushTime == null) {
+      nextPushTime = -1L;
+    }
+    routeInstance.setNextPushTime(nextPushTime);
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
     routeInstance.setMessage(routeInstanceDo.getMessage());
     routeInstance.setListeners(routeInstanceDo.getListeners());
     routeInstance.setUnAckListeners(routeInstanceDo.getUnAckListeners());
+    routeInstance.setEventId(routeInstanceDo.getEventId());
+    routeInstance.setTransactionId(routeInstanceDo.getTransactionId());
+    routeInstance.setAggregation(routeInstanceDo.getAggregation());
+    routeInstance.setExternalApplication(routeInstanceDo.getExternalApplication());
+    routeInstance.setTopic(routeInstanceDo.getTopic());
+    routeInstance.setHeaders(routeInstanceDo.getHeaders());
+    routeInstance.setPayload(routeInstanceDo.getPayload());
+    routeInstance.setTimestamp(routeInstanceDo.getTimestamp());
     return routeInstance;
   }
 }

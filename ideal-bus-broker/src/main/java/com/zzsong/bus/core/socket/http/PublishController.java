@@ -31,8 +31,7 @@ public class PublishController {
    */
   @Nonnull
   @PostMapping("/single")
-  public Mono<PublishResult> publish(@RequestBody @Nonnull
-                                         EventInstance message) {
+  public Mono<PublishResult> publish(@RequestBody @Nonnull EventInstance message) {
     return eventExchange.publish(message);
   }
 
@@ -41,8 +40,7 @@ public class PublishController {
    */
   @Nonnull
   @PostMapping("/batch")
-  public Flux<PublishResult> batchPublish(@RequestBody @Nonnull
-                                              List<EventInstance> messages) {
+  public Flux<PublishResult> publish(@RequestBody @Nonnull List<EventInstance> messages) {
     return Flux.fromIterable(messages).flatMap(eventExchange::publish);
   }
 }

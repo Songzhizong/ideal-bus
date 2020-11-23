@@ -9,7 +9,7 @@ import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.core.admin.service.SubscriptionService;
-import com.zzsong.bus.core.config.BusConfig;
+import com.zzsong.bus.core.config.BusBeanConfig;
 import com.zzsong.bus.core.processor.LocalCache;
 import com.zzsong.bus.core.processor.EventExchange;
 import com.zzsong.bus.core.processor.pusher.DelivererChannel;
@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentMap;
 @Controller
 public class RSocketServer {
   @Nonnull
-  private final BusConfig busConfig;
+  private final BusBeanConfig busConfig;
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -48,7 +48,7 @@ public class RSocketServer {
   @Nonnull
   private final ConcurrentMap<String, DelivererChannel> channelMap = new ConcurrentHashMap<>();
 
-  public RSocketServer(@Nonnull BusConfig busConfig,
+  public RSocketServer(@Nonnull BusBeanConfig busConfig,
                        @Nonnull LocalCache localCache,
                        @Nonnull EventExchange eventExchange,
                        @Nonnull SubscriptionService subscriptionService,

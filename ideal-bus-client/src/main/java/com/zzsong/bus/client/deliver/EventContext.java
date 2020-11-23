@@ -22,12 +22,11 @@ public class EventContext<T> {
   private String message = "";
 
   /** 事件唯一id */
-  @Nonnull
-  private String eventId;
+  private long eventId;
 
   /** 业务方唯一id */
   @Nonnull
-  private String bizId;
+  private String transactionId;
 
   /** 消息头 */
   @Nonnull

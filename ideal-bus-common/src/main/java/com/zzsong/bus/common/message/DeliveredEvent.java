@@ -24,13 +24,12 @@ public class DeliveredEvent {
   /**
    * 事件唯一id
    */
-  @Nonnull
-  private String eventId;
+  private long eventId;
   /**
    * 业务方唯一id
    */
   @Nonnull
-  private String bizId;
+  private String transactionId;
   /**
    * 事件主题
    */

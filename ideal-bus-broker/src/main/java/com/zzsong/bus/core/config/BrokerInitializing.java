@@ -24,7 +24,7 @@ public class BrokerInitializing implements DisposableBean, InitializingBean, App
   private final String key;
   private final int nodeId;
   @Nonnull
-  private final BusConfig busConfig;
+  private final BusBeanConfig busConfig;
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
@@ -32,7 +32,7 @@ public class BrokerInitializing implements DisposableBean, InitializingBean, App
   @Nonnull
   private final ReactiveStringRedisTemplate redisTemplate;
 
-  public BrokerInitializing(@Nonnull BusConfig busConfig,
+  public BrokerInitializing(@Nonnull BusBeanConfig busConfig,
                             @Nonnull LocalCache localCache,
                             @Nonnull BusProperties busProperties,
                             @Nonnull BlockingDequeRouteTransfer blockingDequeRouteTransfer,

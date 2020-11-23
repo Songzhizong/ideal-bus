@@ -1,7 +1,6 @@
 package com.zzsong.bus.abs.transfer;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
-import com.zzsong.bus.abs.constants.EventTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,17 +23,6 @@ public class SaveEventArgs {
    */
   @Nonnull
   private String topic;
-
-  /**
-   * 归属模块
-   */
-  private long moduleId = DBDefaults.LONG_VALUE;
-
-  /**
-   * 事件类型
-   */
-  @Nonnull
-  private EventTypeEnum eventType = EventTypeEnum.UNKNOWN;
 
   /**
    * 事件名称
