@@ -30,7 +30,7 @@ public class EventInstanceDo {
   /** 聚合id */
   @Nullable
   @Indexed(background = true)
-  private String aggregation;
+  private String aggregate;
 
   /** 可通过该字段判断event归属哪个外部应用 */
   @Nullable

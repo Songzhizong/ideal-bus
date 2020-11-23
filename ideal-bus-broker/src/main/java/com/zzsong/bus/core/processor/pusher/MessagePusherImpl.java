@@ -158,7 +158,7 @@ public class MessagePusherImpl implements MessagePusher {
                         return deliveredResult;
                       }));
             } else {
-              String key = routeInstance.getAggregation();
+              String key = routeInstance.getAggregate();
               String topic = routeInstance.getTopic();
               DelivererChannel channel;
               if (StringUtils.isNotBlank(key)) {

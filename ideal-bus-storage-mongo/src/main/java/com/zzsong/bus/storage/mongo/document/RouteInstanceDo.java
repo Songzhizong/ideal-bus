@@ -39,7 +39,7 @@ public class RouteInstanceDo {
 
   /** 聚合id */
   @Nonnull
-  private String aggregation;
+  private String aggregate;
 
   /** 可通过该字段判断event归属哪个应用 */
   @Nullable

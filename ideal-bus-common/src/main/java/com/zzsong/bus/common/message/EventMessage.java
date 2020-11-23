@@ -28,7 +28,7 @@ public class EventMessage<T> {
 
   /** 聚合id */
   @Nullable
-  private String aggregation;
+  private String aggregate;
 
   /** 可通过该字段判断event归属哪个应用 */
   @Nullable
@@ -78,8 +78,8 @@ public class EventMessage<T> {
   @Nonnull
   public static <T> EventMessage<T> of(@Nonnull String topic,
                                        @Nonnull T payload,
-                                       @Nonnull String aggregation) {
-    return new EventMessage<T>(topic, payload).aggregation(aggregation);
+                                       @Nonnull String aggregate) {
+    return new EventMessage<T>(topic, payload).aggregate(aggregate);
   }
 
   @Nonnull
@@ -96,8 +96,8 @@ public class EventMessage<T> {
   }
 
   @Nonnull
-  public EventMessage<T> aggregation(@Nonnull String aggregation) {
-    this.aggregation = aggregation;
+  public EventMessage<T> aggregate(@Nonnull String aggregate) {
+    this.aggregate = aggregate;
     return this;
   }
 

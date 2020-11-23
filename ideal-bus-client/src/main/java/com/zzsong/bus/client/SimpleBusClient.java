@@ -113,10 +113,10 @@ public class SimpleBusClient extends SimpleEventReceiver implements BusClient {
 
   @Nonnull
   private EventChannel getBusChannel(@Nonnull EventMessage<?> message) {
-    final String aggregation = message.getAggregation();
+    final String aggregate = message.getAggregate();
     final EventChannel channel;
-    if (StringUtils.isNotBlank(aggregation)) {
-      channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, aggregation, LbStrategyEnum.CONSISTENT_HASH);
+    if (StringUtils.isNotBlank(aggregate)) {
+      channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, aggregate, LbStrategyEnum.CONSISTENT_HASH);
     } else {
       channel = lbFactory.chooseServer(BUS_BROKER_APP_NAME, message.getTopic(), LbStrategyEnum.ROUND_ROBIN);
     }

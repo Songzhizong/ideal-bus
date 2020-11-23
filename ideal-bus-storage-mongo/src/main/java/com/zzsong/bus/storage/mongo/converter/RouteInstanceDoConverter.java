@@ -22,11 +22,11 @@ public final class RouteInstanceDoConverter {
     routeInstanceDo.setInstanceId(routeInstance.getInstanceId());
     routeInstanceDo.setEventId(routeInstance.getEventId());
     routeInstanceDo.setTransactionId(routeInstance.getTransactionId());
-    String aggregation = routeInstance.getAggregation();
-    if (StringUtils.isBlank(aggregation)) {
-      aggregation = DBDefaults.STRING_VALUE;
+    String aggregate = routeInstance.getAggregate();
+    if (StringUtils.isBlank(aggregate)) {
+      aggregate = DBDefaults.STRING_VALUE;
     }
-    routeInstanceDo.setAggregation(aggregation);
+    routeInstanceDo.setAggregate(aggregate);
     String externalApplication = routeInstance.getExternalApplication();
     if (StringUtils.isNotBlank(externalApplication)) {
       routeInstanceDo.setExternalApplication(externalApplication);
@@ -69,7 +69,7 @@ public final class RouteInstanceDoConverter {
     routeInstance.setUnAckListeners(routeInstanceDo.getUnAckListeners());
     routeInstance.setEventId(routeInstanceDo.getEventId());
     routeInstance.setTransactionId(routeInstanceDo.getTransactionId());
-    routeInstance.setAggregation(routeInstanceDo.getAggregation());
+    routeInstance.setAggregate(routeInstanceDo.getAggregate());
     routeInstance.setExternalApplication(routeInstanceDo.getExternalApplication());
     routeInstance.setTopic(routeInstanceDo.getTopic());
     routeInstance.setHeaders(routeInstanceDo.getHeaders());

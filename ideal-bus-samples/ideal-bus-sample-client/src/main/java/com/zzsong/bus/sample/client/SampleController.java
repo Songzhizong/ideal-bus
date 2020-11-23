@@ -50,7 +50,7 @@ public class SampleController {
     List<String> payload = ImmutableList.of("1", "2", "3");
     EventMessage<List<String>> message = EventMessage.of(topic, payload)
         .transactionId("123456")
-        .aggregation("key")
+        .aggregate("key")
         .externalApplication("externalApp")
         .addHeader("age", "20");
     eventPublisher.publish(message)

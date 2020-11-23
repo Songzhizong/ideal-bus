@@ -108,11 +108,11 @@ public class EventExchange {
     RouteInstance instance = new RouteInstance();
     instance.setEventId(event.getEventId());
     instance.setTransactionId(event.getTransactionId());
-    String aggregation = event.getAggregation();
-    if (aggregation == null) {
-      aggregation = DBDefaults.STRING_VALUE;
+    String aggregate = event.getAggregate();
+    if (aggregate == null) {
+      aggregate = DBDefaults.STRING_VALUE;
     }
-    instance.setAggregation(aggregation);
+    instance.setAggregate(aggregate);
     instance.setExternalApplication(event.getExternalApplication());
     instance.setTopic(event.getTopic());
     instance.setHeaders(event.getHeaders());
