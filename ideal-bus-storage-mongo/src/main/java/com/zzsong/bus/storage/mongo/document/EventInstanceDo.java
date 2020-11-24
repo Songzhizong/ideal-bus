@@ -34,7 +34,6 @@ public class EventInstanceDo {
 
   /** 可通过该字段判断event归属哪个外部应用 */
   @Nullable
-  @Indexed(background = true, sparse = true)
   private String externalApplication;
 
   /** 事件主题 */

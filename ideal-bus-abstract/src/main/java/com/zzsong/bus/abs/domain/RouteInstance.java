@@ -32,7 +32,7 @@ public class RouteInstance extends EventInstance {
   private Long instanceId;
 
   /** broker nodeId */
-  private int nodeId;
+  private long shard;
 
   /** 订阅关系id */
   @Nonnull

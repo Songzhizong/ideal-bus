@@ -1,18 +1,12 @@
 package com.zzsong.bus.core.config;
 
-import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -32,7 +26,7 @@ public class BusProperties {
   private int shardCount = 1;
 
   /** 执行成功的路由实例过期时间, 至少一天 */
-  private Duration routeInstanceExpire = Duration.ofDays(30);
+  private Duration routeInstanceExpire = Duration.ofDays(15);
 
   /** 本地缓存的刷新间隔 */
   private Duration refreshLocalCacheInterval = Duration.ofMinutes(10);

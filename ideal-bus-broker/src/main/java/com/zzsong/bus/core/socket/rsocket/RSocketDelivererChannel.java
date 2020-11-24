@@ -10,6 +10,7 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * @author 宋志宗 on 2020/9/20 1:23 上午
@@ -46,6 +47,7 @@ public class RSocketDelivererChannel implements DelivererChannel {
 
   @Override
   public boolean heartbeat() {
-    return !requester.rsocket().isDisposed();
+    return requester.rsocket() != null
+        && !Objects.requireNonNull(requester.rsocket()).isDisposed();
   }
 }

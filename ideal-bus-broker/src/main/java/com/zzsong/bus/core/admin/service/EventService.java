@@ -78,15 +78,4 @@ public class EventService {
   public Mono<List<Event>> findAll() {
     return eventStorage.findAll();
   }
-
-  /**
-   * 获取所有存在有效期的时间列表
-   *
-   * @return expire大于0的事件列表
-   */
-  @Nonnull
-  public Mono<List<Event>> findDeletableEvents() {
-
-    return Mono.empty();
-  }
 }

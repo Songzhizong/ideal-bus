@@ -35,7 +35,7 @@ public final class RouteInstanceDoConverter {
     routeInstanceDo.setHeaders(routeInstance.getHeaders());
     routeInstanceDo.setPayload(routeInstance.getPayload());
     routeInstanceDo.setTimestamp(routeInstance.getTimestamp());
-    routeInstanceDo.setNodeId(routeInstance.getNodeId());
+    routeInstanceDo.setShard(routeInstance.getShard());
     routeInstanceDo.setSubscriptionId(routeInstance.getSubscriptionId());
     routeInstanceDo.setApplicationId(routeInstance.getApplicationId());
     long nextPushTime = routeInstance.getNextPushTime();
@@ -54,7 +54,7 @@ public final class RouteInstanceDoConverter {
   public static RouteInstance toRouteInstance(@Nonnull RouteInstanceDo routeInstanceDo) {
     RouteInstance routeInstance = new RouteInstance();
     routeInstance.setInstanceId(routeInstanceDo.getInstanceId());
-    routeInstance.setNodeId(routeInstanceDo.getNodeId());
+    routeInstance.setShard(routeInstanceDo.getShard());
     routeInstance.setSubscriptionId(routeInstanceDo.getSubscriptionId());
     routeInstance.setApplicationId(routeInstanceDo.getApplicationId());
     Long nextPushTime = routeInstanceDo.getNextPushTime();

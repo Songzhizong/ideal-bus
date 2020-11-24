@@ -68,7 +68,7 @@ public class RouteInstanceDo {
   //  --------------------------- 路由相关信息 ~ ~ ~
   /** broker nodeId */
   @Indexed(background = true)
-  private int nodeId;
+  private long shard;
 
   /** 订阅关系id */
   @Nonnull

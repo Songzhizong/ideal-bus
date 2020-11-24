@@ -118,7 +118,7 @@ public class EventExchange {
     instance.setHeaders(event.getHeaders());
     instance.setPayload(event.getPayload());
     instance.setTimestamp(event.getTimestamp());
-    instance.setNodeId(properties.getNodeId());
+    instance.setShard(properties.getNodeId());
     instance.setSubscriptionId(details.getSubscriptionId());
     instance.setApplicationId(details.getApplicationId());
     instance.setStatus(RouteInstance.STATUS_WAITING);
