@@ -59,7 +59,7 @@ public class ApplicationDo {
    */
   @NonNull
   @HashIndexed
-  private String externalApplication = DBDefaults.STRING_VALUE;
+  private String externalApp = DBDefaults.STRING_VALUE;
 
   /**
    * 接收推送的地址, 外部应用拥有此属性

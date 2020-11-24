@@ -32,7 +32,7 @@ public class EventMessage<T> {
 
   /** 可通过该字段判断event归属哪个应用 */
   @Nullable
-  private String externalApplication;
+  private String externalApp;
 
   /** 事件主题, 一个事件应该只有一个主题 */
   @Nonnull
@@ -105,8 +105,8 @@ public class EventMessage<T> {
    * 可通过该字段判断event归属哪个应用
    */
   @Nonnull
-  public EventMessage<T> externalApplication(@Nonnull String externalApplication) {
-    this.externalApplication = externalApplication;
+  public EventMessage<T> externalApp(@Nonnull String externalApp) {
+    this.externalApp = externalApp;
     return this;
   }
 

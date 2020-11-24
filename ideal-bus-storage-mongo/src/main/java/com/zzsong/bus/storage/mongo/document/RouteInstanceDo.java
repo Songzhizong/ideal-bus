@@ -43,7 +43,7 @@ public class RouteInstanceDo {
 
   /** 可通过该字段判断event归属哪个应用 */
   @Nullable
-  private String externalApplication;
+  private String externalApp;
 
   /** 主题 */
   @Nonnull

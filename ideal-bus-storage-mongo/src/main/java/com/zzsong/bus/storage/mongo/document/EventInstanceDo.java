@@ -34,7 +34,7 @@ public class EventInstanceDo {
 
   /** 可通过该字段判断event归属哪个外部应用 */
   @Nullable
-  private String externalApplication;
+  private String externalApp;
 
   /** 事件主题 */
   @Nonnull

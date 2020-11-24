@@ -19,9 +19,9 @@ public final class EventInstanceDoConverter {
     EventInstanceDo eventInstanceDo = new EventInstanceDo();
     eventInstanceDo.setEventId(eventInstance.getEventId());
     eventInstanceDo.setTransactionId(eventInstance.getTransactionId());
-    String externalApplication = eventInstance.getExternalApplication();
-    if (StringUtils.isNotBlank(externalApplication)) {
-      eventInstanceDo.setExternalApplication(externalApplication);
+    String externalApp = eventInstance.getExternalApp();
+    if (StringUtils.isNotBlank(externalApp)) {
+      eventInstanceDo.setExternalApp(externalApp);
     }
     eventInstanceDo.setTopic(eventInstance.getTopic());
     eventInstanceDo.setHeaders(eventInstance.getHeaders());
@@ -35,7 +35,7 @@ public final class EventInstanceDoConverter {
     EventInstance eventInstance = new EventInstance();
     eventInstance.setEventId(eventInstanceDo.getEventId());
     eventInstance.setTransactionId(eventInstanceDo.getTransactionId());
-    eventInstance.setExternalApplication(eventInstanceDo.getExternalApplication());
+    eventInstance.setExternalApp(eventInstanceDo.getExternalApp());
     eventInstance.setTopic(eventInstanceDo.getTopic());
     eventInstance.setHeaders(eventInstanceDo.getHeaders());
     eventInstance.setPayload(eventInstanceDo.getPayload());

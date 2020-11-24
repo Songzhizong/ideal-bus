@@ -26,5 +26,5 @@ public class QueryApplicationArgs {
    * 外部应用ID, 外部应用拥有此属性
    */
   @Nullable
-  private String externalApplication;
+  private String externalApp;
 }

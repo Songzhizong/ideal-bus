@@ -51,7 +51,7 @@ public class SampleController {
     EventMessage<List<String>> message = EventMessage.of(topic, payload)
         .transactionId("123456")
         .aggregate("key")
-        .externalApplication("externalApp")
+        .externalApp("externalApp")
         .addHeader("age", "20");
     eventPublisher.publish(message)
         .map(JsonUtils::toJsonString)

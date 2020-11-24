@@ -110,9 +110,9 @@ public final class EventGenerator {
    * 可通过该字段判断event归属哪个外部应用
    */
   @Nonnull
-  public EventGenerator externalApplication(@Nonnull String externalApplication) {
+  public EventGenerator externalApp(@Nonnull String externalApp) {
     EventMessage<?> message = messages.get(cursor);
-    message.externalApplication(externalApplication);
+    message.externalApp(externalApp);
     return this;
   }
 

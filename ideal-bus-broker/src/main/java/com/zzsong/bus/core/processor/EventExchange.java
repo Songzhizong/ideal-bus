@@ -113,7 +113,7 @@ public class EventExchange {
       aggregate = DBDefaults.STRING_VALUE;
     }
     instance.setAggregate(aggregate);
-    instance.setExternalApplication(event.getExternalApplication());
+    instance.setExternalApp(event.getExternalApp());
     instance.setTopic(event.getTopic());
     instance.setHeaders(event.getHeaders());
     instance.setPayload(event.getPayload());
