@@ -19,10 +19,10 @@ public interface RouteInstanceStorage {
   Mono<List<RouteInstance>> saveAll(@Nonnull Collection<RouteInstance> routeInstances);
 
   @Nonnull
-  Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int nodeId);
+  Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard);
 
   @Nonnull
-  Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId);
+  Mono<List<RouteInstance>> loadWaiting(int count, int shard, long subscriptionId);
 
   @Nonnull
   Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message);

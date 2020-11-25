@@ -32,11 +32,13 @@ public class SampleBusListener {
       name = "testAutoAck",
       topic = "example_topic",
       condition = "age>10",
-      delayExp = "120",
+      delayExp = "10",
       autoAck = true
   )
+  @SuppressWarnings("DefaultAnnotationParam")
   public void testAutoAck(@Nonnull EventContext<List<String>> context) {
-    System.out.println(String.join(", ", context.getPayload()));
+    log.info("testAutoAck接收到消息: {}, 序号: {}",
+        String.join(", ", context.getPayload()), counter.incrementAndGet());
   }
 
   @EventListener(name = "broadcast", topic = "broadcast")

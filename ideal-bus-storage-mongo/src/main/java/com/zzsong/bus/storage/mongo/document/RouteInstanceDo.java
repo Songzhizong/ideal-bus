@@ -79,6 +79,9 @@ public class RouteInstanceDo {
   @Nonnull
   private Long applicationId;
 
+  /** 是否广播 */
+  private boolean broadcast = false;
+
   /** 下次推送时间 */
   @Nullable
   @Indexed(direction = IndexDirection.ASCENDING, background = true, sparse = true)
@@ -90,6 +93,9 @@ public class RouteInstanceDo {
 
   /** 已重试次数 */
   private int retryCount = -1;
+
+  /** 最大重试次数 */
+  private int retryLimit = -1;
 
   /** 描述信息 */
   @Nonnull

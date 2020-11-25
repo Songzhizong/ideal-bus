@@ -38,12 +38,14 @@ public final class RouteInstanceDoConverter {
     routeInstanceDo.setShard(routeInstance.getShard());
     routeInstanceDo.setSubscriptionId(routeInstance.getSubscriptionId());
     routeInstanceDo.setApplicationId(routeInstance.getApplicationId());
+    routeInstanceDo.setBroadcast(routeInstance.isBroadcast());
     long nextPushTime = routeInstance.getNextPushTime();
     if (nextPushTime > SnowFlake.START_TIMESTAMP) {
       routeInstanceDo.setNextPushTime(nextPushTime);
     }
     routeInstanceDo.setStatus(routeInstance.getStatus());
     routeInstanceDo.setRetryCount(routeInstance.getRetryCount());
+    routeInstanceDo.setRetryLimit(routeInstance.getRetryLimit());
     routeInstanceDo.setMessage(routeInstance.getMessage());
     routeInstanceDo.setListeners(routeInstance.getListeners());
     routeInstanceDo.setUnAckListeners(routeInstance.getUnAckListeners());
@@ -57,6 +59,7 @@ public final class RouteInstanceDoConverter {
     routeInstance.setShard(routeInstanceDo.getShard());
     routeInstance.setSubscriptionId(routeInstanceDo.getSubscriptionId());
     routeInstance.setApplicationId(routeInstanceDo.getApplicationId());
+    routeInstance.setBroadcast(routeInstanceDo.isBroadcast());
     Long nextPushTime = routeInstanceDo.getNextPushTime();
     if (nextPushTime == null) {
       nextPushTime = -1L;
@@ -64,6 +67,7 @@ public final class RouteInstanceDoConverter {
     routeInstance.setNextPushTime(nextPushTime);
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
+    routeInstance.setRetryLimit(routeInstanceDo.getRetryLimit());
     routeInstance.setMessage(routeInstanceDo.getMessage());
     routeInstance.setListeners(routeInstanceDo.getListeners());
     routeInstance.setUnAckListeners(routeInstanceDo.getUnAckListeners());

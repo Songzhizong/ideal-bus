@@ -42,6 +42,9 @@ public class RouteInstance extends EventInstance {
   @Nonnull
   private Long applicationId;
 
+  /** 是否广播 */
+  private boolean broadcast = false;
+
   /** 下次推送时间 */
   private long nextPushTime = -1;
 
@@ -50,6 +53,9 @@ public class RouteInstance extends EventInstance {
 
   /** 已重试次数 */
   private int retryCount = -1;
+
+  /** 最大重试次数 */
+  private int retryLimit = -1;
 
   /** 描述信息 */
   private String message = DBDefaults.STRING_VALUE;

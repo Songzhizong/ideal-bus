@@ -76,11 +76,11 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
 
   @Nonnull
   @Override
-  public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int nodeId) {
+  public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard) {
     String nextPushTime = "nextPushTime";
     String instanceId = "instanceId";
     Criteria criteria = Criteria
-        .where("nodeId").is(nodeId)
+        .where("shard").is(shard)
         .andOperator(
             Criteria.where(nextPushTime).gt(SnowFlake.START_TIMESTAMP),
             Criteria.where(nextPushTime).lte(maxNextTime)
@@ -107,9 +107,9 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
 
   @Nonnull
   @Override
-  public Mono<List<RouteInstance>> loadWaiting(int count, int nodeId, long subscriptionId) {
+  public Mono<List<RouteInstance>> loadWaiting(int count, int shard, long subscriptionId) {
     Criteria criteria = Criteria
-        .where("nodeId").is(nodeId)
+        .where("shard").is(shard)
         .and("subscriptionId").is(subscriptionId)
         .and("nextPushTime").lte(SnowFlake.START_TIMESTAMP)
         .and("status").is(RouteInstance.STATUS_WAITING);

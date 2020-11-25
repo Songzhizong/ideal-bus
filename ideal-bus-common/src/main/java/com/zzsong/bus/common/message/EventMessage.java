@@ -39,7 +39,7 @@ public class EventMessage<T> {
   private String topic;
 
   /** 事件标签, 一个事件应该只有一个标签 */
-  @Nonnull
+  @Nullable
   private String tag;
 
   /** 消息头,可用于条件匹配 */

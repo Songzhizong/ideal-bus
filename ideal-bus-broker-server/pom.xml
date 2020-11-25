@@ -39,7 +39,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
         <configuration>
-          <mainClass>com.zzsong.bus.server.BrokerApplication</mainClass>
+          <mainClass>com.zzsong.bus.broker.server.BrokerApplication</mainClass>
         </configuration>
         <executions>
           <execution>
