@@ -5,7 +5,7 @@ package com.zzsong.bus.abs.constants;
  *
  * @author 宋志宗 on 2020/9/16
  */
-public enum ApplicationTypeEnum {
+public enum ApplicationType {
   /**
    * 内部订阅者
    */

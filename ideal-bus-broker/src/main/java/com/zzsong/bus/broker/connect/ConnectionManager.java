@@ -1,11 +1,14 @@
 package com.zzsong.bus.broker.connect;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
+import com.zzsong.bus.broker.constants.DeliverResult;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 
 /**
+ * 连接管理器
+ *
  * @author 宋志宗 on 2020/11/25
  */
 public interface ConnectionManager {
@@ -55,6 +58,13 @@ public interface ConnectionManager {
    */
   void markChannelReachable(@Nonnull String appName, @Nonnull DelivererChannel channel);
 
+  /**
+   * 交付
+   *
+   * @param routeInstance 路由实例
+   * @return 交付结果
+   * @author 宋志宗 on 2020/11/25
+   */
   @Nonnull
-  Mono<Boolean> deliver(@Nonnull RouteInstance routeInstance);
+  Mono<DeliverResult> deliver(@Nonnull RouteInstance routeInstance);
 }

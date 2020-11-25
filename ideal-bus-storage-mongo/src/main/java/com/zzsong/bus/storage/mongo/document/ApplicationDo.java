@@ -1,7 +1,7 @@
 package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
-import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.constants.ApplicationType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.HashIndexed;
@@ -46,7 +46,7 @@ public class ApplicationDo {
    * 订阅者类型
    */
   @NonNull
-  private ApplicationTypeEnum applicationType = ApplicationTypeEnum.INTERNAL;
+  private ApplicationType applicationType = ApplicationType.INTERNAL;
 
   /**
    * 应用名称, 内部用

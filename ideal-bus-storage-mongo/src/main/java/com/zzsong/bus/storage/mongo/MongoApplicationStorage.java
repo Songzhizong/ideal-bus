@@ -6,7 +6,7 @@ import com.zzsong.bus.storage.mongo.document.ApplicationDo;
 import com.zzsong.bus.storage.mongo.repository.MongoApplicationRepository;
 import com.zzsong.bus.abs.storage.ApplicationStorage;
 import com.zzsong.bus.abs.transfer.QueryApplicationArgs;
-import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.constants.ApplicationType;
 import com.zzsong.bus.abs.generator.IDGenerator;
 import com.zzsong.bus.abs.generator.IDGeneratorFactory;
 import com.zzsong.bus.abs.share.Paging;
@@ -99,7 +99,7 @@ public class MongoApplicationStorage implements ApplicationStorage {
     if (args != null) {
       String title = args.getTitle();
       String externalApp = args.getExternalApp();
-      ApplicationTypeEnum applicationType = args.getApplicationType();
+      ApplicationType applicationType = args.getApplicationType();
       if (StringUtils.isNotBlank(title)) {
         criteria.and("title").regex("^" + title);
       }

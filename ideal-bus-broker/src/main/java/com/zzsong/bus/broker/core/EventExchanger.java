@@ -39,7 +39,7 @@ public class EventExchanger {
   private final SubscriptionManager subscriptionManager;
 
   @Nonnull
-  public Mono<PublishResult> publish(@Nonnull EventInstance event) {
+  public Mono<PublishResult> exchange(@Nonnull EventInstance event) {
     PublishResult.PublishResultBuilder builder = PublishResult.builder()
         .transactionId(event.getTransactionId())
         .topic(event.getTopic())
@@ -58,7 +58,7 @@ public class EventExchanger {
       List<RouteInstance> collect = instanceList.stream()
           .filter(instance -> instance.getNextPushTime() < 1L)
           .collect(Collectors.toList());
-      return routeTransfer.submit(collect, false)
+      return routeTransfer.submit(collect)
           .thenReturn(builder.build());
     });
   }

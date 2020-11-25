@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping("/publish")
 public class PublishController {
   @Nonnull
-  private final EventExchanger eventExchange;
+  private final EventExchanger eventExchanger;
 
-  public PublishController(@Nonnull EventExchanger eventExchange) {
-    this.eventExchange = eventExchange;
+  public PublishController(@Nonnull EventExchanger eventExchanger) {
+    this.eventExchanger = eventExchanger;
   }
 
   /**
@@ -32,7 +32,7 @@ public class PublishController {
   @Nonnull
   @PostMapping("/single")
   public Mono<PublishResult> publish(@RequestBody @Nonnull EventInstance message) {
-    return eventExchange.publish(message);
+    return eventExchanger.exchange(message);
   }
 
   /**
@@ -41,6 +41,6 @@ public class PublishController {
   @Nonnull
   @PostMapping("/batch")
   public Flux<PublishResult> publish(@RequestBody @Nonnull List<EventInstance> messages) {
-    return Flux.fromIterable(messages).flatMap(eventExchange::publish);
+    return Flux.fromIterable(messages).flatMap(eventExchanger::exchange);
   }
 }

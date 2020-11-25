@@ -1,6 +1,6 @@
 package com.zzsong.bus.abs.transfer;
 
-import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.constants.ApplicationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,7 +21,7 @@ public class QueryApplicationArgs {
    * 订阅者类型
    */
   @Nullable
-  private ApplicationTypeEnum applicationType;
+  private ApplicationType applicationType;
   /**
    * 外部应用ID, 外部应用拥有此属性
    */

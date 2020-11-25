@@ -1,7 +1,7 @@
 package com.zzsong.bus.abs.pojo;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
-import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.constants.ApplicationType;
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.common.util.ConditionMatcher;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class SubscriptionDetails extends Subscription {
    * 订阅者类型
    */
   @Nonnull
-  private ApplicationTypeEnum applicationType;
+  private ApplicationType applicationType;
 
   /**
    * 应用编码, 外部应用拥有此属性

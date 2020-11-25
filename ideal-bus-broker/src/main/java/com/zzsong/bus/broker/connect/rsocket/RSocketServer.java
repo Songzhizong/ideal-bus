@@ -12,8 +12,8 @@ import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
-import com.zzsong.bus.common.share.utils.JsonUtils;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +41,7 @@ public class RSocketServer {
   @Nonnull
   private final LocalCache localCache;
   @Nonnull
-  private final EventExchanger eventExchange;
+  private final EventExchanger eventExchanger;
   @Nonnull
   private final ConnectionManager connectionManager;
   @Nonnull
@@ -111,7 +111,7 @@ public class RSocketServer {
 
   @MessageMapping(RSocketRoute.PUBLISH)
   public Mono<PublishResult> publish(@Nonnull EventInstance message) {
-    return eventExchange.publish(message);
+    return eventExchanger.exchange(message);
   }
 
   @MessageMapping(RSocketRoute.AUTO_SUBSCRIBE)

@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 订阅管理器
+ * 订阅关系管理器
  *
  * @author 宋志宗 on 2020/11/25
  */

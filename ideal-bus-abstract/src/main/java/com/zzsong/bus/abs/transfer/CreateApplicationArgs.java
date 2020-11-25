@@ -1,7 +1,7 @@
 package com.zzsong.bus.abs.transfer;
 
 import com.zzsong.bus.abs.constants.DBDefaults;
-import com.zzsong.bus.abs.constants.ApplicationTypeEnum;
+import com.zzsong.bus.abs.constants.ApplicationType;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +34,7 @@ public class CreateApplicationArgs {
    * 订阅者类型
    */
   @Nonnull
-  private ApplicationTypeEnum applicationType = ApplicationTypeEnum.INTERNAL;
+  private ApplicationType applicationType = ApplicationType.INTERNAL;
 
   /**
    * 应用名称, 内部用
