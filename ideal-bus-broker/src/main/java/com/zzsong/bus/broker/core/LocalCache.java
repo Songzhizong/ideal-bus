@@ -1,25 +1,22 @@
 package com.zzsong.bus.broker.core;
 
-import com.google.common.collect.Maps;
-import com.zzsong.bus.abs.converter.SubscriptionConverter;
-import com.zzsong.bus.abs.domain.Event;
-import com.zzsong.bus.abs.domain.Application;
-import com.zzsong.bus.abs.domain.Subscription;
-import com.zzsong.bus.abs.storage.ApplicationStorage;
-import com.zzsong.bus.abs.storage.EventStorage;
-import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
+import com.zzsong.bus.broker.admin.service.SubscriptionService;
 import com.zzsong.bus.broker.config.BusProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -30,23 +27,15 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class LocalCache implements DisposableBean {
+public class LocalCache implements InitializingBean, DisposableBean {
   @Nonnull
   private final BusProperties properties;
   @Nonnull
-  private final EventStorage eventStorage;
-  @Nonnull
-  private final ApplicationStorage applicationService;
-  @Nonnull
-  private final SubscriptionStorage subscriptionService;
+  private final SubscriptionService subscriptionService;
 
   public LocalCache(@Nonnull BusProperties properties,
-                    @Nonnull EventStorage eventStorage,
-                    @Nonnull ApplicationStorage applicationService,
-                    @Nonnull SubscriptionStorage subscriptionService) {
+                    @Nonnull SubscriptionService subscriptionService) {
     this.properties = properties;
-    this.eventStorage = eventStorage;
-    this.applicationService = applicationService;
     this.subscriptionService = subscriptionService;
   }
 
@@ -56,9 +45,6 @@ public class LocalCache implements DisposableBean {
 
   // ------------------------------ 缓存相关数据 ~ ~ ~
 
-  private Map<String, Event> eventMapping = Collections.emptyMap();
-  private ConcurrentMap<Long, Application> applicationMapping = Maps.newConcurrentMap();
-  private Map<Long, SubscriptionDetails> subscriptionMapping = Collections.emptyMap();
   private Map<String, List<SubscriptionDetails>> topicSubscriptionMapping = Collections.emptyMap();
 
   /**
@@ -66,16 +52,6 @@ public class LocalCache implements DisposableBean {
    */
   public void refreshCache() {
     refreshCacheSignQueue.offer(true);
-  }
-
-  @Nullable
-  public SubscriptionDetails getSubscription(long subscriptionId) {
-    return subscriptionMapping.get(subscriptionId);
-  }
-
-  @Nonnull
-  public Collection<SubscriptionDetails> getAllSubscription() {
-    return subscriptionMapping.values();
   }
 
   /**
@@ -91,22 +67,6 @@ public class LocalCache implements DisposableBean {
       return Collections.emptyList();
     }
     return detailsList;
-  }
-
-  /**
-   * 获取event详情
-   *
-   * @param topic 主题
-   * @return event信息
-   */
-  @Nullable
-  public Event getEvent(@Nonnull String topic) {
-    return eventMapping.get(topic);
-  }
-
-  @Nullable
-  public Application getApplication(long applicationId) {
-    return applicationMapping.get(applicationId);
   }
 
   public void init() {
@@ -140,33 +100,9 @@ public class LocalCache implements DisposableBean {
 
   @Nonnull
   private Mono<Boolean> refreshLocalCache() {
-    Mono<List<Event>> eventListMono = eventStorage.findAll();
-    Mono<List<Application>> applicationListMono = applicationService.findAll();
-    Mono<List<Subscription>> enabledSubscriptionMono = subscriptionService.findAllEnabled();
-    return Mono.zip(eventListMono, applicationListMono, enabledSubscriptionMono)
-        .map(tuple3 -> {
-          List<Event> events = tuple3.getT1();
-          List<Application> applications = tuple3.getT2();
-          List<Subscription> subscriptions = tuple3.getT3();
-          this.eventMapping = events.stream()
-              .collect(Collectors.toMap(Event::getTopic, e -> e));
-          this.applicationMapping = applications.stream()
-              .collect(Collectors.toConcurrentMap(Application::getApplicationId, s -> s));
-          this.subscriptionMapping = new HashMap<>(subscriptions.size());
-          this.topicSubscriptionMapping = subscriptions.stream()
-              .map(s -> {
-                long applicationId = s.getApplicationId();
-                Application application = this.applicationMapping.get(applicationId);
-                if (application == null) {
-                  return null;
-                }
-                SubscriptionDetails details = SubscriptionConverter.toSubscriptionDetails(s);
-                details.setApplicationType(application.getApplicationType());
-                details.setExternalApp(application.getExternalApp());
-                details.setReceiveUrl(application.getReceiveUrl());
-                subscriptionMapping.put(s.getSubscriptionId(), details);
-                return details;
-              }).filter(Objects::nonNull)
+    return subscriptionService.findAllEnabledSubscriptionDetails()
+        .map(subscriptionDetails -> {
+          this.topicSubscriptionMapping = subscriptionDetails.stream()
               .collect(Collectors.groupingBy(SubscriptionDetails::getTopic));
           return true;
         });
@@ -176,5 +112,10 @@ public class LocalCache implements DisposableBean {
   public void destroy() {
     startRefreshCacheThread = false;
     refreshCacheThread.interrupt();
+  }
+
+  @Override
+  public void afterPropertiesSet() {
+    init();
   }
 }

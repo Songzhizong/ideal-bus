@@ -1,12 +1,8 @@
 package com.zzsong.bus.broker.config;
 
-import com.zzsong.bus.broker.core.LocalCache;
-import com.zzsong.bus.broker.core.RouteTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 
@@ -20,26 +16,14 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Configuration
-public class BrokerInitializing implements DisposableBean, InitializingBean, ApplicationRunner {
+public class BrokerInitializing implements DisposableBean, InitializingBean {
   private final String key;
   private final int nodeId;
   @Nonnull
-  private final BusBeanConfig busConfig;
-  @Nonnull
-  private final LocalCache localCache;
-  @Nonnull
-  private final RouteTransfer blockingDequeRouteTransfer;
-  @Nonnull
   private final ReactiveStringRedisTemplate redisTemplate;
 
-  public BrokerInitializing(@Nonnull BusBeanConfig busConfig,
-                            @Nonnull LocalCache localCache,
-                            @Nonnull BusProperties busProperties,
-                            @Nonnull RouteTransfer blockingDequeRouteTransfer,
+  public BrokerInitializing(@Nonnull BusProperties busProperties,
                             @Nonnull ReactiveStringRedisTemplate redisTemplate) {
-    this.busConfig = busConfig;
-    this.localCache = localCache;
-    this.blockingDequeRouteTransfer = blockingDequeRouteTransfer;
     this.redisTemplate = redisTemplate;
     this.nodeId = busProperties.getNodeId();
     this.key = "ideal:register:bus:broker:node:" + nodeId;
@@ -76,12 +60,5 @@ public class BrokerInitializing implements DisposableBean, InitializingBean, App
                 }).subscribe(),
             15, 15, TimeUnit.SECONDS);
 
-  }
-
-  @Override
-  public void run(ApplicationArguments args) {
-    localCache.init();
-    blockingDequeRouteTransfer.init();
-    busConfig.setInitialized(true);
   }
 }

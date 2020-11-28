@@ -84,17 +84,21 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
   @Override
   public void markServerDown(@Nonnull Server server) {
     String instanceId = server.getInstanceId();
+    boolean removed = false;
     synchronized (reachableServers) {
       final Iterator<Server> iterator = reachableServers.iterator();
       while (iterator.hasNext()) {
         Server next = iterator.next();
         if (instanceId.equals(next.getInstanceId())) {
           iterator.remove();
+          removed = true;
           break;
         }
       }
     }
-    this.serverChange();
+    if (removed) {
+      this.serverChange();
+    }
   }
 
   @Override

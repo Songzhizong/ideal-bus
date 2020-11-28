@@ -1,13 +1,15 @@
 package com.zzsong.bus.broker.admin.service;
 
 import com.zzsong.bus.abs.converter.SubscriptionConverter;
+import com.zzsong.bus.abs.domain.Application;
 import com.zzsong.bus.abs.domain.Subscription;
+import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
 import com.zzsong.bus.common.transfer.SubscriptionArgs;
-import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -166,6 +168,59 @@ public class SubscriptionService {
         });
   }
 
+  @Nonnull
+  public Mono<Long> unsubscribe(long applicationId, @Nonnull String topic) {
+    return storage.unsubscribe(applicationId, topic);
+  }
+
+  @Nonnull
+  public Mono<Long> unsubscribe(@Nonnull String topic) {
+    return storage.unsubscribeAll(topic);
+  }
+
+  @Nonnull
+  public Mono<Long> unsubscribe(long applicationId) {
+    return storage.unsubscribeAll(applicationId);
+  }
+
+  @Nonnull
+  public Mono<List<Subscription>> getSubscription(long applicationId) {
+    return storage.findAllByApplication(applicationId);
+  }
+
+  @Nonnull
+  public Mono<List<Subscription>> findAllEnabled() {
+    return storage.findAllEnabled();
+  }
+
+  @Nonnull
+  public Mono<List<SubscriptionDetails>> findAllEnabledSubscriptionDetails() {
+    Mono<List<Application>> applicationListMono = applicationService.findAll();
+    Mono<List<Subscription>> enabledSubscriptionMono = findAllEnabled();
+    return Mono.zip(applicationListMono, enabledSubscriptionMono)
+        .map(tuple -> {
+          List<Application> applications = tuple.getT1();
+          List<Subscription> subscriptions = tuple.getT2();
+          Map<Long, Application> applicationMapping = applications.stream()
+              .collect(Collectors.toMap(Application::getApplicationId, s -> s));
+          return subscriptions.stream()
+              .map(s -> {
+                long applicationId = s.getApplicationId();
+                Application application = applicationMapping.get(applicationId);
+                if (application == null) {
+                  return null;
+                }
+                SubscriptionDetails details = SubscriptionConverter.toSubscriptionDetails(s);
+                details.setApplicationType(application.getApplicationType());
+                details.setExternalApp(application.getExternalApp());
+                details.setReceiveUrl(application.getReceiveUrl());
+                return details;
+              })
+              .filter(Objects::nonNull)
+              .collect(Collectors.toUnmodifiableList());
+        });
+  }
+
   /**
    * 计算新的订阅关系是否发生变更
    * <pre>
@@ -208,30 +263,5 @@ public class SubscriptionService {
     } else {
       return null;
     }
-  }
-
-  @Nonnull
-  public Mono<Long> unsubscribe(long applicationId, @Nonnull String topic) {
-    return storage.unsubscribe(applicationId, topic);
-  }
-
-  @Nonnull
-  public Mono<Long> unsubscribe(@Nonnull String topic) {
-    return storage.unsubscribeAll(topic);
-  }
-
-  @Nonnull
-  public Mono<Long> unsubscribe(long applicationId) {
-    return storage.unsubscribeAll(applicationId);
-  }
-
-  @Nonnull
-  public Mono<List<Subscription>> getSubscription(long applicationId) {
-    return storage.findAllByApplication(applicationId);
-  }
-
-  @Nonnull
-  public Mono<List<Subscription>> findAllEnabled() {
-    return storage.findAllEnabled();
   }
 }

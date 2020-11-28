@@ -1,7 +1,7 @@
 package com.zzsong.bus.client.deliver;
 
-import com.zzsong.bus.common.message.DeliveredEvent;
-import com.zzsong.bus.common.message.DeliveredResult;
+import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.message.DeliverResult;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -12,5 +12,5 @@ import javax.annotation.Nonnull;
 public interface EventDeliverer {
 
   @Nonnull
-  Mono<DeliveredResult> deliver(@Nonnull DeliveredEvent event);
+  Mono<DeliverResult> deliver(@Nonnull DeliverEvent event);
 }

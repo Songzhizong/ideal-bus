@@ -2,7 +2,10 @@ package com.zzsong.bus.storage.mongo.document;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.common.message.EventHeaders;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -10,8 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -83,9 +84,8 @@ public class RouteInstanceDo {
   private boolean broadcast = false;
 
   /** 下次推送时间 */
-  @Nullable
-  @Indexed(direction = IndexDirection.ASCENDING, background = true, sparse = true)
-  private Long nextPushTime;
+  @Indexed(direction = IndexDirection.ASCENDING, background = true)
+  private long nextPushTime = -1;
 
   /** 状态 */
   @Indexed(background = true)
@@ -101,11 +101,7 @@ public class RouteInstanceDo {
   @Nonnull
   private String message;
 
-  /** 消费该事件的监听器列表 */
+  /** 消费该事件的监听器 */
   @Nonnull
-  private List<String> listeners = Collections.emptyList();
-
-  /** 没有ack的监听器列表 */
-  @Nonnull
-  private List<String> unAckListeners = Collections.emptyList();
+  private String listener;
 }

@@ -75,7 +75,6 @@ public class SpringBusClient extends SimpleBusClient
             if (typeClass != EventContext.class) {
               String className = bean.getClass().getName();
               String methodName = method.getName();
-              //noinspection SpellCheckingInspection
               log.error("{}#{} 入参必须是 com.zzsong.bus.receiver.deliver.EventContext类型",
                   className, methodName);
               continue;

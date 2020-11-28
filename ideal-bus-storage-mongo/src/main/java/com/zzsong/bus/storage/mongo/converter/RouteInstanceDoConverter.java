@@ -47,8 +47,7 @@ public final class RouteInstanceDoConverter {
     routeInstanceDo.setRetryCount(routeInstance.getRetryCount());
     routeInstanceDo.setRetryLimit(routeInstance.getRetryLimit());
     routeInstanceDo.setMessage(routeInstance.getMessage());
-    routeInstanceDo.setListeners(routeInstance.getListeners());
-    routeInstanceDo.setUnAckListeners(routeInstance.getUnAckListeners());
+    routeInstanceDo.setListener(routeInstance.getListener());
     return routeInstanceDo;
   }
 
@@ -60,17 +59,13 @@ public final class RouteInstanceDoConverter {
     routeInstance.setSubscriptionId(routeInstanceDo.getSubscriptionId());
     routeInstance.setApplicationId(routeInstanceDo.getApplicationId());
     routeInstance.setBroadcast(routeInstanceDo.isBroadcast());
-    Long nextPushTime = routeInstanceDo.getNextPushTime();
-    if (nextPushTime == null) {
-      nextPushTime = -1L;
-    }
+    long nextPushTime = routeInstanceDo.getNextPushTime();
     routeInstance.setNextPushTime(nextPushTime);
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
     routeInstance.setRetryLimit(routeInstanceDo.getRetryLimit());
     routeInstance.setMessage(routeInstanceDo.getMessage());
-    routeInstance.setListeners(routeInstanceDo.getListeners());
-    routeInstance.setUnAckListeners(routeInstanceDo.getUnAckListeners());
+    routeInstance.setListener(routeInstanceDo.getListener());
     routeInstance.setEventId(routeInstanceDo.getEventId());
     routeInstance.setTransactionId(routeInstanceDo.getTransactionId());
     routeInstance.setAggregate(routeInstanceDo.getAggregate());

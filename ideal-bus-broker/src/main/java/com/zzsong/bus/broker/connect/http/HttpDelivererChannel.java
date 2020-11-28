@@ -2,8 +2,8 @@ package com.zzsong.bus.broker.connect.http;
 
 import com.zzsong.bus.abs.constants.ApplicationType;
 import com.zzsong.bus.broker.connect.DelivererChannel;
-import com.zzsong.bus.common.message.DeliveredEvent;
-import com.zzsong.bus.common.message.DeliveredResult;
+import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.message.DeliverResult;
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import com.zzsong.bus.common.share.utils.ReactorUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.List;
 
 /**
  * @author 宋志宗 on 2020/11/25
@@ -25,8 +24,8 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class HttpDelivererChannel implements DelivererChannel {
-  /** 2分钟超时时间 */
-  private final WebClient webClient = ReactorUtils.createWebClient(Duration.ofMinutes(2));
+  private static final WebClient WEB_CLIENT
+      = ReactorUtils.createWebClient(Duration.ofSeconds(10));
   @Nonnull
   private final String url;
   @Nonnull
@@ -36,33 +35,27 @@ public class HttpDelivererChannel implements DelivererChannel {
 
   @Nonnull
   @Override
-  public Mono<DeliveredResult> deliver(@Nonnull DeliveredEvent event) {
-    return webClient.post().uri(url)
+  public Mono<DeliverResult> deliver(@Nonnull DeliverEvent event) {
+    return WEB_CLIENT.post().uri(url)
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(event))
         .retrieve()
         .bodyToMono(String.class)
         .map(res ->
             switch (applicationType) {
-              case INTERNAL -> JsonUtils.parseJson(res, DeliveredResult.class);
+              case INTERNAL -> JsonUtils.parseJson(res, DeliverResult.class);
               case EXTERNAL -> {
-                DeliveredResult deliveredResult = new DeliveredResult();
+                DeliverResult deliveredResult = new DeliverResult();
                 deliveredResult.setEventId(event.getEventId());
-                deliveredResult.setSuccess(true);
-                List<String> listeners = event.getListeners();
-                if (listeners != null) {
-                  for (String listener : listeners) {
-                    deliveredResult.markAck(listener, true);
-                  }
-                }
+                deliveredResult.setStatus(DeliverResult.Status.ACK);
                 yield deliveredResult;
               }
             }
         )
         .onErrorResume(throwable -> {
-          DeliveredResult deliveredResult = new DeliveredResult();
+          DeliverResult deliveredResult = new DeliverResult();
           deliveredResult.setEventId(event.getEventId());
-          deliveredResult.setSuccess(false);
+          deliveredResult.setStatus(DeliverResult.Status.UN_ACK);
           return Mono.just(deliveredResult);
         });
   }

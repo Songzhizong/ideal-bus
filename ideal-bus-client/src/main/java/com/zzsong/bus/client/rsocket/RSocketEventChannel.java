@@ -268,7 +268,7 @@ public class RSocketEventChannel extends Thread implements EventChannel {
   @Nonnull
   @Override
   @MessageMapping(RSocketRoute.CLIENT_RECEIVE)
-  public Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event) {
+  public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
     return busClient.receive(event);
   }
 

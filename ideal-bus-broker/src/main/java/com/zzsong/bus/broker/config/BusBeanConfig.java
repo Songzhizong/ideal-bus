@@ -1,8 +1,6 @@
 package com.zzsong.bus.broker.config;
 
 import com.zzsong.bus.abs.generator.ReactiveRedisSnowFlakeFactory;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +16,6 @@ public class BusBeanConfig {
 
   @Value("${spring.application.name}")
   private String applicationName;
-
-  @Getter
-  @Setter
-  private boolean initialized;
 
   @Bean
   public ReactiveRedisSnowFlakeFactory reactiveRedisSnowFlakeFactory(

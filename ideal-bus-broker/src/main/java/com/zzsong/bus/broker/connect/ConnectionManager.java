@@ -1,10 +1,11 @@
 package com.zzsong.bus.broker.connect;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
-import com.zzsong.bus.broker.constants.DeliverResult;
+import com.zzsong.bus.common.message.DeliverResult;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * 连接管理器
@@ -12,15 +13,6 @@ import javax.annotation.Nonnull;
  * @author 宋志宗 on 2020/11/25
  */
 public interface ConnectionManager {
-
-  /**
-   * 检测应用是否可用
-   *
-   * @param appName 应用名称
-   * @return 是否可用
-   * @author 宋志宗 on 2020/11/25
-   */
-  boolean isApplicationAvailable(@Nonnull String appName);
 
   /**
    * 注册连接通道
@@ -66,5 +58,6 @@ public interface ConnectionManager {
    * @author 宋志宗 on 2020/11/25
    */
   @Nonnull
-  Mono<DeliverResult> deliver(@Nonnull RouteInstance routeInstance);
+  Mono<DeliverResult> deliver(@Nonnull RouteInstance routeInstance,
+                              @Nullable PreDeliverHandler handler);
 }

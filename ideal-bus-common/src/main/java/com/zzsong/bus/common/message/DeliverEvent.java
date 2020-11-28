@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * 交付到订阅者的事件信息
@@ -18,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveredEvent {
+public class DeliverEvent {
   private long routeInstanceId;
   private long subscriptionId;
   /**
@@ -54,5 +53,5 @@ public class DeliveredEvent {
    * <p>如果为null或者空则代表应交由所有的监听器进行处理</p>
    */
   @Nullable
-  private List<String> listeners;
+  private String listener;
 }

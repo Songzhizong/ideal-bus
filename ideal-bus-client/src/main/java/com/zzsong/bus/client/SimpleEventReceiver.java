@@ -1,7 +1,7 @@
 package com.zzsong.bus.client;
 
-import com.zzsong.bus.common.message.DeliveredEvent;
-import com.zzsong.bus.common.message.DeliveredResult;
+import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.message.DeliverResult;
 import com.zzsong.bus.client.deliver.EventDeliverer;
 import com.zzsong.bus.client.deliver.EventDelivererImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class SimpleEventReceiver implements EventReceiver {
 
   @Nonnull
   @Override
-  public Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event) {
+  public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
     return eventDeliverer.deliver(event).doOnNext(res -> {
       if (primaryBusy.get()) {
         int activeCount = primary.getActiveCount();

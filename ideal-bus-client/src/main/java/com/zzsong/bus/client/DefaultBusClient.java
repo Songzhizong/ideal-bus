@@ -1,7 +1,7 @@
 package com.zzsong.bus.client;
 
-import com.zzsong.bus.common.message.DeliveredEvent;
-import com.zzsong.bus.common.message.DeliveredResult;
+import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.message.DeliverResult;
 import com.zzsong.bus.common.message.EventMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import reactor.core.publisher.Flux;
@@ -28,7 +28,7 @@ public class DefaultBusClient implements BusClient {
 
   @Nonnull
   @Override
-  public Mono<DeliveredResult> receive(@Nonnull DeliveredEvent event) {
+  public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
     return Mono.empty();
   }
 }

@@ -3,9 +3,11 @@ package com.zzsong.bus.broker.core;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.broker.admin.service.RouteInstanceService;
 import com.zzsong.bus.broker.config.BusProperties;
+import com.zzsong.bus.broker.core.transfer.RouteTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -70,6 +72,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
           List<RouteInstance> submitList = new ArrayList<>();
           for (RouteInstance routeInstance : routeInstanceList) {
             long nextPushTime = routeInstance.getNextPushTime();
+            routeInstance.setNextPushTime(-1);
             if (nowTime >= nextPushTime) {
               submitList.add(routeInstance);
             } else {
@@ -78,7 +81,10 @@ public class TimingScheduler implements SmartInitializingSingleton {
             }
           }
           if (submitList.size() > 0) {
-            routeTransfer.submit(submitList).subscribe();
+            Flux.fromIterable(submitList)
+                .flatMap(routeTransfer::submit)
+                .collectList()
+                .subscribe();
           }
         } else {
           preReadSuc = false;
@@ -119,7 +125,10 @@ public class TimingScheduler implements SmartInitializingSingleton {
           int second = (nowSecond + 60 - i) % 60;
           List<RouteInstance> tmpData = ringData.remove(second);
           if (tmpData != null) {
-            routeTransfer.submit(tmpData).subscribe();
+            Flux.fromIterable(tmpData)
+                .flatMap(routeTransfer::submit)
+                .collectList()
+                .subscribe();
           }
         }
         try {

@@ -1,7 +1,7 @@
 package com.zzsong.bus.broker.cluster;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
-import com.zzsong.bus.broker.constants.DeliverResult;
+import com.zzsong.bus.common.message.DeliverResult;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;

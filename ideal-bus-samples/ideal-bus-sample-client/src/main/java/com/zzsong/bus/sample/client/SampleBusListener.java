@@ -32,7 +32,7 @@ public class SampleBusListener {
       name = "testAutoAck",
       topic = "example_topic",
       condition = "age>10",
-      delayExp = "10",
+      delayExp = "-1",
       autoAck = true
   )
   @SuppressWarnings("DefaultAnnotationParam")

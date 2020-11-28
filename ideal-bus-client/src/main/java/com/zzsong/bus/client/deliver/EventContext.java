@@ -39,14 +39,8 @@ public class EventContext<T> {
   /** 事件产生时间戳 */
   private long timestamp;
 
-  /** 监听器名称 */
-  @Nonnull
-  private final String listenerName;
-
-  public EventContext(@Nonnull T payload,
-                      @Nonnull String listenerName) {
+  public EventContext(@Nonnull T payload) {
     this.payload = payload;
-    this.listenerName = listenerName;
   }
 
   /**

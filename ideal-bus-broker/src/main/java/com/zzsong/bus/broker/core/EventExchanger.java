@@ -5,18 +5,18 @@ import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
 import com.zzsong.bus.broker.admin.service.EventInstanceService;
-import com.zzsong.bus.broker.admin.service.RouteInstanceService;
 import com.zzsong.bus.broker.config.BusProperties;
+import com.zzsong.bus.broker.core.transfer.RouteTransfer;
 import com.zzsong.bus.common.message.PublishResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,8 +31,6 @@ public class EventExchanger {
   private final BusProperties properties;
   @Nonnull
   private final RouteTransfer routeTransfer;
-  @Nonnull
-  private final RouteInstanceService routeInstanceService;
   @Nonnull
   private final EventInstanceService eventInstanceService;
   @Nonnull
@@ -54,11 +52,9 @@ public class EventExchanger {
       if (instanceList.isEmpty()) {
         return Mono.just(builder.message("该事件没有订阅者").build());
       }
-      // 过滤掉延迟消息
-      List<RouteInstance> collect = instanceList.stream()
-          .filter(instance -> instance.getNextPushTime() < 1L)
-          .collect(Collectors.toList());
-      return routeTransfer.submit(collect)
+      return Flux.fromIterable(instanceList)
+          .flatMap(routeTransfer::submit)
+          .collectList()
           .thenReturn(builder.build());
     });
   }
@@ -70,8 +66,7 @@ public class EventExchanger {
     return subscriptionManager.getSubscriptions(event)
         .map(list -> list.stream()
             .map(d -> createRouteInstance(event, d))
-            .collect(Collectors.toList()))
-        .flatMap(routeInstanceService::saveAll);
+            .collect(Collectors.toList()));
   }
 
   @Nonnull
@@ -107,7 +102,7 @@ public class EventExchanger {
     String listenerName = details.getListenerName();
     // 指定的监听器列表
     if (StringUtils.isNotBlank(listenerName)) {
-      instance.setListeners(Collections.singletonList(listenerName));
+      instance.setListener(listenerName);
     }
     return instance;
   }
