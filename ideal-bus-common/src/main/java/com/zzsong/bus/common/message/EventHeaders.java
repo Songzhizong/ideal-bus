@@ -12,7 +12,6 @@ import java.util.*;
  */
 public class EventHeaders implements Map<String, Set<String>>, Serializable {
   private static final long serialVersionUID = 117500675943825408L;
-  private static final String PUBLISHER = "X-Bus-Publisher";
   private final Map<String, Set<String>> targetMap;
 
   @Nonnull
@@ -22,16 +21,6 @@ public class EventHeaders implements Map<String, Set<String>>, Serializable {
 
   public EventHeaders() {
     this.targetMap = new LinkedHashMap<>();
-  }
-
-  @Nullable
-  public String getPublisher() {
-    return this.getOne(PUBLISHER);
-  }
-
-  @Nonnull
-  public EventHeaders setPublisher(@Nonnull String publisher) {
-    return this.set(PUBLISHER, publisher);
   }
 
   @Nullable

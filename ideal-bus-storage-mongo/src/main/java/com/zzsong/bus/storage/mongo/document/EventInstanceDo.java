@@ -25,6 +25,7 @@ public class EventInstanceDo {
 
   /** 业务方唯一id */
   @Nonnull
+  @Indexed(background = true)
   private String transactionId;
 
   /** 聚合id */
