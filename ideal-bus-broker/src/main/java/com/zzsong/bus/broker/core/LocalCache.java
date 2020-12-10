@@ -6,6 +6,7 @@ import com.zzsong.bus.broker.config.BusProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -31,12 +32,11 @@ public class LocalCache implements InitializingBean, DisposableBean {
   @Nonnull
   private final BusProperties properties;
   @Nonnull
-  private final SubscriptionService subscriptionService;
+  @Autowired
+  private SubscriptionService subscriptionService;
 
-  public LocalCache(@Nonnull BusProperties properties,
-                    @Nonnull SubscriptionService subscriptionService) {
+  public LocalCache(@Nonnull BusProperties properties) {
     this.properties = properties;
-    this.subscriptionService = subscriptionService;
   }
 
   private Thread refreshCacheThread;
