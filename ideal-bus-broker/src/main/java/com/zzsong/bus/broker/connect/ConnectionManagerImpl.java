@@ -76,8 +76,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
               .flatMap(channel -> channel.deliver(deliveredEvent))
               .onErrorResume(throwable -> {
                 log.error("交付异常: ", throwable);
+                String message = throwable.getMessage();
+                if (message == null) {
+                  message = "";
+                }
                 DeliverResult offLineResult
-                    = new DeliverResult(eventId, DeliverResult.Status.UNKNOWN_EXCEPTION, "");
+                    = new DeliverResult(eventId, DeliverResult.Status.UN_ACK, message);
                 return Mono.just(offLineResult);
               })
               .collectList()
@@ -119,8 +123,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
           if (throwable instanceof ClosedChannelException) {
             deliverResult.setStatus(DeliverResult.Status.CHANNEL_CLOSED);
           } else {
-            log.error("交付异常: ", throwable);
-            deliverResult.setStatus(DeliverResult.Status.UNKNOWN_EXCEPTION);
+            log.error("交付出现未知异常: ", throwable);
+            deliverResult.setStatus(DeliverResult.Status.UN_ACK);
+            String message = throwable.getMessage();
+            if (message != null) {
+              deliverResult.setMessage(message);
+            }
           }
           return Mono.just(deliverResult);
         });

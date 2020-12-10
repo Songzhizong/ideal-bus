@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="broker-2" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="ideal-bus-broker-server" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.bus.broker.server.BrokerApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.bus.server.BrokerApplication" />
     <option name="PROGRAM_PARAMETERS" value="--server.port=13257  --spring.rsocket.server.port=13267 --ideal.bus.node-id=2" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">

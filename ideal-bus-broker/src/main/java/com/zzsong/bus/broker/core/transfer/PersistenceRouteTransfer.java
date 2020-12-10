@@ -235,13 +235,11 @@ public class PersistenceRouteTransfer
                     offlineSet.add(routeInstance.getApplicationId());
                     yield Mono.just(false);
                   }
-                  case CHANNEL_CLOSED,
-                      UNKNOWN_EXCEPTION -> Mono.just(false);
+                  case CHANNEL_CLOSED -> Mono.just(false);
                 });
       }
       // 通道关闭或未知异常均将消息返还给队列
-      case CHANNEL_CLOSED,
-          UNKNOWN_EXCEPTION -> Mono.just(false);
+      case CHANNEL_CLOSED -> Mono.just(false);
     };
   }
 
