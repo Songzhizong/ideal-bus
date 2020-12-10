@@ -4,6 +4,16 @@
 
 ### 🐞 Bug Fixes
 
+- 修复交付失败情况下的无限重试问题
+
+### 🔨 Dependency Upgrades
+
+# 1.1.0-M2
+
+### ⭐ New Features
+
+### 🐞 Bug Fixes
+
 - 修复启动时报循环依赖的问题
 
 ### 🔨 Dependency Upgrades
