@@ -1,3 +1,13 @@
+# 1.1.0-M2
+
+### ⭐ New Features
+
+### 🐞 Bug Fixes
+
+- 修复启动时报循环依赖的问题
+
+### 🔨 Dependency Upgrades
+
 # 1.1.0-M1
 
 ### ⭐ New Features
