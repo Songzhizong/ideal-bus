@@ -28,6 +28,12 @@ public class DefaultBusClient implements BusClient {
 
   @Nonnull
   @Override
+  public Flux<PublishResult> publish(@Nonnull Flux<EventMessage<?>> messages) {
+    return Flux.empty();
+  }
+
+  @Nonnull
+  @Override
   public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
     return Mono.empty();
   }

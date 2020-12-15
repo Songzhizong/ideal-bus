@@ -156,4 +156,10 @@ public class SimpleBusClient extends SimpleEventReceiver implements BusClient {
   public Flux<PublishResult> publish(@Nonnull Collection<EventMessage<?>> messages) {
     return Flux.fromIterable(messages).flatMap(this::publish);
   }
+
+  @Nonnull
+  @Override
+  public Flux<PublishResult> publish(@Nonnull Flux<EventMessage<?>> messages) {
+    return messages.flatMap(this::publish);
+  }
 }

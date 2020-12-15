@@ -23,4 +23,10 @@ public interface EventPublisher {
    */
   @Nonnull
   Flux<PublishResult> publish(@Nonnull Collection<EventMessage<?>> messages);
+
+  /**
+   * 批量发布
+   */
+  @Nonnull
+  Flux<PublishResult> publish(@Nonnull Flux<EventMessage<?>> messages);
 }
