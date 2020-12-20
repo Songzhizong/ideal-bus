@@ -1,14 +1,12 @@
 package com.zzsong.bus.common.message;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * 事件信息
@@ -21,6 +19,9 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventMessage<T> {
+  /** 唯一编号 */
+  @Setter(AccessLevel.PROTECTED)
+  private String uuid = UUID.randomUUID().toString();
 
   /** 业务方唯一id, 通常为业务方的事务编号 */
   @Nonnull
