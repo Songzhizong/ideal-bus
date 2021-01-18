@@ -27,6 +27,10 @@ public class EventMessage<T> {
   @Nonnull
   private String transactionId = "";
 
+  /** 实体类型 */
+  @Nullable
+  private String entity;
+
   /** 聚合id */
   @Nullable
   private String aggregate;
@@ -79,8 +83,9 @@ public class EventMessage<T> {
   @Nonnull
   public static <T> EventMessage<T> of(@Nonnull String topic,
                                        @Nonnull T payload,
+                                       @Nonnull String entity,
                                        @Nonnull String aggregate) {
-    return new EventMessage<T>(topic, payload).aggregate(aggregate);
+    return new EventMessage<T>(topic, payload).entity(entity).aggregate(aggregate);
   }
 
   @Nonnull
@@ -91,8 +96,23 @@ public class EventMessage<T> {
   }
 
   @Nonnull
+  public static <T> EventMessage<T> of(@Nonnull String topic,
+                                       @Nonnull T payload,
+                                       @Nonnull String entity,
+                                       @Nonnull String aggregate,
+                                       @Nonnull EventHeaders headers) {
+    return new EventMessage<>(topic, payload, headers).entity(entity).aggregate(aggregate);
+  }
+
+  @Nonnull
   public EventMessage<T> transactionId(@Nonnull String transactionId) {
     this.transactionId = transactionId;
+    return this;
+  }
+
+  @Nonnull
+  public EventMessage<T> entity(@Nonnull String entity) {
+    this.entity = entity;
     return this;
   }
 
