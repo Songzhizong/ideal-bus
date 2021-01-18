@@ -76,11 +76,8 @@ public class EventExchanger {
     RouteInstance instance = new RouteInstance();
     instance.setEventId(event.getEventId());
     instance.setTransactionId(event.getTransactionId());
-    String aggregate = event.getAggregate();
-    if (aggregate == null) {
-      aggregate = DBDefaults.STRING_VALUE;
-    }
-    instance.setAggregate(aggregate);
+    instance.setEntity(event.getEntity());
+    instance.setAggregate(event.getAggregate());
     instance.setExternalApp(event.getExternalApp());
     instance.setTopic(event.getTopic());
     instance.setHeaders(event.getHeaders());

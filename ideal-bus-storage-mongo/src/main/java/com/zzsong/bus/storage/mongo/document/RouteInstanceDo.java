@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,6 +24,11 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_route_info")
+@CompoundIndexes({
+    @CompoundIndex(name = "ck_entity_aggregate",
+        def = "{'entity' : 1, 'aggregate': 1}",
+        background = true, sparse = true)
+})
 public class RouteInstanceDo {
   /**
    * 实例id
@@ -38,8 +45,12 @@ public class RouteInstanceDo {
   @Nonnull
   private String transactionId;
 
+  /** 实体类型 */
+  @Nullable
+  private String entity;
+
   /** 聚合id */
-  @Nonnull
+  @Nullable
   private String aggregate;
 
   /** 可通过该字段判断event归属哪个应用 */

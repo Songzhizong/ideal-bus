@@ -2,21 +2,18 @@
 
 ### ⭐ New Features
 
-### 🐞 Bug Fixes
-
-- 修复交付失败情况下的无限重试问题
-
-### 🔨 Dependency Upgrades
-
-# 1.1.0-M2
-
-### ⭐ New Features
+- EventMessage新增entity字段保存聚合根的类型
 
 ### 🐞 Bug Fixes
 
 - 修复启动时报循环依赖的问题
+- 修复交付失败情况下的无限重试问题
 
 ### 🔨 Dependency Upgrades
+
+- guava 30.1-jre
+- spring boot 2.4.2
+- project reactor 2020.0.3
 
 # 1.1.0-M1
 

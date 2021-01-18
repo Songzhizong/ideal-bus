@@ -3,6 +3,8 @@ package com.zzsong.bus.storage.mongo.document;
 import com.zzsong.bus.common.message.EventHeaders;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +19,11 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document("ideal_bus_event_inst")
+@CompoundIndexes({
+    @CompoundIndex(name = "ck_entity_aggregate",
+        def = "{'entity' : 1, 'aggregate': 1}",
+        background = true, sparse = true)
+})
 public class EventInstanceDo {
   /** 事件唯一id */
   @Id
@@ -28,9 +35,12 @@ public class EventInstanceDo {
   @Indexed(background = true)
   private String transactionId;
 
+  /** 实体类型 */
+  @Nullable
+  private String entity;
+
   /** 聚合id */
   @Nullable
-  @Indexed(background = true)
   private String aggregate;
 
   /** 可通过该字段判断event归属哪个外部应用 */
