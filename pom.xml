@@ -20,22 +20,30 @@
     <module>ideal-bus-storage-r2dbc</module>
   </modules>
 
-<!--  <repositories>-->
-<!--    <repository>-->
-<!--      <id>my_nexus</id>-->
-<!--      <url>http://192.168.1.182:8081/repository/maven-public/</url>-->
-<!--    </repository>-->
-<!--  </repositories>-->
-<!--  <distributionManagement>-->
-<!--    <repository>-->
-<!--      <id>my_nexus</id>-->
-<!--      <url>http://192.168.1.182:8081/repository/maven-releases/</url>-->
-<!--    </repository>-->
-<!--    <snapshotRepository>-->
-<!--      <id>my_nexus</id>-->
-<!--      <url>http://192.168.1.182:8081/repository/maven-snapshots/</url>-->
-<!--    </snapshotRepository>-->
-<!--  </distributionManagement>-->
+  <repositories>
+    <repository>
+      <id>ideal-release</id>
+      <name>Ideal Release</name>
+      <url>http://192.168.1.182:8081/repository/maven-public/</url>
+    </repository>
+    <repository>
+      <id>ideal-snapshots</id>
+      <name>Ideal Snapshots</name>
+      <url>http://192.168.1.182:8081/repository/maven-snapshots/</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <repository>
+      <id>ideal-release</id>
+      <name>Ideal Release</name>
+      <url>http://192.168.1.182:8081/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ideal-snapshots</id>
+      <name>Ideal Snapshots</name>
+      <url>http://192.168.1.182:8081/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
