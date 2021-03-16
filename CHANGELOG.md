@@ -1,3 +1,16 @@
+# 1.1.0-SNAPSHOT
+
+### ⭐ New Features
+
+- 客户端开始消费时间点由启动过程中修改为启动完成后
+
+### 🐞 Bug Fixes
+
+### 🔨 Dependency Upgrades
+
+- spring boot 2.4.3
+- project reactor 2020.0.5
+
 # 1.1.0-M2
 
 ### ⭐ New Features

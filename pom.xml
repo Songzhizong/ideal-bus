@@ -6,7 +6,7 @@
   <groupId>com.zzsong</groupId>
   <artifactId>ideal-bus</artifactId>
   <packaging>pom</packaging>
-  <version>1.1.0-M2</version>
+  <version>1.1.0-SNAPSHOT</version>
 
   <modules>
     <module>ideal-bus-abstract</module>
@@ -49,9 +49,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <guava.version>30.1-jre</guava.version>
-    <reactor-bom.version>2020.0.3</reactor-bom.version>
-    <spring.boot.version>2.4.2</spring.boot.version>
-    <lombok.version>1.18.16</lombok.version>
+    <reactor-bom.version>2020.0.5</reactor-bom.version>
+    <spring.boot.version>2.4.3</spring.boot.version>
+    <lombok.version>1.18.18</lombok.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
