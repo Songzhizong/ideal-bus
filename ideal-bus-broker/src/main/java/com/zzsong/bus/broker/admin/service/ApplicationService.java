@@ -46,7 +46,7 @@ public class ApplicationService {
     long applicationId = args.getApplicationId();
     return applicationStorage.findById(applicationId)
         .flatMap(opt -> {
-          if (opt.isEmpty()) {
+          if (!opt.isPresent()) {
             return Mono.error(new VisibleException(CommonResMsg.NOT_FOUND));
           }
           Application application = opt.get();

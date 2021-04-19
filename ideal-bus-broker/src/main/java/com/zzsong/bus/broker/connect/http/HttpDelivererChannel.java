@@ -41,14 +41,14 @@ public class HttpDelivererChannel implements DelivererChannel {
         .body(BodyInserters.fromValue(event))
         .retrieve()
         .bodyToMono(String.class)
-        .map(res ->
-            switch (applicationType) {
-              case INTERNAL -> JsonUtils.parseJson(res, DeliverResult.class);
-              case EXTERNAL -> {
+        .map(res -> {
+              if (applicationType == ApplicationType.INTERNAL) {
+                return JsonUtils.parseJson(res, DeliverResult.class);
+              } else {
                 DeliverResult deliveredResult = new DeliverResult();
                 deliveredResult.setEventId(event.getEventId());
                 deliveredResult.setStatus(DeliverResult.Status.ACK);
-                yield deliveredResult;
+                return deliveredResult;
               }
             }
         )

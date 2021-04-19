@@ -11,10 +11,6 @@
   <artifactId>ideal-bus-storage-mongo</artifactId>
   <description>MongoDB存储库</description>
 
-  <properties>
-    <java.version>15</java.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.zzsong</groupId>
