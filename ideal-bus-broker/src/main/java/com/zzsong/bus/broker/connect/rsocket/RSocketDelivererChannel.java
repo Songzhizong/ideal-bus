@@ -18,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 public class RSocketDelivererChannel implements DelivererChannel {
   private static final ParameterizedTypeReference<DeliverResult> DELIVERED_RESULT_RES
-      = new ParameterizedTypeReference<>() {
+      = new ParameterizedTypeReference<DeliverResult>() {
   };
   @Nonnull
   private final String instanceId;

@@ -27,8 +27,8 @@ public class DeliverEvent {
   /**
    * 业务方唯一id
    */
-  @Nonnull
-  private String transactionId;
+  @Nullable
+  private String transactionId = "";
   /**
    * 事件主题
    */

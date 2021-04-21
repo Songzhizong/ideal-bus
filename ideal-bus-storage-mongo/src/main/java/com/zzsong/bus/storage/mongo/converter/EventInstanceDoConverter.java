@@ -18,7 +18,12 @@ public final class EventInstanceDoConverter {
   public static EventInstanceDo fromEventInstance(@Nonnull EventInstance eventInstance) {
     EventInstanceDo eventInstanceDo = new EventInstanceDo();
     eventInstanceDo.setEventId(eventInstance.getEventId());
-    eventInstanceDo.setTransactionId(eventInstance.getTransactionId());
+    String transactionId = eventInstance.getTransactionId();
+    if (StringUtils.isBlank(transactionId)) {
+      eventInstanceDo.setTransactionId(null);
+    } else {
+      eventInstanceDo.setTransactionId(transactionId);
+    }
     eventInstanceDo.setEntity(eventInstance.getEntity());
     eventInstanceDo.setAggregate(eventInstance.getAggregate());
     String externalApp = eventInstance.getExternalApp();

@@ -1,5 +1,6 @@
 package com.zzsong.bus.broker.connect;
 
+import com.google.common.collect.ImmutableList;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.common.message.DeliverEvent;
 import com.zzsong.bus.common.message.DeliverResult;
@@ -30,7 +31,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
   @Override
   public void registerChannel(@Nonnull String appName, @Nonnull DelivererChannel channel) {
-    lbFactory.addServers(appName, List.of(channel));
+    lbFactory.addServers(appName, ImmutableList.of(channel));
   }
 
   @Override

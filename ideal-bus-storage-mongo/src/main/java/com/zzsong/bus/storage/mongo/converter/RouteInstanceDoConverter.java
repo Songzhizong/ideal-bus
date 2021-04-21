@@ -21,7 +21,12 @@ public final class RouteInstanceDoConverter {
     RouteInstanceDo routeInstanceDo = new RouteInstanceDo();
     routeInstanceDo.setInstanceId(routeInstance.getInstanceId());
     routeInstanceDo.setEventId(routeInstance.getEventId());
-    routeInstanceDo.setTransactionId(routeInstance.getTransactionId());
+    String transactionId = routeInstance.getTransactionId();
+    if (StringUtils.isBlank(transactionId)) {
+      routeInstanceDo.setTransactionId(null);
+    } else {
+      routeInstanceDo.setTransactionId(transactionId);
+    }
     routeInstanceDo.setEntity(routeInstance.getEntity());
     routeInstanceDo.setAggregate(routeInstance.getAggregate());
 

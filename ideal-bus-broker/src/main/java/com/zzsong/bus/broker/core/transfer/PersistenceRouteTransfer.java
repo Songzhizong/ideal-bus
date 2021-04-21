@@ -216,31 +216,70 @@ public class PersistenceRouteTransfer
    *
    * @author 宋志宗 on 2020/11/25
    */
+  @SuppressWarnings("DuplicateBranchesInSwitch")
   @Nonnull
   private Mono<Boolean> handleDeliverResult(@Nonnull RouteInstance routeInstance,
                                             @Nonnull DeliverResult deliverResult) {
     DeliverResult.Status status = deliverResult.getStatus();
-    return switch (status) {
-      case ACK, UN_ACK -> handleRouteInstance(routeInstance, deliverResult);
-      case APP_OFFLINE -> {
-        log.debug("应用不在线, 尝试委托集群交付消息.");
-        yield clusterApi
-            .entrustDeliver(routeInstance)
-            .flatMap(entrust ->
-                switch (entrust.getStatus()) {
-                  case ACK, UN_ACK -> handleRouteInstance(routeInstance, deliverResult);
-                  // 集群代理执行交付也失败了则将消息返还给队列
-                  case APP_OFFLINE -> {
-                    log.debug("委托集群交付失败, 应用不在线.");
-                    offlineSet.add(routeInstance.getApplicationId());
-                    yield Mono.just(false);
-                  }
-                  case CHANNEL_CLOSED -> Mono.just(false);
-                });
+//    return switch (status) {
+//      case ACK, UN_ACK -> handleRouteInstance(routeInstance, deliverResult);
+//      case APP_OFFLINE -> {
+//        log.debug("应用不在线, 尝试委托集群交付消息.");
+//        yield clusterApi
+//            .entrustDeliver(routeInstance)
+//            .flatMap(entrust ->
+//                switch (entrust.getStatus()) {
+//                  case ACK, UN_ACK -> handleRouteInstance(routeInstance, deliverResult);
+//                  // 集群代理执行交付也失败了则将消息返还给队列
+//                  case APP_OFFLINE -> {
+//                    log.debug("委托集群交付失败, 应用不在线.");
+//                    offlineSet.add(routeInstance.getApplicationId());
+//                    yield Mono.just(false);
+//                  }
+//                  case CHANNEL_CLOSED -> Mono.just(false);
+//                });
+//      }
+//      // 通道关闭或未知异常均将消息返还给队列
+//      case CHANNEL_CLOSED -> Mono.just(false);
+//    };
+    switch (status) {
+      case ACK:
+      case UN_ACK: {
+        return handleRouteInstance(routeInstance, deliverResult);
       }
-      // 通道关闭或未知异常均将消息返还给队列
-      case CHANNEL_CLOSED -> Mono.just(false);
-    };
+      case APP_OFFLINE: {
+        log.debug("应用不在线, 尝试委托集群交付消息.");
+        return clusterApi
+            .entrustDeliver(routeInstance)
+            .flatMap(entrust -> {
+                  switch (entrust.getStatus()) {
+                    case ACK:
+                    case UN_ACK: {
+                      return handleRouteInstance(routeInstance, deliverResult);
+                    }
+                    // 集群代理执行交付也失败了则将消息返还给队列
+                    case APP_OFFLINE: {
+                      log.debug("委托集群交付失败, 应用不在线.");
+                      offlineSet.add(routeInstance.getApplicationId());
+                      return Mono.just(false);
+                    }
+                    case CHANNEL_CLOSED: {
+                      return Mono.just(false);
+                    }
+                    default:{
+                      return Mono.just(false);
+                    }
+                  }
+                }
+            );
+      }
+      case CHANNEL_CLOSED:{
+        return Mono.just(false);
+      }
+      default:{
+        return Mono.just(false);
+      }
+    }
   }
 
   @Override

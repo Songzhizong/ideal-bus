@@ -72,7 +72,7 @@ public class SubscriptionService {
   public Mono<Subscription> update(@Nonnull SubscribeArgs args, long subscriptionId) {
     return storage.findById(subscriptionId)
         .flatMap(opt -> {
-          if (opt.isEmpty()) {
+          if (!opt.isPresent()) {
             return Mono.error(new VisibleException("订阅关系不存在"));
           }
           Subscription subscription = opt.get();
@@ -86,7 +86,7 @@ public class SubscriptionService {
   public Mono<Integer> reversalStatus(long subscriptionId) {
     return storage.findById(subscriptionId)
         .flatMap(opt -> {
-          if (opt.isEmpty()) {
+          if (!opt.isPresent()) {
             return Mono.error(new VisibleException("订阅关系不存在"));
           }
           Subscription subscription = opt.get();
@@ -101,7 +101,7 @@ public class SubscriptionService {
     long applicationId = autoSubscribeArgs.getApplicationId();
     return applicationService.loadById(applicationId)
         .flatMap(opt -> {
-          if (opt.isEmpty()) {
+          if (!opt.isPresent()) {
             return Mono.error(new VisibleException("订阅者不存在"));
           }
           return getSubscription(applicationId).flatMap(subscriptions -> {
@@ -217,7 +217,7 @@ public class SubscriptionService {
                 return details;
               })
               .filter(Objects::nonNull)
-              .collect(Collectors.toUnmodifiableList());
+              .collect(Collectors.toList());
         });
   }
 

@@ -31,8 +31,8 @@ public class EventInstanceDo {
   private Long eventId;
 
   /** 业务方唯一id */
-  @Nonnull
-  @Indexed(background = true)
+  @Nullable
+  @Indexed(background = true, sparse = true)
   private String transactionId;
 
   /** 实体类型 */

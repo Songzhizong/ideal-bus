@@ -24,7 +24,7 @@ public class EventMessage<T> {
   private String uuid = UUID.randomUUID().toString();
 
   /** 业务方唯一id, 通常为业务方的事务编号 */
-  @Nonnull
+  @Nullable
   private String transactionId = "";
 
   /** 实体类型 */
