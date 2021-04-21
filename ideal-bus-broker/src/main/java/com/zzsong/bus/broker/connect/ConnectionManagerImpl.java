@@ -141,7 +141,11 @@ public class ConnectionManagerImpl implements ConnectionManager {
     deliveredEvent.setRouteInstanceId(instance.getInstanceId());
     deliveredEvent.setSubscriptionId(instance.getSubscriptionId());
     deliveredEvent.setEventId(instance.getEventId());
-    deliveredEvent.setTransactionId(instance.getTransactionId());
+    String transactionId = instance.getTransactionId();
+    if (transactionId == null) {
+      transactionId = "";
+    }
+    deliveredEvent.setTransactionId(transactionId);
     deliveredEvent.setTopic(instance.getTopic());
     deliveredEvent.setHeaders(instance.getHeaders());
     deliveredEvent.setPayload(instance.getPayload());

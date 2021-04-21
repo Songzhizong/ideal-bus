@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author 宋志宗 on 2020/9/17
@@ -25,8 +26,8 @@ public class EventContext<T> {
   private long eventId;
 
   /** 业务方唯一id */
-  @Nonnull
-  private String transactionId;
+  @Nullable
+  private String transactionId = "";
 
   /** 消息头 */
   @Nonnull
