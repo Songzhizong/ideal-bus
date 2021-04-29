@@ -3,7 +3,7 @@ package com.zzsong.bus.broker.admin.controller;
 import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
 import com.zzsong.bus.abs.share.Res;
-import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
+import com.zzsong.bus.common.transfer.ResubscribeArgs;
 import com.zzsong.bus.broker.admin.service.SubscriptionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -82,9 +82,9 @@ public class SubscriptionController {
   @Nonnull
   @PostMapping("/subscribe/auto")
   public Mono<Res<List<Subscription>>> autoSubscription(@RequestBody @Nonnull
-                                                            AutoSubscribeArgs args) {
+                                                            ResubscribeArgs args) {
     return Mono.just(args.checkAndGet())
-        .flatMap(subscriptionService::autoSubscribe)
+        .flatMap(subscriptionService::resubscribe)
         .map(Res::data);
   }
 

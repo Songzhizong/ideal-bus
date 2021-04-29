@@ -8,7 +8,7 @@ import com.zzsong.bus.abs.share.VisibleException;
 import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.abs.transfer.SubscribeArgs;
 import com.zzsong.bus.common.share.utils.JsonUtils;
-import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
+import com.zzsong.bus.common.transfer.ResubscribeArgs;
 import com.zzsong.bus.common.transfer.SubscriptionArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,8 +97,8 @@ public class SubscriptionService {
   }
 
   @Nonnull
-  public Mono<List<Subscription>> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
-    long applicationId = autoSubscribeArgs.getApplicationId();
+  public Mono<List<Subscription>> resubscribe(@Nonnull ResubscribeArgs resubscribeArgs) {
+    long applicationId = resubscribeArgs.getApplicationId();
     return applicationService.loadById(applicationId)
         .flatMap(opt -> {
           if (!opt.isPresent()) {
@@ -110,7 +110,7 @@ public class SubscriptionService {
             // 存储现有的订阅关系, topic_listenerName -> Subscription
             Map<String, Subscription> currentRelationMap = subscriptions.stream()
                 .collect(Collectors.toMap(s -> s.getTopic() + "_" + s.getListenerName(), s -> s));
-            List<SubscriptionArgs> argsList = autoSubscribeArgs.getSubscriptionArgsList();
+            List<SubscriptionArgs> argsList = resubscribeArgs.getSubscriptionArgsList();
             // 计算出变更列表
             List<Subscription> changeList = new ArrayList<>();
             for (SubscriptionArgs args : argsList) {

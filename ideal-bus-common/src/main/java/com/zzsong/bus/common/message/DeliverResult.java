@@ -47,6 +47,5 @@ public class DeliverResult {
      * <p>只代表当前选取的通道被关闭了, 可能存在别的可用通道</p>
      */
     CHANNEL_CLOSED,
-    ;
   }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AutoSubscribeArgs {
+public class ResubscribeArgs {
 
   /**
    * 订阅者id
@@ -28,7 +28,7 @@ public class AutoSubscribeArgs {
   private List<SubscriptionArgs> subscriptionArgsList = Collections.emptyList();
 
   @Nonnull
-  public AutoSubscribeArgs checkAndGet() {
+  public ResubscribeArgs checkAndGet() {
     //noinspection ConstantConditions
     if (applicationId == null) {
       throw new IllegalArgumentException("订阅者id不能为空");

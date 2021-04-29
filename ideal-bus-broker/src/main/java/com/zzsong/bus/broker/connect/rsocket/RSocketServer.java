@@ -12,7 +12,7 @@ import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.LoginMessage;
 import com.zzsong.bus.common.message.PublishResult;
 import com.zzsong.bus.common.share.utils.JsonUtils;
-import com.zzsong.bus.common.transfer.AutoSubscribeArgs;
+import com.zzsong.bus.common.transfer.ResubscribeArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -112,8 +112,8 @@ public class RSocketServer {
   }
 
   @MessageMapping(RSocketRoute.AUTO_SUBSCRIBE)
-  public Mono<String> autoSubscribe(@Nonnull AutoSubscribeArgs autoSubscribeArgs) {
-    return subscriptionService.autoSubscribe(autoSubscribeArgs).map(JsonUtils::toJsonString);
+  public Mono<String> autoSubscribe(@Nonnull ResubscribeArgs resubscribeArgs) {
+    return subscriptionService.resubscribe(resubscribeArgs).map(JsonUtils::toJsonString);
   }
 
   /**

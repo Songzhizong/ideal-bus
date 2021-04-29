@@ -5,9 +5,11 @@ import com.zzsong.bus.common.message.LoginMessage;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,18 +31,18 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   @Nonnull
   private final String brokerIp;
   private final int brokerPort;
-  private final long applicationId;
+  protected final long applicationId;
   @Nonnull
-  private final String clientIpPort;
+  protected final String clientIpPort;
   @Nullable
   private final String accessToken;
   @Nonnull
-  private final String brokerAddress;
+  protected final String brokerAddress;
 
-  private volatile boolean running = false;
-  private volatile boolean destroyed = false;
+  protected volatile boolean running = false;
+  protected volatile boolean destroyed = false;
   @Nullable
-  private RSocketRequester socketRequester = null;
+  protected RSocketRequester socketRequester = null;
 
   protected AbstractRSocketChannel(int socketType,
                                    @Nonnull String brokerIp,
@@ -55,6 +57,14 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     this.clientIpPort = clientIpPort;
     this.accessToken = accessToken;
     this.brokerAddress = brokerIp + ":" + brokerPort;
+  }
+
+  @MessageMapping(RSocketRoute.INTERRUPT)
+  public Mono<String> interrupt(String status) {
+    log.warn("Broker: {} 服务中断: {}, {} 秒后尝试重连...",
+        brokerAddress, status, RESTART_DELAY);
+    restartSocket();
+    return Mono.just("received...");
   }
 
   @Override
