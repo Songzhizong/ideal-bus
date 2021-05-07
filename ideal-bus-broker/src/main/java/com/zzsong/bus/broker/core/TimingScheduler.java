@@ -64,30 +64,35 @@ public class TimingScheduler implements SmartInitializingSingleton {
         long maxNextTime = nowTime + PRE_READ_MILLS;
         int nodeId = busProperties.getNodeId();
         boolean preReadSuc = true;
-        List<RouteInstance> routeInstanceList = routeInstanceService
-            .loadDelayed(maxNextTime, PRE_READ_COUNT, nodeId)
-            .block();
-        if (routeInstanceList != null && routeInstanceList.size() > 0) {
-          log.debug("loadDelayed: {}", routeInstanceList.size());
-          List<RouteInstance> submitList = new ArrayList<>();
-          for (RouteInstance routeInstance : routeInstanceList) {
-            long nextPushTime = routeInstance.getNextPushTime();
-            routeInstance.setNextPushTime(-1);
-            if (nowTime >= nextPushTime) {
-              submitList.add(routeInstance);
-            } else {
-              int ringSecond = (int) (nextPushTime / 1000 % 60);
-              pushTimeRing(ringSecond, routeInstance);
+        try {
+          List<RouteInstance> routeInstanceList = routeInstanceService
+              .loadDelayed(maxNextTime, PRE_READ_COUNT, nodeId)
+              .block();
+          if (routeInstanceList != null && routeInstanceList.size() > 0) {
+            log.debug("loadDelayed: {}", routeInstanceList.size());
+            List<RouteInstance> submitList = new ArrayList<>();
+            for (RouteInstance routeInstance : routeInstanceList) {
+              long nextPushTime = routeInstance.getNextPushTime();
+              routeInstance.setNextPushTime(-1);
+              if (nowTime >= nextPushTime) {
+                submitList.add(routeInstance);
+              } else {
+                int ringSecond = (int) (nextPushTime / 1000 % 60);
+                pushTimeRing(ringSecond, routeInstance);
+              }
             }
+            if (submitList.size() > 0) {
+              Flux.fromIterable(submitList)
+                  .flatMap(routeTransfer::submit)
+                  .collectList()
+                  .subscribe();
+            }
+          } else {
+            preReadSuc = false;
           }
-          if (submitList.size() > 0) {
-            Flux.fromIterable(submitList)
-                .flatMap(routeTransfer::submit)
-                .collectList()
-                .subscribe();
-          }
-        } else {
-          preReadSuc = false;
+        } catch (Exception e) {
+          log.warn("", e);
+          continue;
         }
         long cost = System.currentTimeMillis() - start;
         if (cost < 1000) {
