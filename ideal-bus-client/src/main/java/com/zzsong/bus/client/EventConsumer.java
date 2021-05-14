@@ -10,9 +10,6 @@ import javax.annotation.Nonnull;
  * @author 宋志宗 on 2021/4/29
  */
 public interface EventConsumer {
-  Mono<DeliverResult> receive(@Nonnull DeliverEvent event);
 
-  void registerBusyListener(@Nonnull BusyListener busyListener);
-
-  void removeBusyListener(@Nonnull BusyListener busyListener);
+  Mono<DeliverResult> onMessage(@Nonnull DeliverEvent event, @Nonnull Channel channel);
 }

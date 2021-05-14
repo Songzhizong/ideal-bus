@@ -1,6 +1,6 @@
 package com.zzsong.bus.client.impl;
 
-import com.zzsong.bus.client.BusyListener;
+import com.zzsong.bus.client.Channel;
 import com.zzsong.bus.client.EventConsumer;
 import com.zzsong.bus.common.message.DeliverEvent;
 import com.zzsong.bus.common.message.DeliverResult;
@@ -27,7 +27,6 @@ public class SimpleEventConsumer implements EventConsumer {
   private final ThreadPoolExecutor primary;
   private final Scheduler primaryScheduler;
   private final AtomicBoolean primaryBusy = new AtomicBoolean(false);
-  private Map<String, BusyListener> busyListeners = new ConcurrentHashMap<>();
 
   public SimpleEventConsumer(int corePoolSize, int maximumPoolSize) {
     this.maximumPoolSize = maximumPoolSize;
@@ -39,7 +38,6 @@ public class SimpleEventConsumer implements EventConsumer {
               corePoolSize, maximumPoolSize);
           primaryBusy.set(true);
           // 主线程池资源耗尽了, 发布忙碌通知
-          busyListeners.forEach((id, listener) -> listener.busyNotice());
           if (!e.isShutdown()) {
             r.run();
           }
@@ -48,18 +46,8 @@ public class SimpleEventConsumer implements EventConsumer {
   }
 
   @Override
-  public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
+  public Mono<DeliverResult> onMessage(@Nonnull DeliverEvent event, @Nonnull Channel channel) {
 //    return Mono.just(event).publishOn(primaryScheduler);
     return Mono.empty();
-  }
-
-  @Override
-  public void registerBusyListener(@Nonnull BusyListener busyListener) {
-    busyListeners.put(busyListener.getListenerId(), busyListener);
-  }
-
-  @Override
-  public void removeBusyListener(@Nonnull BusyListener busyListener) {
-    busyListeners.remove(busyListener.getListenerId());
   }
 }

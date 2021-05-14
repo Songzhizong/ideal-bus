@@ -5,5 +5,8 @@ package com.zzsong.bus.client;
  */
 public interface BusyListener {
   String getListenerId();
+
   void busyNotice();
+
+  void idleNotice();
 }
