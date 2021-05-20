@@ -12,7 +12,6 @@ import com.zzsong.bus.common.message.DeliverResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author 宋志宗 on 2020/9/19 8:08 下午
  */
 @Slf4j
-@Component("persistenceRouteTransfer")
+@Deprecated
 public class PersistenceRouteTransfer
     implements InitializingBean, DisposableBean, RouteTransfer, PreDeliverHandler {
   private static final long RETRY_INTERVAL = 10 * 1000L;
@@ -80,7 +79,6 @@ public class PersistenceRouteTransfer
     this.connectionManager = connectionManager;
     this.subscriptionService = subscriptionService;
     this.routeInstanceService = routeInstanceService;
-    RouteTransferFactory.register(TransferType.PERSISTENCE, this);
   }
 
   @Override
@@ -266,17 +264,17 @@ public class PersistenceRouteTransfer
                     case CHANNEL_CLOSED: {
                       return Mono.just(false);
                     }
-                    default:{
+                    default: {
                       return Mono.just(false);
                     }
                   }
                 }
             );
       }
-      case CHANNEL_CLOSED:{
+      case CHANNEL_CLOSED: {
         return Mono.just(false);
       }
-      default:{
+      default: {
         return Mono.just(false);
       }
     }
@@ -334,7 +332,7 @@ public class PersistenceRouteTransfer
       int maxRetryCount = routeInstance.getRetryLimit();
       if (currentRetryCount < maxRetryCount) {
         // 没有达到重试上限, 标记为等待状态并计算下次执行时间
-        routeInstance.setStatus(RouteInstance.STATUS_WAITING);
+        routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
         routeInstance.setMessage("waiting");
         routeInstance.setNextPushTime(System.currentTimeMillis() + RETRY_INTERVAL);
       } else {

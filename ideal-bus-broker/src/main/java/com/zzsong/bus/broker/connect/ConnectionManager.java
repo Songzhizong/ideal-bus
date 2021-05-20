@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
  *
  * @author 宋志宗 on 2020/11/25
  */
+@Deprecated
 public interface ConnectionManager {
 
   /**

@@ -8,9 +8,16 @@ public interface RSocketRoute {
    * 客户端登录
    */
   String LOGIN = "login";
+  /**
+   * 通知客户端断开连接
+   */
   String INTERRUPT = "interrupt";
-  String PUBLISH = "publish";
-  String AUTO_SUBSCRIBE = "auto-subscribe";
+  /**
+   * 向客户端推送消息
+   */
   String CLIENT_RECEIVE = "client-receive";
-  String CHANNEL_CHANGE = "channel-change";
+  /**
+   * channel状态变更
+   */
+  String CHANNEL_CHANGE_STATUS = "channel-change-status";
 }

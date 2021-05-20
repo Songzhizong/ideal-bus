@@ -5,6 +5,7 @@ package com.zzsong.bus.broker.core.transfer;
  *
  * @author 宋志宗 on 2020/11/26
  */
+@Deprecated
 public enum TransferType {
   /**
    * 持久化

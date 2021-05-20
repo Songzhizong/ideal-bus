@@ -16,6 +16,7 @@ import java.util.Objects;
  * @author 宋志宗 on 2020/9/20 1:23 上午
  */
 @Slf4j
+@Deprecated
 public class RSocketDelivererChannel implements DelivererChannel {
   private static final ParameterizedTypeReference<DeliverResult> DELIVERED_RESULT_RES
       = new ParameterizedTypeReference<DeliverResult>() {

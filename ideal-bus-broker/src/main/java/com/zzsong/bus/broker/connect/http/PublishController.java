@@ -1,16 +1,17 @@
 package com.zzsong.bus.broker.connect.http;
 
 import com.zzsong.bus.abs.domain.EventInstance;
-import com.zzsong.bus.common.message.PublishResult;
-import com.zzsong.bus.broker.core.EventExchanger;
+import com.zzsong.bus.broker.core.exchanger.ExchangeResult;
+import com.zzsong.bus.broker.core.exchanger.Exchanger;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,21 +19,17 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/publish")
+@RequiredArgsConstructor
 public class PublishController {
-  @Nonnull
-  private final EventExchanger eventExchanger;
-
-  public PublishController(@Nonnull EventExchanger eventExchanger) {
-    this.eventExchanger = eventExchanger;
-  }
+  private final Exchanger exchanger;
 
   /**
    * 单条发布
    */
   @Nonnull
   @PostMapping("/single")
-  public Mono<PublishResult> publish(@RequestBody @Nonnull EventInstance message) {
-    return eventExchanger.exchange(message);
+  public Mono<ExchangeResult> publish(@RequestBody @Nonnull EventInstance message) {
+    return exchanger.exchange(Collections.singletonList(message));
   }
 
   /**
@@ -40,7 +37,7 @@ public class PublishController {
    */
   @Nonnull
   @PostMapping("/batch")
-  public Flux<PublishResult> publish(@RequestBody @Nonnull List<EventInstance> messages) {
-    return Flux.fromIterable(messages).flatMap(eventExchanger::exchange);
+  public Mono<ExchangeResult> publish(@RequestBody @Nonnull List<EventInstance> messages) {
+    return exchanger.exchange(messages);
   }
 }

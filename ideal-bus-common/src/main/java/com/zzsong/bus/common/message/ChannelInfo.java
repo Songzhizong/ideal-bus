@@ -17,11 +17,12 @@ public class ChannelInfo {
   public static final int STATUS_IDLE = 1;
 
   /** 应用名称 */
-  @Nonnull
-  private String appName;
-  /** 应用实例id */
+  private long applicationId;
+
+  /** 通道实例id */
   @Nonnull
   private String instanceId;
+
   /** 通道状态 */
   private int status;
 }

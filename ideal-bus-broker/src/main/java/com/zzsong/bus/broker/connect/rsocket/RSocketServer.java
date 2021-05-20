@@ -1,18 +1,13 @@
 package com.zzsong.bus.broker.connect.rsocket;
 
 import com.zzsong.bus.abs.domain.Application;
-import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.broker.admin.service.ApplicationService;
-import com.zzsong.bus.broker.admin.service.SubscriptionService;
-import com.zzsong.bus.broker.connect.ConnectionManager;
-import com.zzsong.bus.broker.connect.DelivererChannel;
-import com.zzsong.bus.broker.core.EventExchanger;
+import com.zzsong.bus.broker.core.channel.Channel;
+import com.zzsong.bus.broker.core.consumer.Consumer;
+import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.ChannelInfo;
 import com.zzsong.bus.common.message.LoginMessage;
-import com.zzsong.bus.common.message.PublishResult;
-import com.zzsong.bus.common.share.utils.JsonUtils;
-import com.zzsong.bus.common.transfer.ResubscribeArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,10 +19,9 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author 宋志宗 on 2020/9/19 5:48 下午
@@ -36,16 +30,8 @@ import java.util.concurrent.ConcurrentMap;
 @Controller
 @RequiredArgsConstructor
 public class RSocketServer {
-  @Nonnull
-  private final EventExchanger eventExchanger;
-  @Nonnull
-  private final ConnectionManager connectionManager;
-  @Nonnull
+  private final ConsumerManager consumerManager;
   private final ApplicationService applicationService;
-  @Nonnull
-  private final SubscriptionService subscriptionService;
-  @Nonnull
-  private final ConcurrentMap<String, DelivererChannel> channelMap = new ConcurrentHashMap<>();
 
 
   @ConnectMapping(RSocketRoute.LOGIN)
@@ -54,12 +40,10 @@ public class RSocketServer {
     long applicationId = message.getApplicationId();
     final String instanceId = message.getInstanceId();
     final String accessToken = message.getAccessToken();
-    int socketType = message.getSocketType();
-    final String appName = applicationId + "";
     Mono<Optional<Application>> optionalMono = applicationService.loadById(applicationId);
     optionalMono.doOnNext(optional -> {
       Application application = optional.orElse(null);
-      DelivererChannel[] warp = new DelivererChannel[1];
+      Channel[] warp = new Channel[1];
       Objects.requireNonNull(requester.rsocket())
           .onClose()
           .doFirst(() -> {
@@ -70,17 +54,14 @@ public class RSocketServer {
             } else if (StringUtils.isNotBlank(application.getAccessToken())
                 && Objects.equals(application.getAccessToken(), accessToken)) {
               errMsg = "accessToken不合法";
-              log.info("{} 客户端: {}-{} accessToken不合法", applicationId, instanceId, socketType);
+              log.info("{} 客户端: {} accessToken不合法", applicationId, instanceId);
             } else {
-              log.info("{} 客户端: {}-{} 建立连接.", applicationId, instanceId, socketType);
-              if (socketType == LoginMessage.SOCKET_TYPE_RECEIVE) {
-                RSocketDelivererChannel channel
-                    = new RSocketDelivererChannel(instanceId, requester);
-                warp[0] = channel;
-                String channelKey = buildChannelKey(appName, instanceId);
-                channelMap.put(channelKey, channel);
-                connectionManager.registerChannel(appName, channel);
-              }
+              log.info("{} 客户端: {} 建立连接.", applicationId, instanceId);
+              String channelInstanceId = buildChannelId(applicationId, instanceId);
+              RSocketChannel channel = new RSocketChannel(channelInstanceId, requester);
+              Consumer consumer = consumerManager.loadConsumer(applicationId);
+              consumer.addChannel(channel);
+              warp[0] = channel;
             }
             if (errMsg != null) {
               requester.route(RSocketRoute.INTERRUPT)
@@ -96,54 +77,34 @@ public class RSocketServer {
             log.info("socket error: {}", errMessage);
           })
           .doFinally(consumer -> {
-            DelivererChannel channel = warp[0];
+            Channel channel = warp[0];
             if (channel != null) {
-              connectionManager.markChannelDown(appName, channel);
+              Consumer loadConsumer = consumerManager.loadConsumer(applicationId);
+              loadConsumer.removeChannel(channel);
             }
-            log.info("{} 客户端: {}-{} 断开连接: {}", applicationId, instanceId, socketType, consumer);
+            log.info("{} 客户端: {} 断开连接: {}", applicationId, instanceId, consumer);
           })
           .subscribe();
     }).subscribe();
   }
 
-  @MessageMapping(RSocketRoute.PUBLISH)
-  public Mono<PublishResult> publish(@Nonnull EventInstance message) {
-    return eventExchanger.exchange(message);
-  }
-
-  @MessageMapping(RSocketRoute.AUTO_SUBSCRIBE)
-  public Mono<String> autoSubscribe(@Nonnull ResubscribeArgs resubscribeArgs) {
-    return subscriptionService.resubscribe(resubscribeArgs).map(JsonUtils::toJsonString);
-  }
-
-  /**
-   * 将通道标记为忙碌状态
-   *
-   * @param channelInfo 通道信息
-   */
-  @MessageMapping(RSocketRoute.CHANNEL_CHANGE)
-  public Mono<Boolean> markChannelBusy(@Nonnull ChannelInfo channelInfo) {
+  @MessageMapping(RSocketRoute.CHANNEL_CHANGE_STATUS)
+  public Mono<Boolean> autoSubscribe(@Nonnull ChannelInfo channelInfo) {
+    long applicationId = channelInfo.getApplicationId();
     String instanceId = channelInfo.getInstanceId();
-    String appName = channelInfo.getAppName();
     int status = channelInfo.getStatus();
-    String channelKey = buildChannelKey(appName, instanceId);
-    DelivererChannel channel = channelMap.get(channelKey);
-    if (channel == null) {
-      log.error("channel: {} 不存在", channelKey);
+    String channelId = buildChannelId(applicationId, instanceId);
+    Consumer consumer = consumerManager.loadConsumer(applicationId);
+    if (status == ChannelInfo.STATUS_IDLE) {
+      consumer.markChannelsAvailable(Collections.singleton(channelId));
     } else {
-      if (status == ChannelInfo.STATUS_BUSY) {
-        connectionManager.markChannelBusy(appName, channel);
-      } else if (status == ChannelInfo.STATUS_IDLE) {
-        connectionManager.markChannelReachable(appName, channel);
-      } else {
-        log.warn("未知的通道状态: {}", status);
-      }
+      consumer.markChannelBusy(channelId);
     }
     return Mono.just(true);
   }
 
   @Nonnull
-  private String buildChannelKey(@Nonnull String appName, @Nonnull String instanceId) {
-    return appName + "-" + instanceId;
+  private String buildChannelId(long applicationId, @Nonnull String instanceId) {
+    return applicationId + "-" + instanceId;
   }
 }

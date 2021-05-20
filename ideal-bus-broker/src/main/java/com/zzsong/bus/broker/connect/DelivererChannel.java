@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 /**
  * @author 宋志宗 on 2020/9/20 1:09 上午
  */
+@Deprecated
 public interface DelivererChannel extends LbServer {
 
   @Nonnull

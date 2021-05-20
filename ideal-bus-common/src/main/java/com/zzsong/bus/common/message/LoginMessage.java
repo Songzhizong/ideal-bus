@@ -13,8 +13,6 @@ import javax.annotation.Nullable;
 @Getter
 @Setter
 public class LoginMessage {
-  public static final int SOCKET_TYPE_SEND = 0;
-  public static final int SOCKET_TYPE_RECEIVE = 1;
   /**
    * 应用ID
    */
@@ -29,8 +27,6 @@ public class LoginMessage {
    */
   @Nonnull
   private String instanceId;
-
-  private int socketType;
 
   @Nonnull
   public String toMessageString() {

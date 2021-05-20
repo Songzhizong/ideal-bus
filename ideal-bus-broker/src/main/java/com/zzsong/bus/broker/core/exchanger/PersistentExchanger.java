@@ -1,61 +1,66 @@
-package com.zzsong.bus.broker.core;
+package com.zzsong.bus.broker.core.exchanger;
 
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.pojo.SubscriptionDetails;
-import com.zzsong.bus.broker.admin.service.EventInstanceService;
+import com.zzsong.bus.abs.storage.EventInstanceStorage;
 import com.zzsong.bus.broker.config.BusProperties;
-import com.zzsong.bus.broker.core.transfer.RouteTransfer;
-import com.zzsong.bus.common.message.PublishResult;
+import com.zzsong.bus.broker.core.SubscriptionManager;
+import com.zzsong.bus.broker.core.queue.QueueManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author 宋志宗 on 2020/9/17
+ * 持久化交换机
+ * <pre>
+ *   发布的事件将被持久化保存
+ * </pre>
+ *
+ * @author 宋志宗 on 2021/5/14
  */
 @Slf4j
-@Deprecated
+@Component
 @RequiredArgsConstructor
-public class EventExchanger {
-  @Nonnull
+public class PersistentExchanger implements Exchanger {
   private final BusProperties properties;
-  @Nonnull
-  private final RouteTransfer routeTransfer;
-  @Nonnull
-  private final EventInstanceService eventInstanceService;
-  @Nonnull
+  private final EventInstanceStorage eventInstanceStorage;
   private final SubscriptionManager subscriptionManager;
+  private final QueueManager queueManager;
 
-  @Nonnull
-  public Mono<PublishResult> exchange(@Nonnull EventInstance event) {
-    PublishResult.PublishResultBuilder builder = PublishResult.builder()
-        .transactionId(event.getTransactionId())
-        .topic(event.getTopic())
-        .message("success")
-        .success(true);
-    Mono<EventInstance> savedEvent = eventInstanceService.save(event);
-    Mono<List<RouteInstance>> route = savedEvent
-        .doOnNext(e -> builder.eventId(e.getEventId()))
-        // 路由, 获取满足订阅条件的订阅者列表
-        .flatMap(this::route);
-    return route.flatMap(instanceList -> {
-      if (instanceList.isEmpty()) {
-        return Mono.just(builder.message("该事件没有订阅者").build());
-      }
-      return Flux.fromIterable(instanceList)
-          .flatMap(routeTransfer::submit)
-          .collectList()
-          .thenReturn(builder.build());
-    });
+  @Override
+  public Mono<ExchangeResult> exchange(@Nonnull List<EventInstance> events) {
+    Mono<List<RouteInstance>> listMono = eventInstanceStorage
+        .saveAll(events) // 1. 持久化
+        .flatMap(list -> Flux.fromIterable(list)
+            .flatMap(this::route) // 2. 获取路由消息
+            .collectList()
+            .map(dList -> dList.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList())
+            ) // 3. List<List<RouteInstance>> -> List<RouteInstance>
+        );
+    // 提交到队列管理器并返回执行结果
+    return listMono.flatMap(queueManager::submit)
+        .map(b -> ExchangeResult.builder().success(true).message("success").build())
+        .onErrorResume(throwable -> {
+          ExchangeResult result = ExchangeResult.builder()
+              .success(false)
+              .message(throwable.getMessage())
+              .build();
+          return Mono.just(result);
+        });
   }
+
 
   // ---------------------------------------- private methods ~
 
@@ -86,7 +91,7 @@ public class EventExchanger {
     instance.setApplicationId(details.getApplicationId());
     instance.setBroadcast(details.isBroadcast());
     instance.setStatus(RouteInstance.STATUS_QUEUING);
-    instance.setMessage("waiting");
+    instance.setMessage("init");
     instance.setRetryLimit(details.getRetryCount());
 
     Long delaySeconds = getDelaySeconds(event, details);

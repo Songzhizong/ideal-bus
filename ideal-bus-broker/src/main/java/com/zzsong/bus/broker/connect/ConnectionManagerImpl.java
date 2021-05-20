@@ -10,7 +10,6 @@ import com.zzsong.bus.common.share.loadbalancer.SimpleLbFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -23,7 +22,7 @@ import java.util.List;
  * @author 宋志宗 on 2020/11/25
  */
 @Slf4j
-@Component
+@Deprecated
 @RequiredArgsConstructor
 public class ConnectionManagerImpl implements ConnectionManager {
   @Nonnull

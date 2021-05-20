@@ -108,11 +108,27 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadWaiting(int count, int shard, long subscriptionId) {
+    Criteria or = Criteria.where("status").is(RouteInstance.STATUS_QUEUING)
+        .orOperator(Criteria.where("status").is(RouteInstance.STATUS_TEMPING));
     Criteria criteria = Criteria
         .where("shard").is(shard)
         .and("subscriptionId").is(subscriptionId)
-        .and("nextPushTime").lte(SnowFlake.START_TIMESTAMP)
-        .and("status").is(RouteInstance.STATUS_WAITING);
+        .andOperator(or);
+    Query query = Query.query(criteria).limit(count)
+        .with(Sort.by(Sort.Direction.ASC, "instanceId"));
+    return template.find(query, RouteInstanceDo.class)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .collectList()
+        .defaultIfEmpty(Collections.emptyList());
+  }
+
+  @Nonnull
+  @Override
+  public Mono<List<RouteInstance>> loadTemping(int count, int shard, long subscriptionId) {
+    Criteria criteria = Criteria
+        .where("shard").is(shard)
+        .and("subscriptionId").is(subscriptionId)
+        .and("status").is(RouteInstance.STATUS_TEMPING);
     Query query = Query.query(criteria).limit(count)
         .with(Sort.by(Sort.Direction.ASC, "instanceId"));
     return template.find(query, RouteInstanceDo.class)
@@ -125,6 +141,17 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Override
   public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
     Query updateQuery = Query.query(Criteria.where("instanceId").is(instanceId));
+    Update update = new Update();
+    update.set("status", status);
+    update.set("message", message);
+    return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
+        .map(UpdateResult::getModifiedCount);
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Long> updateStatus(Collection<Long> instanceIdList, int status, @Nonnull String message) {
+    Query updateQuery = Query.query(Criteria.where("instanceId").in(instanceIdList));
     Update update = new Update();
     update.set("status", status);
     update.set("message", message);

@@ -33,6 +33,7 @@ public class LocalCache implements InitializingBean, DisposableBean {
   private final BusProperties properties;
   @Nonnull
   @Autowired
+  @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
   private SubscriptionService subscriptionService;
 
   public LocalCache(@Nonnull BusProperties properties) {

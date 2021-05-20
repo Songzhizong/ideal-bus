@@ -22,6 +22,7 @@ import java.time.Duration;
  * @author 宋志宗 on 2020/11/25
  */
 @Slf4j
+@Deprecated
 @RequiredArgsConstructor
 public class HttpDelivererChannel implements DelivererChannel {
   private static final WebClient WEB_CLIENT

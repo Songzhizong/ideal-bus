@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 /**
  * @author 宋志宗 on 2020/11/28
  */
+@Deprecated
 public interface PreDeliverHandler {
 
   @Nonnull

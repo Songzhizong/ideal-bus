@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * @author 宋志宗 on 2020/11/26
  */
+@Deprecated
 public final class RouteTransferFactory {
   private RouteTransferFactory() {
   }

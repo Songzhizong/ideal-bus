@@ -100,7 +100,6 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     message.setApplicationId(applicationId);
     message.setInstanceId(clientIpPort);
     message.setAccessToken(accessToken);
-    message.setSocketType(socketType);
     final String messageString = message.toMessageString();
     if (socketRequester != null
         && socketRequester.rsocket() != null

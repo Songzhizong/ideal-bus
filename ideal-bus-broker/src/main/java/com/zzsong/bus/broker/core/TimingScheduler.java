@@ -6,7 +6,6 @@ import com.zzsong.bus.broker.config.BusProperties;
 import com.zzsong.bus.broker.core.transfer.RouteTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author 宋志宗 on 2020/9/20 7:50 下午
  */
 @Slf4j
-@Component
+@Deprecated
 public class TimingScheduler implements SmartInitializingSingleton {
   private static final int PRE_READ_COUNT = 1000;
   private static final long PRE_READ_MILLS = 5000L;
