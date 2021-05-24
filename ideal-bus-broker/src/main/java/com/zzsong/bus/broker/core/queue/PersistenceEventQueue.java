@@ -122,6 +122,8 @@ public class PersistenceEventQueue implements EventQueue {
                   } else if (status == DeliverStatus.UNREACHABLE) {
                     offerFirst(routeInstance);
                     this.suspended = true;
+                    long applicationId = consumer.getApplicationId();
+                    log.info("应用: {} 没有在线的连接", applicationId);
                   } else {
                     log.error("Unknown DeliverStatus: {}", status);
                   }
@@ -171,7 +173,7 @@ public class PersistenceEventQueue implements EventQueue {
         this.hasWaiting = false;
         return;
       }
-      log.info("从存储库读取 {} 条消息入列: {}", size, subscriptionId);
+      log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
       Map<Integer, List<RouteInstance>> collect = waitingList.stream()
           .collect(Collectors.groupingBy(RouteInstance::getStatus));
       collect.forEach((s, is) -> {

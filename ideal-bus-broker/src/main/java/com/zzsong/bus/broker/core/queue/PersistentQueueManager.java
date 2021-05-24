@@ -1,12 +1,15 @@
 package com.zzsong.bus.broker.core.queue;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
+import com.zzsong.bus.abs.domain.Subscription;
 import com.zzsong.bus.abs.storage.RouteInstanceStorage;
+import com.zzsong.bus.abs.storage.SubscriptionStorage;
 import com.zzsong.bus.broker.config.BusProperties;
 import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -26,13 +29,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PersistentQueueManager implements QueueManager {
+public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton {
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
   private final ScheduledExecutorService scheduledExecutorService
       = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 
   private final BusProperties properties;
   private final ConsumerManager consumerManager;
+  private final SubscriptionStorage subscriptionStorage;
   private final RouteInstanceStorage routeInstanceStorage;
 
   @Override
@@ -45,8 +49,7 @@ public class PersistentQueueManager implements QueueManager {
       } else {
         Long applicationId = routeInstance.getApplicationId();
         Long subscriptionId = routeInstance.getSubscriptionId();
-        Consumer consumer = consumerManager.loadConsumer(applicationId);
-        EventQueue eventQueue = queueMap.computeIfAbsent(subscriptionId, k -> createQueue(k, consumer));
+        EventQueue eventQueue = loadQueue(applicationId, subscriptionId);
         boolean offer = eventQueue.offer(routeInstance);
         if (offer) {
           routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
@@ -61,9 +64,24 @@ public class PersistentQueueManager implements QueueManager {
   }
 
   @Nonnull
-  private PersistenceEventQueue createQueue(long subscriptionId, @Nonnull Consumer consumer) {
-    int nodeId = properties.getNodeId();
-    return new PersistenceEventQueue(nodeId, subscriptionId,
-        consumer, routeInstanceStorage, scheduledExecutorService);
+  private EventQueue loadQueue(Long applicationId, Long subscriptionId) {
+    return queueMap.computeIfAbsent(subscriptionId, k -> {
+      Consumer consumer = consumerManager.loadConsumer(applicationId);
+      int nodeId = properties.getNodeId();
+      log.info("初始化队列: {}", subscriptionId);
+      return new PersistenceEventQueue(nodeId, subscriptionId,
+          consumer, routeInstanceStorage, scheduledExecutorService);
+    });
+  }
+
+  @Override
+  public void afterSingletonsInstantiated() {
+    List<Subscription> block = subscriptionStorage.findAll().block();
+    assert block != null;
+    for (Subscription subscription : block) {
+      long applicationId = subscription.getApplicationId();
+      Long subscriptionId = subscription.getSubscriptionId();
+      loadQueue(applicationId, subscriptionId);
+    }
   }
 }

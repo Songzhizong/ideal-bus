@@ -33,7 +33,9 @@ public class RSocketServer {
   private final ConsumerManager consumerManager;
   private final ApplicationService applicationService;
 
-
+  /**
+   * 客户端登录
+   */
   @ConnectMapping(RSocketRoute.LOGIN)
   public void login(@Nonnull RSocketRequester requester, @Payload String loginMessage) {
     LoginMessage message = LoginMessage.parseMessage(loginMessage);
@@ -88,6 +90,11 @@ public class RSocketServer {
     }).subscribe();
   }
 
+  /**
+   * 客户端变更通道状态
+   *
+   * @param channelInfo 通道信息
+   */
   @MessageMapping(RSocketRoute.CHANNEL_CHANGE_STATUS)
   public Mono<Boolean> autoSubscribe(@Nonnull ChannelInfo channelInfo) {
     long applicationId = channelInfo.getApplicationId();
@@ -101,6 +108,22 @@ public class RSocketServer {
       consumer.markChannelBusy(channelId);
     }
     return Mono.just(true);
+  }
+
+  /**
+   * 客户端签收消息
+   */
+  @MessageMapping(RSocketRoute.MESSAGE_ACK)
+  public Mono<Boolean> ack() {
+    return Mono.empty();
+  }
+
+  /**
+   * 客户端拒绝消息
+   */
+  @MessageMapping(RSocketRoute.MESSAGE_REJECT)
+  public Mono<Boolean> reject() {
+    return Mono.empty();
   }
 
   @Nonnull

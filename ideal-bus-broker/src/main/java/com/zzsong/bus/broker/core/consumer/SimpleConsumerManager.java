@@ -16,6 +16,6 @@ public class SimpleConsumerManager implements ConsumerManager {
   @Nonnull
   @Override
   public Consumer loadConsumer(long applicationId) {
-    return consumerMap.computeIfAbsent(applicationId, k -> new SimpleConsumer());
+    return consumerMap.computeIfAbsent(applicationId, k -> new SimpleConsumer(applicationId));
   }
 }

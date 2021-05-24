@@ -12,6 +12,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "ideal.bus.receive")
 public class BusReceiveProperties {
   /**
+   * 是启用消费
+   */
+  private boolean enabled = false;
+  /**
    * 核心线程数
    */
   private int corePoolSize = 0;

@@ -22,17 +22,20 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class SimpleConsumer implements Consumer {
-  private static final int RECOVER_MILLS = 5_000;
+  /** 忙碌状态channel回到可用状态的恢复时间 */
+  private static final int RECOVER_MILLS = 10_000;
   private static final ScheduledExecutorService SCHEDULED
-      = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+      = Executors.newSingleThreadScheduledExecutor();
   private final Map<String, Channel> availableChannelMap = new HashMap<>();
   private final Map<String, BusyChannelWrapper> busyChannelMap = new HashMap<>();
   private final LoadBalancer<Channel> loadBalancer
       = LoadBalancer.newLoadBalancer(LbStrategyEnum.RANDOM);
 
+  private final long applicationId;
   private List<Channel> availableChannels = new ArrayList<>();
 
-  public SimpleConsumer() {
+  public SimpleConsumer(long applicationId) {
+    this.applicationId = applicationId;
     SCHEDULED.schedule(() -> {
       long currentTimeMillis = System.currentTimeMillis();
       List<String> collect = busyChannelMap.values().stream()
@@ -41,6 +44,11 @@ public class SimpleConsumer implements Consumer {
           .collect(Collectors.toList());
       markChannelsAvailable(collect);
     }, 2, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public long getApplicationId() {
+    return applicationId;
   }
 
   @Nonnull

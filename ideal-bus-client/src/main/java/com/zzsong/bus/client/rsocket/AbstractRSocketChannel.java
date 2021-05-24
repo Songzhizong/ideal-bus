@@ -14,8 +14,8 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,9 +25,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRSocketChannel extends Thread implements RSocketChannel {
   private static final int RESTART_DELAY = 10;
 
-  private final BlockingQueue<Boolean> restartNoticeQueue = new ArrayBlockingQueue<>(1);
-
-  private final int socketType;
+  private final BlockingQueue<Boolean> restartNoticeQueue = new SynchronousQueue<>();
   @Nonnull
   private final String brokerIp;
   private final int brokerPort;
@@ -44,13 +42,11 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   @Nullable
   protected RSocketRequester socketRequester = null;
 
-  protected AbstractRSocketChannel(int socketType,
-                                   @Nonnull String brokerIp,
+  protected AbstractRSocketChannel(@Nonnull String brokerIp,
                                    int brokerPort,
                                    long applicationId,
                                    @Nonnull String clientIpPort,
                                    @Nullable String accessToken) {
-    this.socketType = socketType;
     this.brokerIp = brokerIp;
     this.brokerPort = brokerPort;
     this.applicationId = applicationId;
@@ -88,10 +84,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     log.info("RSocketBusChannel destroy, broker address: {}", brokerAddress);
   }
 
-  /**
-   * @param socketType 0 发送消息通道, 1 接收消息通道
-   */
-  private synchronized boolean connect(int socketType) {
+  private synchronized boolean doConnect() {
     RSocketStrategies rSocketStrategies = RSocketConfigure.R_SOCKET_STRATEGIES;
     RSocketRequester.Builder requesterBuilder = RSocketConfigure.R_SOCKET_REQUESTER_BUILDER;
     SocketAcceptor responder
@@ -151,7 +144,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
 
   @Override
   public void run() {
-    boolean connect = connect(socketType);
+    boolean connect = doConnect();
     if (!connect) {
       restartSocket();
     } else {
@@ -164,7 +157,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
         if (poll != null) {
           TimeUnit.SECONDS.sleep(RESTART_DELAY);
           log.info("Restart socket, broker address: {}", brokerAddress);
-          connect(socketType);
+          doConnect();
         }
       } catch (InterruptedException e) {
         // Interrupted

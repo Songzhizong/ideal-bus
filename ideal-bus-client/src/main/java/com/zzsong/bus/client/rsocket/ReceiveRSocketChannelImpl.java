@@ -9,23 +9,20 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 /**
  * @author 宋志宗 on 2021/4/28
  */
 public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements ReceiveRSocketChannel {
-  private final String listenerId = UUID.randomUUID().toString();
   private final EventConsumer eventConsumer;
 
-  protected ReceiveRSocketChannelImpl(int socketType,
-                                      @Nonnull String brokerIp,
+  protected ReceiveRSocketChannelImpl(@Nonnull String brokerIp,
                                       int brokerPort,
                                       long applicationId,
                                       @Nonnull String clientIpPort,
                                       @Nullable String accessToken,
                                       EventConsumer eventConsumer) {
-    super(socketType, brokerIp, brokerPort, applicationId, clientIpPort, accessToken);
+    super(brokerIp, brokerPort, applicationId, clientIpPort, accessToken);
     this.eventConsumer = eventConsumer;
   }
 
@@ -37,8 +34,8 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
    * @author 宋志宗 on 2021/4/29
    */
   @Nonnull
-  @MessageMapping(RSocketRoute.CLIENT_RECEIVE)
-  public Mono<DeliverResult> receive(@Nonnull DeliverEvent event) {
+  @MessageMapping(RSocketRoute.MESSAGE_DELIVER)
+  public Mono<DeliverResult> deliver(@Nonnull DeliverEvent event) {
     return eventConsumer.onMessage(event, this);
   }
 

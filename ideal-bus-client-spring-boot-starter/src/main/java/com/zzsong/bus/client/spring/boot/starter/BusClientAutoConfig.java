@@ -1,12 +1,8 @@
 package com.zzsong.bus.client.spring.boot.starter;
 
-import com.zzsong.bus.client.BusClient;
-import com.zzsong.bus.client.DefaultBusClient;
-import com.zzsong.bus.common.share.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Nonnull;

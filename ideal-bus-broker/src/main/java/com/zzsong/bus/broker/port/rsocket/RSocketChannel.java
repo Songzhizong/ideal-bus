@@ -5,6 +5,7 @@ import com.zzsong.bus.broker.core.channel.Channel;
 import com.zzsong.bus.broker.core.consumer.DeliverStatus;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -25,7 +26,7 @@ public class RSocketChannel implements Channel {
   @Override
   public Mono<DeliverStatus> deliverMessage(@Nonnull RouteInstance routeInstance) {
     DeliverEvent deliverEvent = createDeliverEvent(routeInstance);
-    return requester.route(RSocketRoute.CLIENT_RECEIVE).data(deliverEvent)
+    return requester.route(RSocketRoute.MESSAGE_DELIVER).data(deliverEvent)
         .retrieveMono(DeliverStatus.class);
   }
 
@@ -48,7 +49,7 @@ public class RSocketChannel implements Channel {
     deliveredEvent.setTransactionId(transactionId);
     deliveredEvent.setTopic(instance.getTopic());
     deliveredEvent.setHeaders(instance.getHeaders());
-    deliveredEvent.setPayload(instance.getPayload());
+    deliveredEvent.setPayload(JsonUtils.toJsonStringIgnoreNull(instance.getPayload()));
     deliveredEvent.setTimestamp(instance.getTimestamp());
     deliveredEvent.setListener(instance.getListener());
     return deliveredEvent;
