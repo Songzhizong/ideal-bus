@@ -1,4 +1,4 @@
-package com.zzsong.bus.broker.connect.http;
+package com.zzsong.bus.broker.port.http;
 
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.broker.core.exchanger.ExchangeResult;

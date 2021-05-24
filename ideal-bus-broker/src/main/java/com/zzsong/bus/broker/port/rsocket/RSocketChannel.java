@@ -1,4 +1,4 @@
-package com.zzsong.bus.broker.connect.rsocket;
+package com.zzsong.bus.broker.port.rsocket;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.broker.core.channel.Channel;

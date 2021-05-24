@@ -3,7 +3,6 @@ package com.zzsong.bus.broker.core;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.broker.admin.service.RouteInstanceService;
 import com.zzsong.bus.broker.config.BusProperties;
-import com.zzsong.bus.broker.core.transfer.RouteTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import reactor.core.publisher.Flux;
@@ -35,15 +34,11 @@ public class TimingScheduler implements SmartInitializingSingleton {
   @Nonnull
   private final BusProperties busProperties;
   @Nonnull
-  private final RouteTransfer routeTransfer;
-  @Nonnull
   private final RouteInstanceService routeInstanceService;
 
   public TimingScheduler(@Nonnull BusProperties busProperties,
-                         @Nonnull RouteTransfer routeTransfer,
                          @Nonnull RouteInstanceService routeInstanceService) {
     this.busProperties = busProperties;
-    this.routeTransfer = routeTransfer;
     this.routeInstanceService = routeInstanceService;
   }
 
@@ -82,7 +77,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
             }
             if (submitList.size() > 0) {
               Flux.fromIterable(submitList)
-                  .flatMap(routeTransfer::submit)
+//                  .flatMap(routeTransfer::submit)
                   .collectList()
                   .subscribe();
             }
@@ -130,7 +125,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
           List<RouteInstance> tmpData = ringData.remove(second);
           if (tmpData != null) {
             Flux.fromIterable(tmpData)
-                .flatMap(routeTransfer::submit)
+//                .flatMap(routeTransfer::submit)
                 .collectList()
                 .subscribe();
           }
