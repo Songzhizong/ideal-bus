@@ -18,4 +18,9 @@ ideal:
   bus:
     auto-subscribe: true
     application-id: 8367141577293824
-    broker-addresses: 127.0.0.1:13266
+    publish:
+      enabled: true
+      http-base-url: lb://IDEAL-BUS
+    consumer:
+      enabled: true
+      broker-addresses: 127.0.0.1:13266

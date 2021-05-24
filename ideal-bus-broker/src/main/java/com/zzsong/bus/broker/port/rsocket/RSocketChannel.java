@@ -5,6 +5,7 @@ import com.zzsong.bus.broker.core.channel.Channel;
 import com.zzsong.bus.broker.core.consumer.DeliverStatus;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.DeliverEvent;
+import com.zzsong.bus.common.message.DeliverResult;
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,15 @@ public class RSocketChannel implements Channel {
   public Mono<DeliverStatus> deliverMessage(@Nonnull RouteInstance routeInstance) {
     DeliverEvent deliverEvent = createDeliverEvent(routeInstance);
     return requester.route(RSocketRoute.MESSAGE_DELIVER).data(deliverEvent)
-        .retrieveMono(DeliverStatus.class);
+        .retrieveMono(DeliverResult.class)
+        .map(deliverResult -> {
+          DeliverResult.Status status = deliverResult.getStatus();
+          if (status == DeliverResult.Status.SUCCESS) {
+            return DeliverStatus.SUCCESS;
+          } else {
+            return DeliverStatus.CHANNEL_BUSY;
+          }
+        });
   }
 
   @Nonnull

@@ -108,12 +108,10 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadWaiting(int count, int shard, long subscriptionId) {
-    Criteria or = Criteria.where("status").is(RouteInstance.STATUS_QUEUING)
-        .orOperator(Criteria.where("status").is(RouteInstance.STATUS_TEMPING));
     Criteria criteria = Criteria
         .where("shard").is(shard)
         .and("subscriptionId").is(subscriptionId)
-        .andOperator(or);
+        .and("status").in(RouteInstance.STATUS_QUEUING, RouteInstance.STATUS_TEMPING);
     Query query = Query.query(criteria).limit(count)
         .with(Sort.by(Sort.Direction.ASC, "instanceId"));
     return template.find(query, RouteInstanceDo.class)

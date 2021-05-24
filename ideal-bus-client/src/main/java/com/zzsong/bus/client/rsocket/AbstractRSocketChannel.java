@@ -37,7 +37,6 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   @Nonnull
   protected final String brokerAddress;
 
-  protected volatile boolean running = false;
   protected volatile boolean destroyed = false;
   @Nullable
   protected RSocketRequester socketRequester = null;
@@ -84,7 +83,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     log.info("RSocketBusChannel destroy, broker address: {}", brokerAddress);
   }
 
-  private synchronized boolean doConnect() {
+  private synchronized void doConnect() {
     RSocketStrategies rSocketStrategies = RSocketConfigure.R_SOCKET_STRATEGIES;
     RSocketRequester.Builder requesterBuilder = RSocketConfigure.R_SOCKET_REQUESTER_BUILDER;
     SocketAcceptor responder
@@ -103,9 +102,11 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .tcp(brokerIp, brokerPort);
+            .connectTcp(brokerIp, brokerPort).block();
       } catch (Exception e) {
-        return false;
+        log.info("e: " + e.getMessage());
+        restartSocket();
+        return;
       }
     } else {
       try {
@@ -113,13 +114,23 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .tcp(brokerIp, brokerPort);
+            .connectTcp(brokerIp, brokerPort).block();
       } catch (Exception e) {
-        return false;
+        log.info("e: " + e.getMessage());
+        restartSocket();
+        return;
       }
     }
-    Objects.requireNonNull(socketRequester.rsocket())
-        .onClose()
+    if (socketRequester == null) {
+      restartSocket();
+      return;
+    }
+    RSocket rsocket = socketRequester.rsocket();
+    if (rsocket == null) {
+      restartSocket();
+      return;
+    }
+    rsocket.onClose()
         .doOnError(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
@@ -131,25 +142,18 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
           restartSocket();
         })
         .subscribe();
-    return true;
   }
 
   private void restartSocket() {
 //    if (running) {
 //      lbFactory.markServerDown(SimpleBusClient.BUS_BROKER_APP_NAME, this);
 //    }
-    running = false;
     restartNoticeQueue.offer(true);
   }
 
   @Override
   public void run() {
-    boolean connect = doConnect();
-    if (!connect) {
-      restartSocket();
-    } else {
-      running = true;
-    }
+    doConnect();
     while (!destroyed) {
       Boolean poll;
       try {

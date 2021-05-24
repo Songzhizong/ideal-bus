@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SimpleConsumer implements Consumer {
   /** 忙碌状态channel回到可用状态的恢复时间 */
-  private static final int RECOVER_MILLS = 10_000;
+  private static final int RECOVER_MILLS = 30_000;
   private static final ScheduledExecutorService SCHEDULED
       = Executors.newSingleThreadScheduledExecutor();
   private final Map<String, Channel> availableChannelMap = new HashMap<>();
@@ -55,6 +55,9 @@ public class SimpleConsumer implements Consumer {
   @Override
   public Mono<DeliverStatus> deliverMessage(@Nonnull RouteInstance routeInstance) {
     if (availableChannels.isEmpty()) {
+      if (busyChannelMap.isEmpty()) {
+        return Mono.just(DeliverStatus.OFFLINE);
+      }
       return Mono.just(DeliverStatus.UNREACHABLE);
     }
     Channel channel = loadBalancer.chooseServer(null, availableChannels);

@@ -1,6 +1,6 @@
 package com.zzsong.bus.client.rsocket;
 
-import com.zzsong.bus.client.EventConsumer;
+import com.zzsong.bus.client.ConsumerExecutor;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.message.DeliverEvent;
 import com.zzsong.bus.common.message.DeliverResult;
@@ -14,16 +14,17 @@ import javax.annotation.Nullable;
  * @author 宋志宗 on 2021/4/28
  */
 public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements ReceiveRSocketChannel {
-  private final EventConsumer eventConsumer;
+  private final ConsumerExecutor consumerExecutor;
 
-  protected ReceiveRSocketChannelImpl(@Nonnull String brokerIp,
-                                      int brokerPort,
-                                      long applicationId,
-                                      @Nonnull String clientIpPort,
-                                      @Nullable String accessToken,
-                                      EventConsumer eventConsumer) {
+  public ReceiveRSocketChannelImpl(@Nonnull String brokerIp,
+                                   int brokerPort,
+                                   long applicationId,
+                                   @Nonnull String clientIpPort,
+                                   @Nullable String accessToken,
+                                   @Nonnull ConsumerExecutor consumerExecutor) {
     super(brokerIp, brokerPort, applicationId, clientIpPort, accessToken);
-    this.eventConsumer = eventConsumer;
+    this.consumerExecutor = consumerExecutor;
+    consumerExecutor.addListener(this);
   }
 
   /**
@@ -36,7 +37,17 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
   @Nonnull
   @MessageMapping(RSocketRoute.MESSAGE_DELIVER)
   public Mono<DeliverResult> deliver(@Nonnull DeliverEvent event) {
-    return eventConsumer.onMessage(event, this);
+    boolean submit = consumerExecutor.submit(event, this);
+    DeliverResult result = new DeliverResult();
+    result.setEventId(event.getEventId());
+    if (submit) {
+      result.setStatus(DeliverResult.Status.SUCCESS);
+      result.setMessage("success");
+    } else {
+      result.setStatus(DeliverResult.Status.BUSY);
+      result.setMessage("busy");
+    }
+    return Mono.just(result);
   }
 
   @Override
@@ -51,6 +62,16 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
 
   @Override
   public void reject(long routeInstanceId) {
+
+  }
+
+  @Override
+  public void onBusy() {
+
+  }
+
+  @Override
+  public void onIdle() {
 
   }
 }

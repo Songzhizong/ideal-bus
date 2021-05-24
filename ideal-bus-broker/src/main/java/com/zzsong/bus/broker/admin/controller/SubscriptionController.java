@@ -80,9 +80,8 @@ public class SubscriptionController {
    * @return 订阅结果
    */
   @Nonnull
-  @PostMapping("/subscribe/auto")
-  public Mono<Res<List<Subscription>>> autoSubscription(@RequestBody @Nonnull
-                                                            ResubscribeArgs args) {
+  @PostMapping("/resubscribe")
+  public Mono<Res<List<Subscription>>> resubscribe(@RequestBody @Nonnull ResubscribeArgs args) {
     return Mono.just(args.checkAndGet())
         .flatMap(subscriptionService::resubscribe)
         .map(Res::data);

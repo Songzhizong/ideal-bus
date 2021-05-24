@@ -1,4 +1,4 @@
-package com.zzsong.bus.broker.core.exchanger;
+package com.zzsong.bus.common.message;
 
 import lombok.*;
 

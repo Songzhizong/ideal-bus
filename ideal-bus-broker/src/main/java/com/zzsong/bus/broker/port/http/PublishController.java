@@ -1,7 +1,7 @@
 package com.zzsong.bus.broker.port.http;
 
 import com.zzsong.bus.abs.domain.EventInstance;
-import com.zzsong.bus.broker.core.exchanger.ExchangeResult;
+import com.zzsong.bus.common.message.ExchangeResult;
 import com.zzsong.bus.broker.core.exchanger.Exchanger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

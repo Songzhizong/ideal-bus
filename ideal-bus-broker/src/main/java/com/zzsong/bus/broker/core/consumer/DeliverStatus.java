@@ -16,4 +16,8 @@ public enum DeliverStatus {
    * 整个消费者处在不可达状态, 暂时无法接收消息
    */
   UNREACHABLE,
+  /**
+   * 应用不在线
+   */
+  OFFLINE,
 }

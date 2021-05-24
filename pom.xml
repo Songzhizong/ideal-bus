@@ -51,6 +51,7 @@
     <guava.version>30.1.1-jre</guava.version>
     <reactor-bom.version>2020.0.6</reactor-bom.version>
     <spring.boot.version>2.4.4</spring.boot.version>
+    <spring-cloud.version>2020.0.2</spring-cloud.version>
     <lombok.version>1.18.20</lombok.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
@@ -73,6 +74,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
