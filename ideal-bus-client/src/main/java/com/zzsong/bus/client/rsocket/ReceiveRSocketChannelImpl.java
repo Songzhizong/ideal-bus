@@ -2,17 +2,22 @@ package com.zzsong.bus.client.rsocket;
 
 import com.zzsong.bus.client.ConsumerExecutor;
 import com.zzsong.bus.common.constants.RSocketRoute;
+import com.zzsong.bus.common.transfer.ChannelArgs;
 import com.zzsong.bus.common.message.DeliverEvent;
 import com.zzsong.bus.common.message.DeliverResult;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 
 /**
  * @author 宋志宗 on 2021/4/28
  */
+@CommonsLog
 public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements ReceiveRSocketChannel {
   private final ConsumerExecutor consumerExecutor;
 
@@ -25,6 +30,31 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
     super(brokerIp, brokerPort, applicationId, clientIpPort, accessToken);
     this.consumerExecutor = consumerExecutor;
     consumerExecutor.addListener(this);
+  }
+
+  @Override
+  public void close() {
+    super.close();
+  }
+
+  @Override
+  public void ack(long routeInstanceId) {
+
+  }
+
+  @Override
+  public void reject(long routeInstanceId) {
+
+  }
+
+  @Override
+  public void onBusy() {
+    channelChangeStatus(ChannelArgs.STATUS_BUSY);
+  }
+
+  @Override
+  public void onIdle() {
+    channelChangeStatus(ChannelArgs.STATUS_IDLE);
   }
 
   /**
@@ -50,28 +80,21 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
     return Mono.just(result);
   }
 
-  @Override
-  public void close() {
-    super.close();
-  }
-
-  @Override
-  public void ack(long routeInstanceId) {
-
-  }
-
-  @Override
-  public void reject(long routeInstanceId) {
-
-  }
-
-  @Override
-  public void onBusy() {
-
-  }
-
-  @Override
-  public void onIdle() {
-
+  private void channelChangeStatus(int status) {
+    ChannelArgs channelArgs = new ChannelArgs();
+    channelArgs.setApplicationId(applicationId);
+    channelArgs.setInstanceId(super.clientIpPort);
+    channelArgs.setStatus(status);
+    if (super.socketRequester == null) {
+      log.info("super.socketRequester is null");
+      super.restartSocket();
+      return;
+    }
+    super.socketRequester.route(RSocketRoute.CHANNEL_CHANGE_STATUS)
+        .data(channelArgs)
+        .retrieveMono(Boolean.class)
+        .retryWhen(Retry.fixedDelay(5, Duration.ofMillis(500)))
+        .doOnNext(b -> log.info(super.brokerAddress + "change status to " + status))
+        .subscribe();
   }
 }

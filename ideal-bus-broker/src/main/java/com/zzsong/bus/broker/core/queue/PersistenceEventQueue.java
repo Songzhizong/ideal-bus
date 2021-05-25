@@ -11,10 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -30,7 +27,6 @@ import java.util.stream.Collectors;
 public class PersistenceEventQueue implements EventQueue {
   private static final int BLOCKING_MILLS = 1_000;
   private static final int EXPECT_SIZE = 1_000;
-  private static final int LOAD_TEMPING_DELAY_SECONDS = 5;
   private static final int OFFLINE_SUSPEND_SECONDS = 30;
   private static final int UNREACHABLE_SUSPEND_SECONDS = 5;
   private final BlockingDeque<RouteInstance> queue
@@ -52,18 +48,15 @@ public class PersistenceEventQueue implements EventQueue {
   private final AtomicInteger suspendSeconds = new AtomicInteger(1);
   private volatile boolean started = false;
 
-
   public PersistenceEventQueue(int shardId,
                                long subscriptionId,
                                @Nonnull Consumer consumer,
-                               @Nonnull RouteInstanceStorage routeInstanceStorage,
-                               @Nonnull ScheduledExecutorService scheduledExecutorService) {
+                               @Nonnull RouteInstanceStorage routeInstanceStorage) {
     this.shardId = shardId;
     this.subscriptionId = subscriptionId;
     this.consumer = consumer;
     this.routeInstanceStorage = routeInstanceStorage;
     start();
-    scheduledExecutorService.schedule(this::loadTemping, LOAD_TEMPING_DELAY_SECONDS, TimeUnit.SECONDS);
   }
 
   @Override
@@ -71,13 +64,17 @@ public class PersistenceEventQueue implements EventQueue {
     if (hasWaiting.get()) {
       return false;
     }
-    if (size.get() >= EXPECT_SIZE) {
-      hasWaiting.set(true);
-      return false;
-    } else {
-      offerLast(routeInstance);
-      return true;
+    lock.lock();
+    try {
+      if (size.get() >= EXPECT_SIZE) {
+        hasWaiting.set(true);
+        return false;
+      }
+    } finally {
+      lock.unlock();
     }
+    offerLast(routeInstance);
+    return true;
   }
 
   @Override
@@ -104,7 +101,7 @@ public class PersistenceEventQueue implements EventQueue {
     return routeInstance;
   }
 
-  public synchronized void start() {
+  public void start() {
     if (this.started) {
       return;
     }
@@ -149,6 +146,7 @@ public class PersistenceEventQueue implements EventQueue {
           } else {
             // 队列中没有消息执行的操作
             if (this.hasWaiting.get()) {
+              log.info("Has waiting, loading...");
               loadWaiting();
             }
           }
@@ -168,47 +166,35 @@ public class PersistenceEventQueue implements EventQueue {
   }
 
   private void loadWaiting() {
-    tryLock(() -> {
-      List<RouteInstance> waitingList = routeInstanceStorage
+    lock.lock();
+    List<RouteInstance> waitingList;
+    int size;
+    try {
+      waitingList = routeInstanceStorage
           .loadWaiting(EXPECT_SIZE, shardId, subscriptionId).block();
       if (waitingList == null) {
         return;
       }
-      int size = waitingList.size();
+      size = waitingList.size();
       if (size == 0) {
         this.hasWaiting.set(false);
         return;
       }
-      log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
-      Map<Integer, List<RouteInstance>> collect = waitingList.stream()
-          .collect(Collectors.groupingBy(RouteInstance::getStatus));
-      collect.forEach((s, is) -> {
-        if (s == RouteInstance.STATUS_TEMPING) {
-          offerTempingList(is).block();
-        } else {
-          for (RouteInstance instance : is) {
-            offerLast(instance);
-          }
-        }
-      });
-    });
-  }
+      this.hasWaiting.set(size >= EXPECT_SIZE);
+    } finally {
+      lock.unlock();
+    }
 
-  private void loadTemping() {
-    tryLock(() -> {
-      int count = EXPECT_SIZE - size.get();
-      if (count > 0) {
-        List<RouteInstance> instanceList = routeInstanceStorage
-            .loadTemping(count, shardId, subscriptionId).block();
-        if (instanceList == null) {
-          return;
+    log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
+    Map<Integer, List<RouteInstance>> collect = waitingList.stream()
+        .collect(Collectors.groupingBy(RouteInstance::getStatus));
+    collect.forEach((s, is) -> {
+      if (s == RouteInstance.STATUS_TEMPING) {
+        offerTempingList(is).block();
+      } else {
+        for (RouteInstance instance : is) {
+          offerLast(instance);
         }
-        int size = instanceList.size();
-        if (size == 0) {
-          return;
-        }
-        log.info("从存储库读取 {} 条暂存消息入列: {}", size, subscriptionId);
-        offerTempingList(instanceList).block();
       }
     });
   }
@@ -227,16 +213,5 @@ public class PersistenceEventQueue implements EventQueue {
             offerLast(instance);
           }
         });
-  }
-
-  private void tryLock(@Nonnull Runnable runnable) {
-    boolean tryLock = lock.tryLock();
-    if (tryLock) {
-      try {
-        runnable.run();
-      } finally {
-        lock.unlock();
-      }
-    }
   }
 }

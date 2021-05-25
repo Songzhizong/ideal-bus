@@ -1,4 +1,4 @@
-package com.zzsong.bus.common.message;
+package com.zzsong.bus.common.transfer;
 
 import com.zzsong.bus.common.share.utils.JsonUtils;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
  */
 @Getter
 @Setter
-public class LoginMessage {
+public class LoginArgs {
   /**
    * 应用ID
    */
@@ -34,7 +34,7 @@ public class LoginMessage {
   }
 
   @Nonnull
-  public static LoginMessage parseMessage(@Nonnull String message) {
-    return JsonUtils.parseJson(message, LoginMessage.class);
+  public static LoginArgs parseMessage(@Nonnull String message) {
+    return JsonUtils.parseJson(message, LoginArgs.class);
   }
 }

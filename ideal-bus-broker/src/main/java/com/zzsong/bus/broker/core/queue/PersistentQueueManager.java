@@ -17,8 +17,6 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +29,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton {
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
-  private final ScheduledExecutorService scheduledExecutorService
-      = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 
   private final BusProperties properties;
   private final ConsumerManager consumerManager;
@@ -69,8 +65,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
       Consumer consumer = consumerManager.loadConsumer(applicationId);
       int nodeId = properties.getNodeId();
       log.info("初始化队列: {}", subscriptionId);
-      return new PersistenceEventQueue(nodeId, subscriptionId,
-          consumer, routeInstanceStorage, scheduledExecutorService);
+      return new PersistenceEventQueue(nodeId, subscriptionId, consumer, routeInstanceStorage);
     });
   }
 

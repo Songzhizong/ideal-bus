@@ -1,8 +1,6 @@
 package com.zzsong.bus.client.listener;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.apachecommons.CommonsLog;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -12,7 +10,7 @@ import java.util.Map;
 /**
  * @author 宋志宗 on 2020/9/17
  */
-@Slf4j
+@CommonsLog
 public class ListenerFactory {
   private ListenerFactory() {
   }
@@ -40,7 +38,7 @@ public class ListenerFactory {
         = LISTENER_MAPPING.computeIfAbsent(topic, k -> new HashMap<>(4));
     IEventListener previous = listenerMap.put(listenerName, listener);
     if (previous != null) {
-      log.error("监听器名称: {} 重复", listenerName);
+      log.error("监听器名称: " + listenerName + " 重复");
       System.exit(0);
     }
   }

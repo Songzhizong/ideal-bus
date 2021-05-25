@@ -1,12 +1,7 @@
 package com.zzsong.bus.client.spring.boot.starter;
 
-import com.zzsong.bus.client.ConsumerExecutor;
-import com.zzsong.bus.client.EventConsumer;
-import com.zzsong.bus.client.EventPublisher;
-import com.zzsong.bus.client.impl.AutoDeliverEventConsumer;
-import com.zzsong.bus.client.impl.HttpEventPublisher;
-import com.zzsong.bus.client.impl.NoneEventPublisher;
-import com.zzsong.bus.client.impl.ThreadPoolConsumerExecutor;
+import com.zzsong.bus.client.*;
+import com.zzsong.bus.client.impl.*;
 import com.zzsong.bus.client.rsocket.ReceiveRSocketChannel;
 import com.zzsong.bus.client.rsocket.ReceiveRSocketChannelImpl;
 import com.zzsong.bus.common.share.utils.IpUtil;
@@ -44,24 +39,41 @@ public class BusClientAutoConfig {
   }
 
   @Bean
-  public EventPublisher eventPublisher(@Nullable ReactorLoadBalancerExchangeFilterFunction lbFunction) {
+  public WebClient busClientWebClient(@Nullable ReactorLoadBalancerExchangeFilterFunction lbFunction) {
+    String brokerHttpBaseUrl = properties.getBrokerHttpBaseUrl();
+    if (StringUtils.isBlank(brokerHttpBaseUrl)) {
+      throw new IllegalArgumentException("ideal.bus.broker-http-base-url must be not blank");
+    }
+    WebClient.Builder builder = WebClient.builder();
+    if (brokerHttpBaseUrl.startsWith("lb://")) {
+      if (lbFunction == null) {
+        throw new IllegalArgumentException("ReactorLoadBalancerExchangeFilterFunction is null");
+      }
+      builder.filter(lbFunction);
+    }
+    return builder.build();
+  }
+
+  @Bean
+  public BusAdmin busAdmin(@Nonnull WebClient busClientWebClient) {
+    String brokerHttpBaseUrl = properties.getBrokerHttpBaseUrl();
+    return new BusAdminImpl(brokerHttpBaseUrl, busClientWebClient);
+  }
+
+  @Bean
+  public EventPublisher eventPublisher(@Nonnull WebClient busClientWebClient) {
     BusPublishProperties publish = properties.getPublish();
+    String brokerHttpBaseUrl = properties.getBrokerHttpBaseUrl();
     if (publish.isEnabled()) {
-      String httpBaseUrl = publish.getHttpBaseUrl();
-      if (StringUtils.isBlank(httpBaseUrl)) {
-        throw new IllegalArgumentException("ideal.bus.publish.http-base-url must be not blank");
-      }
-      WebClient.Builder builder = WebClient.builder();
-      if (httpBaseUrl.startsWith("lb://")) {
-        if (lbFunction == null) {
-          throw new IllegalArgumentException("ReactorLoadBalancerExchangeFilterFunction is null");
-        }
-        builder.filter(lbFunction);
-      }
-      return new HttpEventPublisher(httpBaseUrl, builder.build());
+      return new HttpEventPublisher(brokerHttpBaseUrl, busClientWebClient);
     } else {
       return new NoneEventPublisher();
     }
+  }
+
+  @Bean
+  public ListenerInitializer listenerInitializer() {
+    return new SpringListenerInitializer();
   }
 
   @Bean
@@ -85,6 +97,7 @@ public class BusClientAutoConfig {
   public List<ReceiveRSocketChannel> receiveRSocketChannels(ConsumerExecutor consumerExecutor) {
     BusConsumerProperties consumer = properties.getConsumer();
     if (!consumer.isEnabled()) {
+      log.info("Event consumer disabled");
       return Collections.emptyList();
     }
     String ip = IpUtil.getIp();
@@ -100,32 +113,16 @@ public class BusClientAutoConfig {
       }
       String brokerIp = split[0];
       String brokerPortStr = split[1];
-      int brokerPort = Integer.parseInt(brokerPortStr);
+      int brokerPort;
+      try {
+        brokerPort = Integer.parseInt(brokerPortStr);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Illegal broker address: " + address);
+      }
       ReceiveRSocketChannelImpl channel = new ReceiveRSocketChannelImpl(brokerIp, brokerPort,
           applicationId, ip + ":" + serverPort, accessToken, consumerExecutor);
-//      channel.connect();
       channels.add(channel);
     }
     return channels;
   }
-
-//  @Bean
-//  public BusClient busClient() {
-//    if (clientProperties.isEnabled()) {
-//      final int corePoolSize = receiveProperties.getCorePoolSize();
-//      final int maximumPoolSize = receiveProperties.getMaximumPoolSize();
-//      final SpringBusClient busClient = new SpringBusClient(corePoolSize, maximumPoolSize);
-//      busClient.setApplicationId(clientProperties.getApplicationId());
-//      busClient.setBrokerAddresses(clientProperties.getBrokerAddresses());
-//      busClient.setAccessToken(clientProperties.getAccessToken());
-//      final String ip = IpUtil.getIp();
-//      final int port = serverPort == null ? 8080 : serverPort;
-//      busClient.setClientIpPort(ip + ":" + port);
-//      busClient.setAutoSubscribe(clientProperties.isAutoSubscribe());
-//      return busClient;
-//    } else {
-//      log.warn("ideal bus is disabled");
-//      return new DefaultBusClient();
-//    }
-//  }
 }

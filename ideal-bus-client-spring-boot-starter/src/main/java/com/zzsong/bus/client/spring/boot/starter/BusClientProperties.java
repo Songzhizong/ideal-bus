@@ -16,6 +16,9 @@ public class BusClientProperties {
   /** 应用id */
   private long applicationId;
 
+
+  private String brokerHttpBaseUrl;
+
   private String accessToken = "";
 
   /** 启动自动订阅 */

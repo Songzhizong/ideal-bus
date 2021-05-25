@@ -13,7 +13,4 @@ public class BusPublishProperties {
    * 是启用消息发布
    */
   private boolean enabled = true;
-
-
-  private String httpBaseUrl;
 }

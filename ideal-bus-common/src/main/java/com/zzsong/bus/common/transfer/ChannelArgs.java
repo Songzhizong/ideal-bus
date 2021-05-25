@@ -1,4 +1,4 @@
-package com.zzsong.bus.common.message;
+package com.zzsong.bus.common.transfer;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  */
 @Getter
 @Setter
-public class ChannelInfo {
+public class ChannelArgs {
   /** 忙碌 */
   public static final int STATUS_BUSY = 0;
   /** 空闲 */

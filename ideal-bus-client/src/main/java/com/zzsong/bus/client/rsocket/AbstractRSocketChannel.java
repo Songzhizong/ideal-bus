@@ -1,10 +1,10 @@
 package com.zzsong.bus.client.rsocket;
 
 import com.zzsong.bus.common.constants.RSocketRoute;
-import com.zzsong.bus.common.message.LoginMessage;
+import com.zzsong.bus.common.transfer.LoginArgs;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 宋志宗 on 2021/4/28
  */
-@Slf4j
+@CommonsLog
 public abstract class AbstractRSocketChannel extends Thread implements RSocketChannel {
   private static final int RESTART_DELAY = 10;
 
@@ -56,8 +56,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
 
   @MessageMapping(RSocketRoute.INTERRUPT)
   public Mono<String> interrupt(String status) {
-    log.warn("Broker: {} 服务中断: {}, {} 秒后尝试重连...",
-        brokerAddress, status, RESTART_DELAY);
+    log.warn("Broker: " + brokerAddress + " 服务中断: " + status + ", " + RESTART_DELAY + " 秒后尝试重连...");
     restartSocket();
     return Mono.just("received...");
   }
@@ -80,7 +79,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
       }
     }
     this.interrupt();
-    log.info("RSocketBusChannel destroy, broker address: {}", brokerAddress);
+    log.info("RSocketBusChannel destroy, broker address: " + brokerAddress);
   }
 
   private synchronized void doConnect() {
@@ -89,7 +88,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     RSocketRequester.Builder requesterBuilder = RSocketConfigure.R_SOCKET_REQUESTER_BUILDER;
     SocketAcceptor responder
         = RSocketMessageHandler.responder(rSocketStrategies, this);
-    final LoginMessage message = new LoginMessage();
+    final LoginArgs message = new LoginArgs();
     message.setApplicationId(applicationId);
     message.setInstanceId(clientIpPort);
     message.setAccessToken(accessToken);
@@ -125,11 +124,11 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .doOnError(error -> {
               String errMessage = error.getClass().getSimpleName() +
                   ": " + error.getMessage();
-              log.info("Broker socket error: {}", errMessage);
+              log.info("Broker socket error: " + errMessage);
             })
             .doFinally(consumer -> {
-              log.info("Broker {} 连接断开: {}, {} 秒后尝试重连...",
-                  brokerAddress, consumer, RESTART_DELAY);
+              log.info("Broker " + brokerAddress
+                  + " 连接断开: " + consumer + ", " + RESTART_DELAY + " 秒后尝试重连...");
               restartSocket();
             })
             .subscribe())
@@ -137,14 +136,14 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
         .onErrorResume(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
-          log.info("Broker socket connect failure: {}", errMessage);
+          log.info("Broker socket connect failure: " + errMessage);
           restartSocket();
           return Mono.just(true);
         })
         .subscribe();
   }
 
-  private void restartSocket() {
+  protected void restartSocket() {
     restartNoticeQueue.offer(true);
   }
 
@@ -157,7 +156,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
         poll = restartNoticeQueue.poll(5, TimeUnit.SECONDS);
         if (poll != null) {
           TimeUnit.SECONDS.sleep(RESTART_DELAY);
-          log.info("Restart socket, broker address: {}", brokerAddress);
+          log.info("Restart socket, broker address: " + brokerAddress);
           doConnect();
         }
       } catch (InterruptedException e) {

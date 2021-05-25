@@ -1,13 +1,17 @@
 package com.zzsong.bus.broker.port.rsocket;
 
 import com.zzsong.bus.abs.domain.Application;
+import com.zzsong.bus.abs.domain.RouteInstance;
+import com.zzsong.bus.abs.storage.RouteInstanceStorage;
 import com.zzsong.bus.broker.admin.service.ApplicationService;
 import com.zzsong.bus.broker.core.channel.Channel;
 import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import com.zzsong.bus.common.constants.RSocketRoute;
-import com.zzsong.bus.common.message.ChannelInfo;
-import com.zzsong.bus.common.message.LoginMessage;
+import com.zzsong.bus.common.transfer.AckArgs;
+import com.zzsong.bus.common.transfer.ChannelArgs;
+import com.zzsong.bus.common.transfer.LoginArgs;
+import com.zzsong.bus.common.transfer.RejectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +36,14 @@ import java.util.Optional;
 public class RSocketServer {
   private final ConsumerManager consumerManager;
   private final ApplicationService applicationService;
+  private final RouteInstanceStorage routeInstanceStorage;
 
   /**
    * 客户端登录
    */
   @ConnectMapping(RSocketRoute.LOGIN)
   public void login(@Nonnull RSocketRequester requester, @Payload String loginMessage) {
-    LoginMessage message = LoginMessage.parseMessage(loginMessage);
+    LoginArgs message = LoginArgs.parseMessage(loginMessage);
     long applicationId = message.getApplicationId();
     final String instanceId = message.getInstanceId();
     final String accessToken = message.getAccessToken();
@@ -93,16 +98,16 @@ public class RSocketServer {
   /**
    * 客户端变更通道状态
    *
-   * @param channelInfo 通道信息
+   * @param channelArgs 通道信息
    */
   @MessageMapping(RSocketRoute.CHANNEL_CHANGE_STATUS)
-  public Mono<Boolean> autoSubscribe(@Nonnull ChannelInfo channelInfo) {
-    long applicationId = channelInfo.getApplicationId();
-    String instanceId = channelInfo.getInstanceId();
-    int status = channelInfo.getStatus();
+  public Mono<Boolean> channelChangeStatus(@Nonnull ChannelArgs channelArgs) {
+    long applicationId = channelArgs.getApplicationId();
+    String instanceId = channelArgs.getInstanceId();
+    int status = channelArgs.getStatus();
     String channelId = buildChannelId(applicationId, instanceId);
     Consumer consumer = consumerManager.loadConsumer(applicationId);
-    if (status == ChannelInfo.STATUS_IDLE) {
+    if (status == ChannelArgs.STATUS_IDLE) {
       consumer.markChannelsAvailable(Collections.singleton(channelId));
     } else {
       consumer.markChannelBusy(channelId);
@@ -114,15 +119,18 @@ public class RSocketServer {
    * 客户端签收消息
    */
   @MessageMapping(RSocketRoute.MESSAGE_ACK)
-  public Mono<Boolean> ack() {
-    return Mono.empty();
+  public Mono<Boolean> ack(@Nonnull AckArgs args) {
+    long routeInstanceId = args.getRouteInstanceId();
+    int success = RouteInstance.STATUS_SUCCESS;
+    return routeInstanceStorage.updateStatus(routeInstanceId, success, "success").map(l -> true);
   }
 
   /**
    * 客户端拒绝消息
    */
   @MessageMapping(RSocketRoute.MESSAGE_REJECT)
-  public Mono<Boolean> reject() {
+  public Mono<Boolean> reject(@Nonnull RejectArgs args) {
+
     return Mono.empty();
   }
 
