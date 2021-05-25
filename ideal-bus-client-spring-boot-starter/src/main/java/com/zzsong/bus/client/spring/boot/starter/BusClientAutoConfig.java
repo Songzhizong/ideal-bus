@@ -103,7 +103,8 @@ public class BusClientAutoConfig {
       int brokerPort = Integer.parseInt(brokerPortStr);
       ReceiveRSocketChannelImpl channel = new ReceiveRSocketChannelImpl(brokerIp, brokerPort,
           applicationId, ip + ":" + serverPort, accessToken, consumerExecutor);
-      channel.connect();
+//      channel.connect();
+      channels.add(channel);
     }
     return channels;
   }

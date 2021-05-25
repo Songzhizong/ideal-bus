@@ -1,3 +1,4 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.zzsong.bus.client.spring.boot.starter.BusClientAutoConfig
+  com.zzsong.bus.client.spring.boot.starter.BusClientAutoConfig,\
+com.zzsong.bus.client.spring.boot.starter.BusClientRunner

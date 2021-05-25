@@ -13,9 +13,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRSocketChannel extends Thread implements RSocketChannel {
   private static final int RESTART_DELAY = 10;
 
-  private final BlockingQueue<Boolean> restartNoticeQueue = new SynchronousQueue<>();
+  private final BlockingQueue<Boolean> restartNoticeQueue = new ArrayBlockingQueue<>(1);
   @Nonnull
   private final String brokerIp;
   private final int brokerPort;
@@ -52,6 +51,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     this.clientIpPort = clientIpPort;
     this.accessToken = accessToken;
     this.brokerAddress = brokerIp + ":" + brokerPort;
+    this.setName(brokerAddress);
   }
 
   @MessageMapping(RSocketRoute.INTERRUPT)
@@ -84,6 +84,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   }
 
   private synchronized void doConnect() {
+    log.info("doConnect...");
     RSocketStrategies rSocketStrategies = RSocketConfigure.R_SOCKET_STRATEGIES;
     RSocketRequester.Builder requesterBuilder = RSocketConfigure.R_SOCKET_REQUESTER_BUILDER;
     SocketAcceptor responder
@@ -93,16 +94,14 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     message.setInstanceId(clientIpPort);
     message.setAccessToken(accessToken);
     final String messageString = message.toMessageString();
-    if (socketRequester != null
-        && socketRequester.rsocket() != null
-        && !Objects.requireNonNull(socketRequester.rsocket()).isDisposed()) {
+    if (socketRequester != null && !socketRequester.rsocketClient().isDisposed()) {
+      socketRequester.rsocketClient().dispose();
       try {
-        Objects.requireNonNull(socketRequester.rsocket()).dispose();
         socketRequester = requesterBuilder
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .connectTcp(brokerIp, brokerPort).block();
+            .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
         restartSocket();
@@ -114,40 +113,38 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .connectTcp(brokerIp, brokerPort).block();
+            .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
         restartSocket();
         return;
       }
     }
-    if (socketRequester == null) {
-      restartSocket();
-      return;
-    }
-    RSocket rsocket = socketRequester.rsocket();
-    if (rsocket == null) {
-      restartSocket();
-      return;
-    }
-    rsocket.onClose()
-        .doOnError(error -> {
+    socketRequester.rsocketClient().source()
+        .doOnNext(rSocket -> rSocket.onClose()
+            .doOnError(error -> {
+              String errMessage = error.getClass().getSimpleName() +
+                  ": " + error.getMessage();
+              log.info("Broker socket error: {}", errMessage);
+            })
+            .doFinally(consumer -> {
+              log.info("Broker {} 连接断开: {}, {} 秒后尝试重连...",
+                  brokerAddress, consumer, RESTART_DELAY);
+              restartSocket();
+            })
+            .subscribe())
+        .map(r -> true)
+        .onErrorResume(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
-          log.info("Broker socket error: {}", errMessage);
-        })
-        .doFinally(consumer -> {
-          log.info("Broker {} 连接断开: {}, {} 秒后尝试重连...",
-              brokerAddress, consumer, RESTART_DELAY);
+          log.info("Broker socket connect failure: {}", errMessage);
           restartSocket();
+          return Mono.just(true);
         })
         .subscribe();
   }
 
   private void restartSocket() {
-//    if (running) {
-//      lbFactory.markServerDown(SimpleBusClient.BUS_BROKER_APP_NAME, this);
-//    }
     restartNoticeQueue.offer(true);
   }
 
@@ -164,7 +161,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
           doConnect();
         }
       } catch (InterruptedException e) {
-        // Interrupted
+        log.info("Interrupted");
       }
     }
   }
