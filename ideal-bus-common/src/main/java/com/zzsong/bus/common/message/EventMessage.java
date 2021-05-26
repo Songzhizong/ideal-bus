@@ -25,7 +25,7 @@ public class EventMessage<T> {
 
   /** 业务方唯一id, 通常为业务方的事务编号 */
   @Nullable
-  private String transactionId = "";
+  private String transactionId;
 
   /** 实体类型 */
   @Nullable

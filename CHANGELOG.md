@@ -1,4 +1,19 @@
-# 1.1.0-SNAPSHOT
+# 1.2.0
+
+### ⭐ New Features
+
+- 重构服务端实现
+- 重构客户端实现
+- 支持按topic为事件设置存储过期时间
+
+### 🐞 Bug Fixes
+
+### 🔨 Dependency Upgrades
+
+- spring boot 2.4.6
+- project reactor 2020.0.7
+
+# 1.1.0
 
 ### ⭐ New Features
 

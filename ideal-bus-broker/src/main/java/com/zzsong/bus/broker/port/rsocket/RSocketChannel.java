@@ -51,11 +51,7 @@ public class RSocketChannel implements Channel {
     deliveredEvent.setRouteInstanceId(instance.getInstanceId());
     deliveredEvent.setSubscriptionId(instance.getSubscriptionId());
     deliveredEvent.setEventId(instance.getEventId());
-    String transactionId = instance.getTransactionId();
-    if (transactionId == null) {
-      transactionId = "";
-    }
-    deliveredEvent.setTransactionId(transactionId);
+    deliveredEvent.setTransactionId(instance.getTransactionId());
     deliveredEvent.setTopic(instance.getTopic());
     deliveredEvent.setHeaders(instance.getHeaders());
     deliveredEvent.setPayload(JsonUtils.toJsonStringIgnoreNull(instance.getPayload()));
