@@ -57,11 +57,13 @@ public class SimpleConsumer implements Consumer {
   @Nonnull
   @Override
   public Mono<DeliverStatus> deliverMessage(@Nonnull RouteInstance routeInstance) {
-    if (availableChannels.isEmpty()) {
-      if (busyChannelMap.isEmpty()) {
-        return Mono.just(DeliverStatus.OFFLINE);
+    synchronized (this) {
+      if (availableChannels.isEmpty()) {
+        if (busyChannelMap.isEmpty()) {
+          return Mono.just(DeliverStatus.OFFLINE);
+        }
+        return Mono.just(DeliverStatus.UNREACHABLE);
       }
-      return Mono.just(DeliverStatus.UNREACHABLE);
     }
     Channel channel = loadBalancer.chooseServer(null, availableChannels);
     if (channel == null) {
@@ -75,7 +77,6 @@ public class SimpleConsumer implements Consumer {
         .flatMap(status -> {
           if (status != DeliverStatus.SUCCESS) {
             String channelId = channel.getInstanceId();
-            log.info("channel: {} busy", channelId);
             markChannelBusy(channelId);
             return Mono.just(status);
           } else {
@@ -105,6 +106,7 @@ public class SimpleConsumer implements Consumer {
   public synchronized void markChannelBusy(@Nonnull String channelId) {
     Channel channel = availableChannelMap.remove(channelId);
     if (channel != null) {
+      log.info("channel: {} busy", channelId);
       this.availableChannels = new ArrayList<>(availableChannelMap.values());
       BusyChannelWrapper wrapper = new BusyChannelWrapper(System.currentTimeMillis(), channel);
       busyChannelMap.put(channelId, wrapper);
@@ -117,6 +119,7 @@ public class SimpleConsumer implements Consumer {
     for (String channelId : channelIds) {
       BusyChannelWrapper wrapper = busyChannelMap.remove(channelId);
       if (wrapper != null) {
+        log.info("change channel: {} available", channelId);
         change++;
         Channel channel = wrapper.getChannel();
         availableChannelMap.put(channelId, channel);
