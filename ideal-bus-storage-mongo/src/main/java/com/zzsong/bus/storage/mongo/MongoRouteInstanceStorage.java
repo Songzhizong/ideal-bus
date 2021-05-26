@@ -15,12 +15,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,14 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     this.idGenerator = idGeneratorFactory.getGenerator("routeInstance");
     this.template = template;
     this.repository = repository;
+  }
+
+  @Override
+  public Mono<Optional<RouteInstance>> findById(long routeInstanceId) {
+    return repository.findById(routeInstanceId)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .map(Optional::of)
+        .defaultIfEmpty(Optional.empty());
   }
 
   @Nonnull
@@ -74,6 +84,21 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
         .defaultIfEmpty(Collections.emptyList());
   }
 
+  @Override
+  public Mono<List<RouteInstance>> saveAll(@Nonnull Flux<RouteInstance> routeInstances) {
+    Flux<RouteInstanceDo> flux = routeInstances.map(instance -> {
+      //noinspection ConstantConditions
+      if (instance.getInstanceId() == null) {
+        instance.setInstanceId(idGenerator.generate());
+      }
+      return RouteInstanceDoConverter.fromRouteInstance(instance);
+    });
+    return repository.saveAll(flux)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .collectList()
+        .defaultIfEmpty(Collections.emptyList());
+  }
+  
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard) {
@@ -111,8 +136,22 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     Criteria criteria = Criteria
         .where("shard").is(shard)
         .and("subscriptionId").is(subscriptionId)
-        .and("nextPushTime").lte(SnowFlake.START_TIMESTAMP)
-        .and("status").is(RouteInstance.STATUS_WAITING);
+        .and("status").in(RouteInstance.STATUS_QUEUING, RouteInstance.STATUS_TEMPING);
+    Query query = Query.query(criteria).limit(count)
+        .with(Sort.by(Sort.Direction.ASC, "instanceId"));
+    return template.find(query, RouteInstanceDo.class)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .collectList()
+        .defaultIfEmpty(Collections.emptyList());
+  }
+
+  @Nonnull
+  @Override
+  public Mono<List<RouteInstance>> loadTemping(int count, int shard, long subscriptionId) {
+    Criteria criteria = Criteria
+        .where("shard").is(shard)
+        .and("subscriptionId").is(subscriptionId)
+        .and("status").is(RouteInstance.STATUS_TEMPING);
     Query query = Query.query(criteria).limit(count)
         .with(Sort.by(Sort.Direction.ASC, "instanceId"));
     return template.find(query, RouteInstanceDo.class)
@@ -125,6 +164,17 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Override
   public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
     Query updateQuery = Query.query(Criteria.where("instanceId").is(instanceId));
+    Update update = new Update();
+    update.set("status", status);
+    update.set("message", message);
+    return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
+        .map(UpdateResult::getModifiedCount);
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Long> updateStatus(Collection<Long> instanceIdList, int status, @Nonnull String message) {
+    Query updateQuery = Query.query(Criteria.where("instanceId").in(instanceIdList));
     Update update = new Update();
     update.set("status", status);
     update.set("message", message);

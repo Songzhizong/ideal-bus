@@ -100,7 +100,7 @@ public class RouteInstanceDo {
 
   /** 状态 */
   @Indexed(background = true)
-  private int status = RouteInstance.STATUS_WAITING;
+  private int status = RouteInstance.STATUS_QUEUING;
 
   /** 已重试次数 */
   private int retryCount = -1;

@@ -36,7 +36,7 @@ public final class SubscriptionConverter {
     subscription.setListenerName(args.getListenerName());
     String delayExp = args.getDelayExp();
     if (delayExp != null) {
-      subscription.setCondition(delayExp);
+      subscription.setDelayExp(delayExp);
     }
     String condition = args.getCondition();
     if (condition != null) {
@@ -56,22 +56,22 @@ public final class SubscriptionConverter {
 
   @Nonnull
   public static SubscriptionDetails toSubscriptionDetails(@Nonnull Subscription subscription) {
-      SubscriptionDetails subscriptionDetails = new SubscriptionDetails();
-      subscriptionDetails.setCondition(subscription.getCondition());
+    SubscriptionDetails subscriptionDetails = new SubscriptionDetails();
+    subscriptionDetails.setCondition(subscription.getCondition());
 //      subscriptionDetails.setApplicationType();
 //      subscriptionDetails.setExternalApp();
 //      subscriptionDetails.setReceiveUrl();
 //      subscriptionDetails.setConditionGroup();
-      subscriptionDetails.setSubscriptionId(subscription.getSubscriptionId());
-      subscriptionDetails.setApplicationId(subscription.getApplicationId());
-      subscriptionDetails.setTopic(subscription.getTopic());
-      subscriptionDetails.setListenerName(subscription.getListenerName());
-      subscriptionDetails.setDelayExp(subscription.getDelayExp());
-      subscriptionDetails.setCondition(subscription.getCondition());
-      subscriptionDetails.setBroadcast(subscription.isBroadcast());
-      subscriptionDetails.setRetryCount(subscription.getRetryCount());
-      subscriptionDetails.setConsumeType(subscription.getConsumeType());
-      subscriptionDetails.setStatus(subscription.getStatus());
-      return subscriptionDetails;
+    subscriptionDetails.setSubscriptionId(subscription.getSubscriptionId());
+    subscriptionDetails.setApplicationId(subscription.getApplicationId());
+    subscriptionDetails.setTopic(subscription.getTopic());
+    subscriptionDetails.setListenerName(subscription.getListenerName());
+    subscriptionDetails.setDelayExp(subscription.getDelayExp());
+    subscriptionDetails.setCondition(subscription.getCondition());
+    subscriptionDetails.setBroadcast(subscription.isBroadcast());
+    subscriptionDetails.setRetryCount(subscription.getRetryCount());
+    subscriptionDetails.setConsumeType(subscription.getConsumeType());
+    subscriptionDetails.setStatus(subscription.getStatus());
+    return subscriptionDetails;
   }
 }

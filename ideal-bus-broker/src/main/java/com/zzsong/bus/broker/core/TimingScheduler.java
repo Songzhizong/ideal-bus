@@ -3,11 +3,10 @@ package com.zzsong.bus.broker.core;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.broker.admin.service.RouteInstanceService;
 import com.zzsong.bus.broker.config.BusProperties;
-import com.zzsong.bus.broker.core.transfer.RouteTransfer;
+import com.zzsong.bus.broker.core.queue.QueueManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
+
 public class TimingScheduler implements SmartInitializingSingleton {
   private static final int PRE_READ_COUNT = 1000;
   private static final long PRE_READ_MILLS = 5000L;
@@ -33,18 +33,15 @@ public class TimingScheduler implements SmartInitializingSingleton {
   private volatile boolean scheduleThreadToStop = false;
   private volatile boolean ringThreadToStop = false;
 
-  @Nonnull
+  private final QueueManager queueManager;
   private final BusProperties busProperties;
-  @Nonnull
-  private final RouteTransfer routeTransfer;
-  @Nonnull
   private final RouteInstanceService routeInstanceService;
 
-  public TimingScheduler(@Nonnull BusProperties busProperties,
-                         @Nonnull RouteTransfer routeTransfer,
+  public TimingScheduler(@Nonnull QueueManager queueManager,
+                         @Nonnull BusProperties busProperties,
                          @Nonnull RouteInstanceService routeInstanceService) {
+    this.queueManager = queueManager;
     this.busProperties = busProperties;
-    this.routeTransfer = routeTransfer;
     this.routeInstanceService = routeInstanceService;
   }
 
@@ -64,30 +61,32 @@ public class TimingScheduler implements SmartInitializingSingleton {
         long maxNextTime = nowTime + PRE_READ_MILLS;
         int nodeId = busProperties.getNodeId();
         boolean preReadSuc = true;
-        List<RouteInstance> routeInstanceList = routeInstanceService
-            .loadDelayed(maxNextTime, PRE_READ_COUNT, nodeId)
-            .block();
-        if (routeInstanceList != null && routeInstanceList.size() > 0) {
-          log.debug("loadDelayed: {}", routeInstanceList.size());
-          List<RouteInstance> submitList = new ArrayList<>();
-          for (RouteInstance routeInstance : routeInstanceList) {
-            long nextPushTime = routeInstance.getNextPushTime();
-            routeInstance.setNextPushTime(-1);
-            if (nowTime >= nextPushTime) {
-              submitList.add(routeInstance);
-            } else {
-              int ringSecond = (int) (nextPushTime / 1000 % 60);
-              pushTimeRing(ringSecond, routeInstance);
+        try {
+          List<RouteInstance> routeInstanceList = routeInstanceService
+              .loadDelayed(maxNextTime, PRE_READ_COUNT, nodeId)
+              .block();
+          if (routeInstanceList != null && routeInstanceList.size() > 0) {
+            log.debug("load delay messages: {}", routeInstanceList.size());
+            List<RouteInstance> submitList = new ArrayList<>();
+            for (RouteInstance routeInstance : routeInstanceList) {
+              long nextPushTime = routeInstance.getNextPushTime();
+              routeInstance.setNextPushTime(-1);
+              if (nowTime >= nextPushTime) {
+                submitList.add(routeInstance);
+              } else {
+                int ringSecond = (int) (nextPushTime / 1000 % 60);
+                pushTimeRing(ringSecond, routeInstance);
+              }
             }
+            if (submitList.size() > 0) {
+              submit(submitList);
+            }
+          } else {
+            preReadSuc = false;
           }
-          if (submitList.size() > 0) {
-            Flux.fromIterable(submitList)
-                .flatMap(routeTransfer::submit)
-                .collectList()
-                .subscribe();
-          }
-        } else {
-          preReadSuc = false;
+        } catch (Exception e) {
+          log.warn("", e);
+          continue;
         }
         long cost = System.currentTimeMillis() - start;
         if (cost < 1000) {
@@ -125,10 +124,7 @@ public class TimingScheduler implements SmartInitializingSingleton {
           int second = (nowSecond + 60 - i) % 60;
           List<RouteInstance> tmpData = ringData.remove(second);
           if (tmpData != null) {
-            Flux.fromIterable(tmpData)
-                .flatMap(routeTransfer::submit)
-                .collectList()
-                .subscribe();
+            submit(tmpData);
           }
         }
         try {
@@ -145,6 +141,13 @@ public class TimingScheduler implements SmartInitializingSingleton {
     ringThread.setDaemon(true);
     ringThread.setName("ring-thread");
     ringThread.start();
+  }
+
+  private void submit(@Nonnull List<RouteInstance> routeInstances) {
+    for (RouteInstance routeInstance : routeInstances) {
+      routeInstance.setNextPushTime(-1);
+    }
+    queueManager.submit(routeInstances).block();
   }
 
 

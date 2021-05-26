@@ -1,0 +1,25 @@
+### 批量发布
+POST http://127.0.0.1:13256/publish/batch
+Content-Type: application/json
+
+[
+  {
+    "uuid": "uuid",
+    "transactionId": "",
+    "entity": "acs_organization",
+    "aggregate": "197956390067634176",
+    "externalApp": "",
+    "topic": "ACS_ORGANIZATION_CREATED",
+    "tag": "",
+    "headers": {
+    },
+    "payload": {
+      "organization": {
+        "organizationId": 197956390067634176,
+        "organizationName": "阳光帝景",
+        "createdTime": "2021-03-02 15:54:39.131"
+      }
+    },
+    "timestamp": 1614671679179
+  }
+]

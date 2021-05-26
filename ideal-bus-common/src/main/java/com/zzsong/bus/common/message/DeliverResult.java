@@ -24,29 +24,10 @@ public class DeliverResult {
   private String message = "";
 
   public enum Status {
-    /**
-     * 交付成功
-     * <p>客户端成功接收消息并完成处理</p>
-     */
-    ACK,
+    /** 成功 */
+    SUCCESS,
 
-    /**
-     * 执行失败
-     * <p>客户端成功接收但处理失败</p>
-     */
-    UN_ACK,
-
-    /**
-     * 交付失败, 应用离线
-     * <p>应用不在线</p>ı
-     */
-    APP_OFFLINE,
-
-    /**
-     * 交付失败, 选取的通道被关闭
-     * <p>只代表当前选取的通道被关闭了, 可能存在别的可用通道</p>
-     */
-    CHANNEL_CLOSED,
-    ;
+    /** 忙碌 */
+    BUSY,
   }
 }

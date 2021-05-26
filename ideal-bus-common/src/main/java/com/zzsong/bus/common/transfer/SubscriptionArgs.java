@@ -49,10 +49,9 @@ public class SubscriptionArgs {
   @Nullable
   private Integer retryCount;
 
-  public SubscriptionArgs checkAndGet() {
+  public void checkAndGet() {
     if (StringUtils.isBlank(topic)) {
       throw new IllegalArgumentException("topic不能为空");
     }
-    return this;
   }
 }

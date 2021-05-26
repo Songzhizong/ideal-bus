@@ -16,14 +16,18 @@ import javax.annotation.Nonnull;
 public class RouteInstance extends EventInstance {
   /** 丢弃 */
   public static final int STATUS_DISCARD = -1;
-  /** 等待执行状态 */
-  public static final int STATUS_WAITING = 0;
-  /** 执行中 */
+  /** 正在队列中等待消费 */
+  public static final int STATUS_QUEUING = 0;
+  /** 消费端正在处理 */
   public static final int STATUS_RUNNING = 1;
-  /** 执行成功 */
+  /** 消费端处理成功 */
   public static final int STATUS_SUCCESS = 2;
-  /** 执行失败 */
+  /** 消费端处理失败 */
   public static final int STATUS_FAILURE = 3;
+  /** 存储库中暂存, 等待加入队列 */
+  public static final int STATUS_TEMPING = 4;
+  /** 延迟中, 待延迟结束转为暂存状态 */
+  public static final int STATUS_DELAYING = 5;
 
   /** 实例id */
   @Nonnull
@@ -47,7 +51,7 @@ public class RouteInstance extends EventInstance {
   private long nextPushTime = -1;
 
   /** 状态: -1 丢弃, 0 等待执行, 1 执行中, 2 完成, 3 失败 */
-  private int status = STATUS_WAITING;
+  private int status = STATUS_QUEUING;
 
   /** 已重试次数 */
   private int retryCount = -1;

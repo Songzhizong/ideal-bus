@@ -43,7 +43,7 @@ public class DeliverEvent {
    * 消息内容
    */
   @Nonnull
-  private Object payload;
+  private String payload;
   /**
    * 事件产生时间戳
    */
