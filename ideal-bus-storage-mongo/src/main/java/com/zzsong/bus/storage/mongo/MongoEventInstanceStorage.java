@@ -1,5 +1,6 @@
 package com.zzsong.bus.storage.mongo;
 
+import com.mongodb.client.result.DeleteResult;
 import com.zzsong.bus.abs.domain.EventInstance;
 import com.zzsong.bus.abs.generator.IDGenerator;
 import com.zzsong.bus.abs.generator.IDGeneratorFactory;
@@ -7,10 +8,14 @@ import com.zzsong.bus.abs.storage.EventInstanceStorage;
 import com.zzsong.bus.storage.mongo.converter.EventInstanceDoConverter;
 import com.zzsong.bus.storage.mongo.document.EventInstanceDo;
 import com.zzsong.bus.storage.mongo.repository.MongoEventInstanceRepository;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,14 +25,16 @@ import java.util.stream.Collectors;
  */
 @Component
 public class MongoEventInstanceStorage implements EventInstanceStorage {
-  @Nonnull
   private final IDGenerator idGenerator;
+  private final ReactiveMongoTemplate template;
   private final MongoEventInstanceRepository repository;
 
-  public MongoEventInstanceStorage(MongoEventInstanceRepository repository,
-                                   @Nonnull IDGeneratorFactory idGeneratorFactory) {
+  public MongoEventInstanceStorage(@Nonnull MongoEventInstanceRepository repository,
+                                   @Nonnull IDGeneratorFactory idGeneratorFactory,
+                                   @Nonnull ReactiveMongoTemplate template) {
     this.idGenerator = idGeneratorFactory.getGenerator("eventInstance");
     this.repository = repository;
+    this.template = template;
   }
 
   @Nonnull
@@ -58,5 +65,13 @@ public class MongoEventInstanceStorage implements EventInstanceStorage {
         .map(EventInstanceDoConverter::toEventInstance)
         .map(Optional::of)
         .defaultIfEmpty(Optional.empty());
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Long> deleteByIdLessThenAndTopicIn(long maxId, @Nonnull Collection<String> topics) {
+    Criteria criteria = Criteria.where("eventId").lt(maxId).and("topic").in(topics);
+    Query query = Query.query(criteria);
+    return template.remove(query, EventInstanceDo.class).map(DeleteResult::getDeletedCount);
   }
 }
