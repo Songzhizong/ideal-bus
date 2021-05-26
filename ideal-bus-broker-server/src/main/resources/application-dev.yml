@@ -1,5 +1,5 @@
 logging:
-  config: classpath:logback-spring-dev.xml
+  config: classpath:logback-spring-prd.xml
 spring:
   data:
     mongodb:

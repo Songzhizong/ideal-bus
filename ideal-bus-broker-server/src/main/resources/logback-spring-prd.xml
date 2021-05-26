@@ -119,8 +119,8 @@
   </logger>
 
   <!-- 项目日志, 输出到一般日志文件、重要日志文件、warn和error日志输出到控制台 -->
-  <logger name="com.zzsong" level="info" additivity="false">
-    <!--    <appender-ref ref="ALL_FILE"/>-->
+  <logger name="com.zzsong" level="debug" additivity="false">
+    <appender-ref ref="ALL_FILE"/>
     <appender-ref ref="INFO_FILE"/>
     <appender-ref ref="IMP_FILE"/>
     <appender-ref ref="DEFAULT_CONSOLE_WARN"/>

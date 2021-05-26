@@ -26,7 +26,7 @@ public class SimpleConsumer implements Consumer {
   /** 忙碌状态channel回到可用状态的恢复时间 */
   private static final int RECOVER_MILLS = 30_000;
   private static final ScheduledExecutorService SCHEDULED
-      = Executors.newSingleThreadScheduledExecutor();
+      = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
   private final Map<String, Channel> availableChannelMap = new HashMap<>();
   private final Map<String, BusyChannelWrapper> busyChannelMap = new HashMap<>();
   private final LoadBalancer<Channel> loadBalancer
@@ -46,7 +46,7 @@ public class SimpleConsumer implements Consumer {
           .map(wrapper -> wrapper.getChannel().getInstanceId())
           .collect(Collectors.toList());
       markChannelsAvailable(collect);
-    }, 2, TimeUnit.SECONDS);
+    }, 5, TimeUnit.SECONDS);
   }
 
   @Override
