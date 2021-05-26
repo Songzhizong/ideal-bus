@@ -1,6 +1,7 @@
 package com.zzsong.bus.broker.core.consumer;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
+import com.zzsong.bus.abs.storage.RouteInstanceStorage;
 import com.zzsong.bus.broker.core.channel.Channel;
 import com.zzsong.bus.common.share.lb.LbStrategyEnum;
 import com.zzsong.bus.common.share.lb.LoadBalancer;
@@ -30,12 +31,14 @@ public class SimpleConsumer implements Consumer {
   private final Map<String, BusyChannelWrapper> busyChannelMap = new HashMap<>();
   private final LoadBalancer<Channel> loadBalancer
       = LoadBalancer.newLoadBalancer(LbStrategyEnum.RANDOM);
-
-  private final long applicationId;
   private List<Channel> availableChannels = new ArrayList<>();
+  private final long applicationId;
+  private final RouteInstanceStorage routeInstanceStorage;
 
-  public SimpleConsumer(long applicationId) {
+  public SimpleConsumer(long applicationId,
+                        RouteInstanceStorage routeInstanceStorage) {
     this.applicationId = applicationId;
+    this.routeInstanceStorage = routeInstanceStorage;
     SCHEDULED.schedule(() -> {
       long currentTimeMillis = System.currentTimeMillis();
       List<String> collect = busyChannelMap.values().stream()
@@ -69,11 +72,16 @@ public class SimpleConsumer implements Consumer {
           log.info("channel.deliverMessage(routeInstance) ex: {}", throwable.getMessage());
           return Mono.just(DeliverStatus.CHANNEL_BUSY);
         })
-        .doOnNext(status -> {
+        .flatMap(status -> {
           if (status != DeliverStatus.SUCCESS) {
             String channelId = channel.getInstanceId();
             log.info("channel: {} busy", channelId);
             markChannelBusy(channelId);
+            return Mono.just(status);
+          } else {
+            routeInstance.setStatus(RouteInstance.STATUS_RUNNING);
+            routeInstance.setMessage("running");
+            return routeInstanceStorage.save(routeInstance).map(r -> status);
           }
         });
   }

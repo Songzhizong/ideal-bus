@@ -1,22 +1,28 @@
 package com.zzsong.bus.abs.storage;
 
 import com.zzsong.bus.abs.domain.RouteInstance;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 宋志宗 on 2020/9/17
  */
 public interface RouteInstanceStorage {
 
+  Mono<Optional<RouteInstance>> findById(long routeInstanceId);
+
   @Nonnull
   Mono<RouteInstance> save(@Nonnull RouteInstance routeInstance);
 
   @Nonnull
   Mono<List<RouteInstance>> saveAll(@Nonnull Collection<RouteInstance> routeInstances);
+
+  Mono<List<RouteInstance>> saveAll(@Nonnull Flux<RouteInstance> routeInstances);
 
   @Nonnull
   Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard);

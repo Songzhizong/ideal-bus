@@ -11,13 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 持久化队列管理器
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton {
+  private static final long RETRY_INTERVAL = 10_000L;
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
 
   private final BusProperties properties;
@@ -37,35 +39,75 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
 
   @Override
   public Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstances) {
-    List<RouteInstance> collect = routeInstances.stream().peek(routeInstance -> {
-      long nextPushTime = routeInstance.getNextPushTime();
-      if (nextPushTime > 0) {
-        routeInstance.setStatus(RouteInstance.STATUS_DELAYING);
-        routeInstance.setMessage("delaying");
-      } else {
-        Long applicationId = routeInstance.getApplicationId();
-        Long subscriptionId = routeInstance.getSubscriptionId();
-        EventQueue eventQueue = loadQueue(applicationId, subscriptionId);
-        boolean offer = eventQueue.offer(routeInstance);
-        if (offer) {
-          routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
-          routeInstance.setMessage("be queuing");
-        } else {
-          routeInstance.setStatus(RouteInstance.STATUS_TEMPING);
-          routeInstance.setMessage("temping");
-        }
-      }
-    }).collect(Collectors.toList());
-    return routeInstanceStorage.saveAll(collect).map(r -> true);
+    if (routeInstances.isEmpty()) {
+      return Mono.just(true);
+    }
+    Flux<RouteInstance> flux = Flux.fromIterable(routeInstances)
+        .doOnNext(routeInstance -> {
+          long nextPushTime = routeInstance.getNextPushTime();
+          if (nextPushTime > 0) {
+            routeInstance.setStatus(RouteInstance.STATUS_DELAYING);
+            routeInstance.setMessage("delaying");
+          } else {
+            Long applicationId = routeInstance.getApplicationId();
+            Long subscriptionId = routeInstance.getSubscriptionId();
+            EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
+            boolean offer = eventQueue.offer(routeInstance);
+            if (offer) {
+              routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
+              routeInstance.setMessage("be queuing");
+            } else {
+              routeInstance.setStatus(RouteInstance.STATUS_TEMPING);
+              routeInstance.setMessage("temping");
+            }
+          }
+        });
+    return routeInstanceStorage.saveAll(flux).map(r -> true);
+  }
+
+  @Override
+  public Mono<Boolean> ack(long routeInstanceId) {
+    int success = RouteInstance.STATUS_SUCCESS;
+    log.debug("message: {} ack", routeInstanceId);
+    return routeInstanceStorage.updateStatus(routeInstanceId, success, "success").map(l -> true);
+  }
+
+  @Override
+  public Mono<Boolean> reject(long routeInstanceId, @Nullable String message) {
+    return routeInstanceStorage.findById(routeInstanceId)
+        .flatMap(opt -> {
+          if (opt.isPresent()) {
+            String saveMessage = message != null ? message : "";
+            RouteInstance routeInstance = opt.get();
+            int retryLimit = routeInstance.getRetryLimit();
+            int retryCount = routeInstance.getRetryCount() + 1;
+
+            routeInstance.setRetryCount(retryCount);
+            if (retryCount < retryLimit) {
+              routeInstance.setStatus(RouteInstance.STATUS_DELAYING);
+              routeInstance.setMessage(saveMessage);
+              routeInstance.setNextPushTime(System.currentTimeMillis() + RETRY_INTERVAL);
+              log.debug("message: {} reject, current retry count: {}", routeInstanceId, retryCount);
+            } else {
+              routeInstance.setStatus(RouteInstance.STATUS_FAILURE);
+              routeInstance.setMessage("Reach the retry limit: " + saveMessage);
+              routeInstance.setNextPushTime(-1);
+              log.info("message: {} reject and reach the retry limit: {}", routeInstanceId, retryLimit);
+            }
+            return routeInstanceStorage.save(routeInstance).map(i -> true);
+          } else {
+            return Mono.just(true);
+          }
+        });
   }
 
   @Nonnull
-  private EventQueue loadQueue(Long applicationId, Long subscriptionId) {
+  private EventQueue loadQueue(Long applicationId, Long subscriptionId, boolean init) {
     return queueMap.computeIfAbsent(subscriptionId, k -> {
-      Consumer consumer = consumerManager.loadConsumer(applicationId);
+      Consumer consumer = consumerManager.loadConsumer(applicationId, routeInstanceStorage);
       int nodeId = properties.getNodeId();
       log.info("初始化队列: {}", subscriptionId);
-      return new PersistenceEventQueue(nodeId, subscriptionId, consumer, routeInstanceStorage);
+      return new PersistenceEventQueue(init, nodeId, subscriptionId, consumer, routeInstanceStorage);
     });
   }
 
@@ -76,7 +118,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
     for (Subscription subscription : block) {
       long applicationId = subscription.getApplicationId();
       Long subscriptionId = subscription.getSubscriptionId();
-      loadQueue(applicationId, subscriptionId);
+      loadQueue(applicationId, subscriptionId, true);
     }
   }
 }

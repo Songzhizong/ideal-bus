@@ -4,6 +4,7 @@ import com.zzsong.bus.abs.domain.RouteInstance;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -21,4 +22,21 @@ public interface QueueManager {
    * @author 宋志宗 on 2021/5/19
    */
   Mono<Boolean> submit(@Nonnull List<RouteInstance> routeInstances);
+
+  /**
+   * 签收消息
+   *
+   * @param routeInstanceId 消息id
+   * @author 宋志宗 on 2021/5/26
+   */
+  Mono<Boolean> ack(long routeInstanceId);
+
+  /**
+   * 拒绝消息
+   *
+   * @param routeInstanceId 消息id
+   * @param message         描述信息
+   * @author 宋志宗 on 2021/5/26
+   */
+  Mono<Boolean> reject(long routeInstanceId, @Nullable String message);
 }

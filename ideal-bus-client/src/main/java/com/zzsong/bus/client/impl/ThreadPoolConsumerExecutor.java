@@ -28,6 +28,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
   private final AtomicInteger counter = new AtomicInteger(0);
   private final EventConsumer consumer;
   private final List<ExecutorListener> listeners = new ArrayList<>();
+  private volatile boolean busy = false;
 
   public ThreadPoolConsumerExecutor(int corePoolSize,
                                     int maximumPoolSize,
@@ -61,7 +62,8 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
           consumer.onMessage(event, channel);
         } finally {
           int decrementAndGet = counter.decrementAndGet();
-          if (decrementAndGet < corePoolSize || decrementAndGet == 0) {
+          if ((decrementAndGet < corePoolSize || decrementAndGet == 0) && this.busy) {
+            this.busy = false;
             for (ExecutorListener listener : listeners) {
               listener.onIdle();
             }
@@ -75,6 +77,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
       flag = false;
     }
     if (!flag) {
+      this.busy = true;
       for (ExecutorListener listener : listeners) {
         listener.onBusy();
       }

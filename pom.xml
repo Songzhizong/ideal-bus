@@ -49,14 +49,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <guava.version>30.1.1-jre</guava.version>
-    <reactor-bom.version>2020.0.6</reactor-bom.version>
-    <spring.boot.version>2.4.4</spring.boot.version>
+    <reactor-bom.version>2020.0.7</reactor-bom.version>
+    <spring.boot.version>2.4.6</spring.boot.version>
     <spring-cloud.version>2020.0.2</spring-cloud.version>
     <lombok.version>1.18.20</lombok.version>
-    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <docker-maven-plugin.version>1.2.2</docker-maven-plugin.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -83,6 +84,12 @@
         <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- lombok -->
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -1,5 +1,7 @@
 package com.zzsong.bus.broker.core.consumer;
 
+import com.zzsong.bus.abs.storage.RouteInstanceStorage;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -8,5 +10,5 @@ import javax.annotation.Nonnull;
 public interface ConsumerManager {
 
   @Nonnull
-  Consumer loadConsumer(long applicationId);
+  Consumer loadConsumer(long applicationId, @Nonnull RouteInstanceStorage routeInstanceStorage);
 }

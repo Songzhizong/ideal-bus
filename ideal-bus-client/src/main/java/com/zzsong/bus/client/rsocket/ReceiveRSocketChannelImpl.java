@@ -2,9 +2,11 @@ package com.zzsong.bus.client.rsocket;
 
 import com.zzsong.bus.client.ConsumerExecutor;
 import com.zzsong.bus.common.constants.RSocketRoute;
-import com.zzsong.bus.common.transfer.ChannelArgs;
 import com.zzsong.bus.common.message.DeliverEvent;
 import com.zzsong.bus.common.message.DeliverResult;
+import com.zzsong.bus.common.transfer.AckArgs;
+import com.zzsong.bus.common.transfer.ChannelArgs;
+import com.zzsong.bus.common.transfer.RejectArgs;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import reactor.core.publisher.Mono;
@@ -39,12 +41,37 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
 
   @Override
   public void ack(long routeInstanceId) {
-
+    AckArgs args = new AckArgs();
+    args.setRouteInstanceId(routeInstanceId);
+    if (super.socketRequester == null) {
+      log.info("super.socketRequester is null");
+      super.restartSocket();
+      return;
+    }
+    super.socketRequester.route(RSocketRoute.MESSAGE_ACK)
+        .data(args)
+        .retrieveMono(Boolean.class)
+        .retryWhen(Retry.fixedDelay(5, Duration.ofMillis(500)))
+        .doOnNext(b -> log.debug("ack message " + routeInstanceId))
+        .subscribe();
   }
 
   @Override
-  public void reject(long routeInstanceId) {
-
+  public void reject(long routeInstanceId, @Nullable String message) {
+    RejectArgs args = new RejectArgs();
+    args.setRouteInstanceId(routeInstanceId);
+    args.setMessage(message);
+    if (super.socketRequester == null) {
+      log.info("super.socketRequester is null");
+      super.restartSocket();
+      return;
+    }
+    super.socketRequester.route(RSocketRoute.MESSAGE_REJECT)
+        .data(args)
+        .retrieveMono(Boolean.class)
+        .retryWhen(Retry.fixedDelay(5, Duration.ofMillis(500)))
+        .doOnNext(b -> log.debug("reject message " + routeInstanceId + " -> " + message))
+        .subscribe();
   }
 
   @Override

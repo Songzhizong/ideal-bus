@@ -11,11 +11,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -32,8 +32,8 @@ public class PersistenceEventQueue implements EventQueue {
   private final BlockingDeque<RouteInstance> queue
       = new LinkedBlockingDeque<>(EXPECT_SIZE << 2);
   private final AtomicInteger size = new AtomicInteger(0);
-  private final Lock lock = new ReentrantLock();
 
+  private final boolean init;
   private final int shardId;
   private final long subscriptionId;
   private final Consumer consumer;
@@ -43,20 +43,23 @@ public class PersistenceEventQueue implements EventQueue {
    * 默认为true, 假定存储库中存在未入列的消息.
    * 当暂存队列写满时
    */
-  private final AtomicBoolean hasWaiting = new AtomicBoolean(true);
+  private final AtomicBoolean hasWaiting = new AtomicBoolean(false);
   private final AtomicBoolean suspended = new AtomicBoolean(false);
   private final AtomicInteger suspendSeconds = new AtomicInteger(1);
   private volatile boolean started = false;
 
-  public PersistenceEventQueue(int shardId,
-                               long subscriptionId,
+  public PersistenceEventQueue(boolean init, int shardId, long subscriptionId,
                                @Nonnull Consumer consumer,
                                @Nonnull RouteInstanceStorage routeInstanceStorage) {
+    this.init = init;
     this.shardId = shardId;
     this.subscriptionId = subscriptionId;
     this.consumer = consumer;
     this.routeInstanceStorage = routeInstanceStorage;
     start();
+    if (init) {
+      hasWaiting.set(true);
+    }
   }
 
   @Override
@@ -64,14 +67,9 @@ public class PersistenceEventQueue implements EventQueue {
     if (hasWaiting.get()) {
       return false;
     }
-    lock.lock();
-    try {
-      if (size.get() >= EXPECT_SIZE) {
-        hasWaiting.set(true);
-        return false;
-      }
-    } finally {
-      lock.unlock();
+    if (size.get() >= EXPECT_SIZE) {
+      hasWaiting.set(true);
+      return false;
     }
     offerLast(routeInstance);
     return true;
@@ -107,7 +105,9 @@ public class PersistenceEventQueue implements EventQueue {
     }
     this.started = true;
     // 装载消息到内部队列
-    loadWaiting();
+    if (init) {
+      loadWaiting();
+    }
     Thread thread = new Thread(() -> {
       while (started) {
         try {
@@ -166,24 +166,17 @@ public class PersistenceEventQueue implements EventQueue {
   }
 
   private void loadWaiting() {
-    lock.lock();
-    List<RouteInstance> waitingList;
-    int size;
-    try {
-      waitingList = routeInstanceStorage
-          .loadWaiting(EXPECT_SIZE, shardId, subscriptionId).block();
-      if (waitingList == null) {
-        return;
-      }
-      size = waitingList.size();
-      if (size == 0) {
-        this.hasWaiting.set(false);
-        return;
-      }
-      this.hasWaiting.set(size >= EXPECT_SIZE);
-    } finally {
-      lock.unlock();
+    List<RouteInstance> waitingList = routeInstanceStorage
+        .loadWaiting(EXPECT_SIZE, shardId, subscriptionId).block();
+    if (waitingList == null) {
+      return;
     }
+    int size = waitingList.size();
+    if (size == 0) {
+      this.hasWaiting.set(false);
+      return;
+    }
+    this.hasWaiting.set(size >= EXPECT_SIZE);
 
     log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
     Map<Integer, List<RouteInstance>> collect = waitingList.stream()

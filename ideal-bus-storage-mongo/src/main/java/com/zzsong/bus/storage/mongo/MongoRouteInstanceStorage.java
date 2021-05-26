@@ -15,12 +15,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,14 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     this.idGenerator = idGeneratorFactory.getGenerator("routeInstance");
     this.template = template;
     this.repository = repository;
+  }
+
+  @Override
+  public Mono<Optional<RouteInstance>> findById(long routeInstanceId) {
+    return repository.findById(routeInstanceId)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .map(Optional::of)
+        .defaultIfEmpty(Optional.empty());
   }
 
   @Nonnull
@@ -74,6 +84,21 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
         .defaultIfEmpty(Collections.emptyList());
   }
 
+  @Override
+  public Mono<List<RouteInstance>> saveAll(@Nonnull Flux<RouteInstance> routeInstances) {
+    Flux<RouteInstanceDo> flux = routeInstances.map(instance -> {
+      //noinspection ConstantConditions
+      if (instance.getInstanceId() == null) {
+        instance.setInstanceId(idGenerator.generate());
+      }
+      return RouteInstanceDoConverter.fromRouteInstance(instance);
+    });
+    return repository.saveAll(flux)
+        .map(RouteInstanceDoConverter::toRouteInstance)
+        .collectList()
+        .defaultIfEmpty(Collections.emptyList());
+  }
+  
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard) {

@@ -1,12 +1,12 @@
 package com.zzsong.bus.broker.port.rsocket;
 
 import com.zzsong.bus.abs.domain.Application;
-import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.storage.RouteInstanceStorage;
 import com.zzsong.bus.broker.admin.service.ApplicationService;
 import com.zzsong.bus.broker.core.channel.Channel;
 import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
+import com.zzsong.bus.broker.core.queue.QueueManager;
 import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.transfer.AckArgs;
 import com.zzsong.bus.common.transfer.ChannelArgs;
@@ -34,6 +34,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 public class RSocketServer {
+  private final QueueManager queueManager;
   private final ConsumerManager consumerManager;
   private final ApplicationService applicationService;
   private final RouteInstanceStorage routeInstanceStorage;
@@ -66,7 +67,7 @@ public class RSocketServer {
               log.info("{} 客户端: {} 建立连接.", applicationId, instanceId);
               String channelInstanceId = buildChannelId(applicationId, instanceId);
               RSocketChannel channel = new RSocketChannel(channelInstanceId, requester);
-              Consumer consumer = consumerManager.loadConsumer(applicationId);
+              Consumer consumer = consumerManager.loadConsumer(applicationId, routeInstanceStorage);
               consumer.addChannel(channel);
               warp[0] = channel;
             }
@@ -86,7 +87,7 @@ public class RSocketServer {
           .doFinally(consumer -> {
             Channel channel = warp[0];
             if (channel != null) {
-              Consumer loadConsumer = consumerManager.loadConsumer(applicationId);
+              Consumer loadConsumer = consumerManager.loadConsumer(applicationId, routeInstanceStorage);
               loadConsumer.removeChannel(channel);
             }
             log.info("{} 客户端: {} 断开连接: {}", applicationId, instanceId, consumer);
@@ -106,7 +107,7 @@ public class RSocketServer {
     String instanceId = channelArgs.getInstanceId();
     int status = channelArgs.getStatus();
     String channelId = buildChannelId(applicationId, instanceId);
-    Consumer consumer = consumerManager.loadConsumer(applicationId);
+    Consumer consumer = consumerManager.loadConsumer(applicationId, routeInstanceStorage);
     if (status == ChannelArgs.STATUS_IDLE) {
       consumer.markChannelsAvailable(Collections.singleton(channelId));
     } else {
@@ -121,8 +122,7 @@ public class RSocketServer {
   @MessageMapping(RSocketRoute.MESSAGE_ACK)
   public Mono<Boolean> ack(@Nonnull AckArgs args) {
     long routeInstanceId = args.getRouteInstanceId();
-    int success = RouteInstance.STATUS_SUCCESS;
-    return routeInstanceStorage.updateStatus(routeInstanceId, success, "success").map(l -> true);
+    return queueManager.ack(routeInstanceId);
   }
 
   /**
@@ -130,8 +130,9 @@ public class RSocketServer {
    */
   @MessageMapping(RSocketRoute.MESSAGE_REJECT)
   public Mono<Boolean> reject(@Nonnull RejectArgs args) {
-
-    return Mono.empty();
+    long routeInstanceId = args.getRouteInstanceId();
+    String message = args.getMessage();
+    return queueManager.reject(routeInstanceId, message);
   }
 
   @Nonnull

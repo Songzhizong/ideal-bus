@@ -17,7 +17,7 @@ spring:
 ideal:
   bus:
     auto-subscribe: true
-    application-id: 8367141577293824
+    application-id: 3511651756154880
     broker-http-base-url: lb://IDEAL-BUS
     publish:
       enabled: true
