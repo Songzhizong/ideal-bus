@@ -22,10 +22,10 @@ ideal:
     refresh-local-cache-interval: 10M
     route-instance-expire: 1D
     event-instance-expires:
-      - expire: 1D
+      - expire: 1H
         topics:
           - broadcast
-      - expire: 15D
+      - expire: 1H
         topics:
           - testUnAck
-          - testAutoAck
+          - example_topic

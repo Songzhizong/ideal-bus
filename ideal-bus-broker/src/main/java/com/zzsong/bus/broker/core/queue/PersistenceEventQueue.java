@@ -28,7 +28,7 @@ public class PersistenceEventQueue implements EventQueue {
   private static final int BLOCKING_MILLS = 1_000;
   private static final int EXPECT_SIZE = 1_000;
   private static final int OFFLINE_SUSPEND_SECONDS = 30;
-  private static final int UNREACHABLE_SUSPEND_SECONDS = 5;
+  private static final int UNREACHABLE_SUSPEND_SECONDS = 1;
   private final BlockingDeque<RouteInstance> queue
       = new LinkedBlockingDeque<>(EXPECT_SIZE << 2);
   private final AtomicInteger size = new AtomicInteger(0);

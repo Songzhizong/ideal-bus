@@ -24,3 +24,5 @@ ideal:
     consumer:
       enabled: true
       broker-addresses: 127.0.0.1:13266
+      core-pool-size: 8
+      maximum-pool-size: 16

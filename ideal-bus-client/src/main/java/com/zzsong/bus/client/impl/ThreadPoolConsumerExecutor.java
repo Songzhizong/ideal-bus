@@ -15,6 +15,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,7 +29,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
   private final AtomicInteger counter = new AtomicInteger(0);
   private final EventConsumer consumer;
   private final List<ExecutorListener> listeners = new ArrayList<>();
-  private volatile boolean busy = false;
+  private final AtomicBoolean busy = new AtomicBoolean(false);
 
   public ThreadPoolConsumerExecutor(int corePoolSize,
                                     int maximumPoolSize,
@@ -43,7 +44,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
         new BasicThreadFactory.Builder().namingPattern("event-pool-%d").build(),
         (r, e) -> {
-          log.info("任务执行线程池资源不足, 核心线程数: "
+          log.debug("任务执行线程池资源不足, 核心线程数: "
               + corePoolSize + ", 最大线程数: " + maximumPoolSize);
           throw new RejectedExecutionException();
         });
@@ -62,8 +63,8 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
           consumer.onMessage(event, channel);
         } finally {
           int decrementAndGet = counter.decrementAndGet();
-          if ((decrementAndGet < corePoolSize || decrementAndGet == 0) && this.busy) {
-            this.busy = false;
+          if ((decrementAndGet < corePoolSize || decrementAndGet == 0) && this.busy.get()) {
+            this.busy.set(false);
             for (ExecutorListener listener : listeners) {
               listener.onIdle();
             }
@@ -76,8 +77,8 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
       log.error("Unknown exception: ", e);
       flag = false;
     }
-    if (!flag) {
-      this.busy = true;
+    if (!flag && !this.busy.get()) {
+      this.busy.set(true);
       for (ExecutorListener listener : listeners) {
         listener.onBusy();
       }

@@ -19,7 +19,7 @@ public class BusConsumerProperties {
   /**
    * 核心线程数
    */
-  private int corePoolSize = 0;
+  private int corePoolSize = 32;
   /**
    * 最大线程数
    */
