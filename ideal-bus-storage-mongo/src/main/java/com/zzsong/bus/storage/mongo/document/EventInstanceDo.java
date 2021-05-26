@@ -53,8 +53,8 @@ public class EventInstanceDo {
   private String topic;
 
   /** 事件标签, 一个事件应该只有一个标签 */
-  @Nonnull
-  @Indexed(background = true)
+  @Nullable
+  @Indexed(background = true, sparse = true)
   private String tag;
 
   /** 消息头,可用于条件匹配 */
@@ -66,5 +66,6 @@ public class EventInstanceDo {
   private Object payload;
 
   /** 事件产生时间戳 */
+  @Indexed(background = true)
   private long timestamp;
 }

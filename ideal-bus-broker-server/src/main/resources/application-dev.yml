@@ -18,3 +18,14 @@ ideal:
   bus:
     # 当前节点在集群中的编号, 必填且不可重复
     node-id: 1
+    enable-expire-scheduler: true
+    refresh-local-cache-interval: 10M
+    route-instance-expire: 1D
+    event-instance-expires:
+      - expire: 1D
+        topics:
+          - broadcast
+      - expire: 15D
+        topics:
+          - testUnAck
+          - testAutoAck
