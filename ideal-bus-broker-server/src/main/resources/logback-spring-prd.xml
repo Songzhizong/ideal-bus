@@ -32,13 +32,13 @@
 
   <!--========================================= 文件日志 =========================================-->
   <!-- 日志目录 -->
-  <property name="LOG_HOME" value="./log"/>
+  <property name="LOG_HOME" value="./log/ideal-bus-broker"/>
   <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
   <!-- %d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%15.15t] %-40.40logger{39} %6L : %m%n -->
   <property name="File_LOG_PATTERN"
             value="%d{HH:mm:ss.SSS} %5p - [%15.15t] %-40.40logger{39}  : %m%n"/>
   <!-- 日志文件最大的大小 -->
-  <property name="MAX_SIZE" value="50MB"/>
+  <property name="MAX_SIZE" value="20MB"/>
   <!-- 日志文件名称 -->
   <property name="AUTO_File_NAME" value="%d{yyyy-MM-dd}.%i.log"/>
 
@@ -112,15 +112,15 @@
   <!-- 启动日志输出到控制台和文件 -->
   <logger name="com.zzsong.bus.broker.server.BrokerApplication"
           level="info" additivity="false">
-    <appender-ref ref="ALL_FILE"/>
+    <!--    <appender-ref ref="ALL_FILE"/>-->
     <appender-ref ref="INFO_FILE"/>
     <appender-ref ref="IMP_FILE"/>
     <appender-ref ref="DEFAULT_CONSOLE_ALL"/>
   </logger>
 
   <!-- 项目日志, 输出到一般日志文件、重要日志文件、warn和error日志输出到控制台 -->
-  <logger name="com.zzsong" level="debug" additivity="false">
-    <appender-ref ref="ALL_FILE"/>
+  <logger name="com.zzsong" level="info" additivity="false">
+    <!--    <appender-ref ref="ALL_FILE"/>-->
     <appender-ref ref="INFO_FILE"/>
     <appender-ref ref="IMP_FILE"/>
     <appender-ref ref="DEFAULT_CONSOLE_WARN"/>
@@ -128,7 +128,7 @@
 
   <!-- 默认日志配置, 输出到控制台、一般日志文件、重要日志文件 -->
   <root level="info">
-    <appender-ref ref="ALL_FILE"/>
+    <!--    <appender-ref ref="ALL_FILE"/>-->
     <appender-ref ref="INFO_FILE"/>
     <appender-ref ref="IMP_FILE"/>
     <appender-ref ref="DEFAULT_CONSOLE_ALL"/>
