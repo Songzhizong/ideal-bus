@@ -32,7 +32,7 @@ public class BrokerScheduler {
    */
   @Scheduled(initialDelay = 60 * 60_000, fixedDelay = 60 * 60_000)
   public void deleteExpireEventInstance() {
-    boolean enableExpireScheduler = properties.isEnableExpireScheduler();
+    boolean enableExpireScheduler = properties.isEnableStorageScheduling();
     if (!enableExpireScheduler) {
       return;
     }
@@ -64,7 +64,7 @@ public class BrokerScheduler {
    */
   @Scheduled(initialDelay = 60 * 60_000, fixedDelay = 60 * 60_000)
   public void deleteExpireRouteInstance() {
-    boolean enableExpireScheduler = properties.isEnableExpireScheduler();
+    boolean enableExpireScheduler = properties.isEnableStorageScheduling();
     if (!enableExpireScheduler) {
       return;
     }
@@ -87,7 +87,7 @@ public class BrokerScheduler {
    */
   @Scheduled(initialDelay = 10_000, fixedDelay = 10_000)
   public void updateRunningToDelaying() {
-    boolean enableExpireScheduler = properties.isEnableExpireScheduler();
+    boolean enableExpireScheduler = properties.isEnableStorageScheduling();
     if (!enableExpireScheduler) {
       return;
     }

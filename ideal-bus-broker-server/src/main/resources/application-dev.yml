@@ -18,9 +18,13 @@ ideal:
   bus:
     # 当前节点在集群中的编号, 必填且不可重复
     node-id: 1
-    enable-expire-scheduler: true
+    # 是否开启存储库定时任务, 每个存储库起一个, 默认false
+    enable-storage-scheduling: true
+    # 刷新本地缓存的间隔, 默认10分钟
     refresh-local-cache-interval: 10M
+    # 消息实例的的过期时间, 默认15天
     route-instance-expire: 1D
+    # 事件存储的过期配置, 按需配置, 不在列表中的一直保存
     event-instance-expires:
       - expire: 1D
         topics:

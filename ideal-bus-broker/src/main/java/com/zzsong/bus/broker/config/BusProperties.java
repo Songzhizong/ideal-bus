@@ -23,7 +23,8 @@ public class BusProperties {
   /** 当前节点的nodeId, 集群部署每个节点都必须有自己的id */
   private int nodeId = -1;
 
-  private boolean enableExpireScheduler = false;
+  /** 开启存储库定时任务 */
+  private boolean enableStorageScheduling = false;
 
   /** 执行成功的路由实例过期时间, 至少一天 */
   private Duration routeInstanceExpire = Duration.ofDays(15);
