@@ -9,6 +9,7 @@ import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton {
+public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton, DisposableBean {
   private static final long RETRY_INTERVAL = 10_000L;
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
 
@@ -52,7 +53,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             Long applicationId = routeInstance.getApplicationId();
             Long subscriptionId = routeInstance.getSubscriptionId();
             EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
-            boolean offer = eventQueue.offer(routeInstance);
+            boolean offer = eventQueue.test();
             if (offer) {
               routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
               routeInstance.setMessage("be queuing");
@@ -62,7 +63,19 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             }
           }
         });
-    return routeInstanceStorage.saveAll(flux).map(r -> true);
+    return routeInstanceStorage.saveAll(flux)
+        .doOnNext(routeInstanceList -> {
+          for (RouteInstance routeInstance : routeInstanceList) {
+            int status = routeInstance.getStatus();
+            if (status == RouteInstance.STATUS_QUEUING) {
+              Long applicationId = routeInstance.getApplicationId();
+              Long subscriptionId = routeInstance.getSubscriptionId();
+              EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
+              eventQueue.offer(routeInstance);
+            }
+          }
+        })
+        .map(r -> true);
   }
 
   @Override
@@ -119,6 +132,13 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
       long applicationId = subscription.getApplicationId();
       Long subscriptionId = subscription.getSubscriptionId();
       loadQueue(applicationId, subscriptionId, true);
+    }
+  }
+
+  @Override
+  public void destroy() {
+    for (EventQueue value : queueMap.values()) {
+      value.destroy();
     }
   }
 }

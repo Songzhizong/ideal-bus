@@ -9,7 +9,9 @@ import javax.annotation.Nonnull;
  */
 public interface EventQueue {
 
-  boolean offer(@Nonnull RouteInstance routeInstance);
+  boolean test();
+
+  void offer(@Nonnull RouteInstance routeInstance);
 
   /**
    * 销毁队列
