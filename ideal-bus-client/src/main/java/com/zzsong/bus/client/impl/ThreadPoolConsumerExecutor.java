@@ -30,6 +30,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
   private final EventConsumer consumer;
   private final List<ExecutorListener> listeners = new ArrayList<>();
   private final AtomicBoolean busy = new AtomicBoolean(false);
+  private final AtomicBoolean running = new AtomicBoolean(true);
 
   public ThreadPoolConsumerExecutor(int corePoolSize,
                                     int maximumPoolSize,
@@ -48,33 +49,53 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
               + corePoolSize + ", 最大线程数: " + maximumPoolSize);
           throw new RejectedExecutionException();
         });
+    Thread hook = new Thread(() -> {
+      long timeMillis = System.currentTimeMillis();
+      this.running.set(false);
+      this.executor.shutdown();
+      try {
+        //noinspection ResultOfMethodCallIgnored
+        this.executor.awaitTermination(60, TimeUnit.SECONDS);
+        log.info("ThreadPoolConsumerExecutor shutdown, consuming: "
+            + (System.currentTimeMillis() - timeMillis));
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    });
+    hook.setName("ThreadPoolConsumerExecutor-shutdown");
+    Runtime.getRuntime().addShutdownHook(hook);
   }
 
   @Override
   public boolean submit(@Nonnull DeliverEvent event, @Nonnull Channel channel) {
     boolean flag = true;
-    try {
-      executor.execute(() -> {
-        int incrementAndGet = counter.incrementAndGet();
-        if (incrementAndGet == maximumPoolSize) {
-          log.debug("队列已满");
-        }
-        try {
-          consumer.onMessage(event, channel);
-        } finally {
-          int decrementAndGet = counter.decrementAndGet();
-          if ((decrementAndGet < corePoolSize || decrementAndGet == 0) && this.busy.get()) {
-            this.busy.set(false);
-            for (ExecutorListener listener : listeners) {
-              listener.onIdle();
+    if (running.get()) {
+      try {
+        executor.execute(() -> {
+          int incrementAndGet = counter.incrementAndGet();
+          if (incrementAndGet == maximumPoolSize) {
+            log.debug("队列已满");
+          }
+          try {
+            consumer.onMessage(event, channel);
+          } finally {
+            int decrementAndGet = counter.decrementAndGet();
+            if ((decrementAndGet < corePoolSize || decrementAndGet == 0)
+                && this.busy.get() && this.running.get()) {
+              this.busy.set(false);
+              for (ExecutorListener listener : listeners) {
+                listener.onIdle();
+              }
             }
           }
-        }
-      });
-    } catch (RejectedExecutionException e) {
-      flag = false;
-    } catch (Exception e) {
-      log.error("Unknown exception: ", e);
+        });
+      } catch (RejectedExecutionException e) {
+        flag = false;
+      } catch (Exception e) {
+        log.error("Unknown exception: ", e);
+        flag = false;
+      }
+    } else {
       flag = false;
     }
     if (!flag && !this.busy.get()) {
