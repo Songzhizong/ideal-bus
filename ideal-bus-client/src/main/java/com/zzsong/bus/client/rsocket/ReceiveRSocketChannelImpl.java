@@ -44,8 +44,7 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
     AckArgs args = new AckArgs();
     args.setRouteInstanceId(routeInstanceId);
     if (super.socketRequester == null) {
-      log.info("super.socketRequester is null");
-      super.restartSocket();
+      super.restartSocket("super.socketRequester is null");
       return;
     }
     super.socketRequester.route(RSocketRoute.MESSAGE_ACK)
@@ -62,8 +61,7 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
     args.setRouteInstanceId(routeInstanceId);
     args.setMessage(message);
     if (super.socketRequester == null) {
-      log.info("super.socketRequester is null");
-      super.restartSocket();
+      super.restartSocket("super.socketRequester is null");
       return;
     }
     super.socketRequester.route(RSocketRoute.MESSAGE_REJECT)
@@ -113,8 +111,7 @@ public class ReceiveRSocketChannelImpl extends AbstractRSocketChannel implements
     channelArgs.setInstanceId(super.clientIpPort);
     channelArgs.setStatus(status);
     if (super.socketRequester == null) {
-      log.info("super.socketRequester is null");
-      super.restartSocket();
+      super.restartSocket("super.socketRequester is null");
       return;
     }
     super.socketRequester.route(RSocketRoute.CHANNEL_CHANGE_STATUS)

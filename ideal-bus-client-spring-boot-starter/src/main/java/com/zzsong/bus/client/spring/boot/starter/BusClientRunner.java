@@ -10,6 +10,7 @@ import com.zzsong.bus.common.transfer.SubscriptionArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.apachecommons.CommonsLog;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 
@@ -23,7 +24,7 @@ import java.util.Set;
  */
 @CommonsLog
 @RequiredArgsConstructor
-public class BusClientRunner implements ApplicationRunner {
+public class BusClientRunner implements ApplicationRunner, DisposableBean {
   private final BusAdmin admin;
   private final ListenerInitializer listenerInitializer;
   private final BusClientProperties properties;
@@ -65,6 +66,14 @@ public class BusClientRunner implements ApplicationRunner {
     // 3. 建立消费通道
     for (ReceiveRSocketChannel channel : receiveRSocketChannels) {
       channel.connect();
+    }
+  }
+
+  @Override
+  public void destroy() {
+    // 3. 建立消费通道
+    for (ReceiveRSocketChannel channel : receiveRSocketChannels) {
+      channel.close();
     }
   }
 }

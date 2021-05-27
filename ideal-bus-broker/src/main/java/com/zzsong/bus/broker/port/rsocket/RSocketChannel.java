@@ -26,7 +26,13 @@ public class RSocketChannel implements Channel {
   @Nonnull
   @Override
   public Mono<DeliverStatus> deliverMessage(@Nonnull RouteInstance routeInstance) {
-    DeliverEvent deliverEvent = createDeliverEvent(routeInstance);
+    DeliverEvent deliverEvent;
+    try {
+      deliverEvent = createDeliverEvent(routeInstance);
+    } catch (Exception e) {
+      log.warn("createDeliverEvent ex: {}", e.getMessage());
+      return Mono.error(e);
+    }
     return requester.route(RSocketRoute.MESSAGE_DELIVER).data(deliverEvent)
         .retrieveMono(DeliverResult.class)
         .map(deliverResult -> {
