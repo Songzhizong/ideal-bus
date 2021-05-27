@@ -4,6 +4,7 @@ import com.zzsong.bus.common.constants.RSocketRoute;
 import com.zzsong.bus.common.transfer.LoginArgs;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.core.RSocketClient;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -56,8 +57,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
 
   @MessageMapping(RSocketRoute.INTERRUPT)
   public Mono<String> interrupt(String status) {
-    log.warn("Broker: " + brokerAddress + " 服务中断: " + status + ", " + RESTART_DELAY + " 秒后尝试重连...");
-    restartSocket();
+    restartSocket("Broker: " + brokerAddress + " 服务中断: " + status + ", " + RESTART_DELAY + " 秒后尝试重连...");
     return Mono.just("received...");
   }
 
@@ -71,12 +71,15 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     if (destroyed) {
       return;
     }
+    log.info("close channel: " + brokerAddress);
     destroyed = true;
     if (socketRequester != null) {
       RSocket rsocket = socketRequester.rsocket();
       if (rsocket != null) {
         rsocket.dispose();
       }
+      RSocketClient rSocketClient = socketRequester.rsocketClient();
+      rSocketClient.dispose();
     }
     this.interrupt();
     log.info("RSocketBusChannel destroy, broker address: " + brokerAddress);
@@ -103,7 +106,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
-        restartSocket();
+        restartSocket(null);
         return;
       }
     } else {
@@ -115,7 +118,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .tcp(brokerIp, brokerPort);
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
-        restartSocket();
+        restartSocket(null);
         return;
       }
     }
@@ -127,24 +130,28 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
               log.info("Broker socket error: " + errMessage);
             })
             .doFinally(consumer -> {
-              log.info("Broker " + brokerAddress
-                  + " 连接断开: " + consumer + ", " + RESTART_DELAY + " 秒后尝试重连...");
-              restartSocket();
+              String msg = "Broker " + brokerAddress + " 连接断开: "
+                  + consumer + ", " + RESTART_DELAY + " 秒后尝试重连...";
+              restartSocket(msg);
             })
             .subscribe())
         .map(r -> true)
         .onErrorResume(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
-          log.info("Broker socket connect failure: " + errMessage);
-          restartSocket();
+          restartSocket("Broker socket connect failure: " + errMessage);
           return Mono.just(true);
         })
         .subscribe();
   }
 
-  protected void restartSocket() {
-    restartNoticeQueue.offer(true);
+  protected void restartSocket(@Nullable String message) {
+    if (!destroyed) {
+      if (message != null) {
+        log.info(message);
+      }
+      restartNoticeQueue.offer(true);
+    }
   }
 
   @Override
@@ -160,7 +167,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
           doConnect();
         }
       } catch (InterruptedException e) {
-        log.info("Interrupted");
+        log.info("restartNoticeQueue.poll interrupted");
       }
     }
   }

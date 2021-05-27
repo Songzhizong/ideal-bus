@@ -49,19 +49,7 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
               + corePoolSize + ", 最大线程数: " + maximumPoolSize);
           throw new RejectedExecutionException();
         });
-    Thread hook = new Thread(() -> {
-      long timeMillis = System.currentTimeMillis();
-      this.running.set(false);
-      this.executor.shutdown();
-      try {
-        //noinspection ResultOfMethodCallIgnored
-        this.executor.awaitTermination(60, TimeUnit.SECONDS);
-        log.info("ThreadPoolConsumerExecutor shutdown, consuming: "
-            + (System.currentTimeMillis() - timeMillis));
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    });
+    Thread hook = new Thread(this::shutdown);
     hook.setName("ThreadPoolConsumerExecutor-shutdown");
     Runtime.getRuntime().addShutdownHook(hook);
   }
@@ -110,5 +98,20 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
   @Override
   public synchronized void addListener(@Nonnull ExecutorListener listener) {
     listeners.add(listener);
+  }
+
+  private void shutdown() {
+    long timeMillis = System.currentTimeMillis();
+    this.running.set(false);
+    this.executor.shutdown();
+    try {
+      //noinspection ResultOfMethodCallIgnored
+      this.executor.awaitTermination(60, TimeUnit.SECONDS);
+      log.info("ThreadPoolConsumerExecutor shutdown, consuming: "
+          + (System.currentTimeMillis() - timeMillis));
+      TimeUnit.SECONDS.sleep(1);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 }
