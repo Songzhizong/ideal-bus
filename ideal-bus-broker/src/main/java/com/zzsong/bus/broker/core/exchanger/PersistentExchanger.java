@@ -106,6 +106,7 @@ public class PersistentExchanger implements Exchanger {
     instance.setApplicationId(details.getApplicationId());
     instance.setBroadcast(details.isBroadcast());
     instance.setStatus(RouteInstance.STATUS_QUEUING);
+    instance.setStatusTime(System.currentTimeMillis());
     instance.setMessage("init");
     instance.setRetryLimit(details.getRetryCount());
 

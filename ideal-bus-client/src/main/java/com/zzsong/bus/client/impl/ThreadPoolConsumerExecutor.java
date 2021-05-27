@@ -45,8 +45,10 @@ public class ThreadPoolConsumerExecutor implements ConsumerExecutor {
         60, TimeUnit.SECONDS, new SynchronousQueue<>(),
         new BasicThreadFactory.Builder().namingPattern("event-pool-%d").build(),
         (r, e) -> {
-          log.debug("任务执行线程池资源不足, 核心线程数: "
-              + corePoolSize + ", 最大线程数: " + maximumPoolSize);
+          if (!busy.get()) {
+            log.info("任务执行线程池资源不足, 核心线程数: "
+                + corePoolSize + ", 最大线程数: " + maximumPoolSize);
+          }
           throw new RejectedExecutionException();
         });
     Thread hook = new Thread(this::shutdown);

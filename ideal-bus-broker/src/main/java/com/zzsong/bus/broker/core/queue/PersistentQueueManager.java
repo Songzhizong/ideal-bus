@@ -14,9 +14,11 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton, DisposableBean {
   private static final long RETRY_INTERVAL = 10_000L;
+  private static final Duration FIXED_DELAY = Duration.ofMillis(40);
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
 
   private final BusProperties properties;
@@ -82,7 +85,16 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
   public Mono<Boolean> ack(long routeInstanceId) {
     int success = RouteInstance.STATUS_SUCCESS;
     log.debug("message: {} ack", routeInstanceId);
-    return routeInstanceStorage.updateStatus(routeInstanceId, success, "success").map(l -> true);
+    return routeInstanceStorage
+        .updateStatus(routeInstanceId, success, "success")
+        .flatMap(l -> {
+          if (l < 1) {
+            return Mono.error(new IllegalArgumentException("update count = " + l));
+          }
+          return Mono.just(true);
+        })
+        .retryWhen(Retry.fixedDelay(3, FIXED_DELAY))
+        .onErrorReturn(true);
   }
 
   @Override
@@ -96,6 +108,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             int retryCount = routeInstance.getRetryCount() + 1;
 
             routeInstance.setRetryCount(retryCount);
+            routeInstance.setStatusTime(System.currentTimeMillis());
             if (retryCount < retryLimit) {
               routeInstance.setStatus(RouteInstance.STATUS_DELAYING);
               routeInstance.setMessage(saveMessage);

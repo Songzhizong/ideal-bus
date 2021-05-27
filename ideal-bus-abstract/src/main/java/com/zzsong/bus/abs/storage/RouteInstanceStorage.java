@@ -57,4 +57,7 @@ public interface RouteInstanceStorage {
    */
   @Nonnull
   Mono<Long> deleteAllSucceedByCreateTimeLessThan(long time);
+
+  @Nonnull
+  Mono<Long> updateRunningToDelaying(long maxRunningStatusTime, long nextPushTime);
 }

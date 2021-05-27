@@ -98,7 +98,7 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
         .collectList()
         .defaultIfEmpty(Collections.emptyList());
   }
-  
+
   @Nonnull
   @Override
   public Mono<List<RouteInstance>> loadDelayed(long maxNextTime, int count, int shard) {
@@ -163,10 +163,16 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
   @Nonnull
   @Override
   public Mono<Long> updateStatus(long instanceId, int status, @Nonnull String message) {
-    Query updateQuery = Query.query(Criteria.where("instanceId").is(instanceId));
+    Criteria criteria = Criteria.where("instanceId").is(instanceId);
+    if (status == RouteInstance.STATUS_RUNNING) {
+      criteria = criteria.and("status")
+          .in(RouteInstance.STATUS_QUEUING, RouteInstance.STATUS_TEMPING);
+    }
+    Query updateQuery = Query.query(criteria);
     Update update = new Update();
     update.set("status", status);
     update.set("message", message);
+    update.set("statusTime", System.currentTimeMillis());
     return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
         .map(UpdateResult::getModifiedCount);
   }
@@ -178,7 +184,8 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     Update update = new Update();
     update.set("status", status);
     update.set("message", message);
-    return template.updateFirst(updateQuery, update, RouteInstanceDo.class)
+    update.set("statusTime", System.currentTimeMillis());
+    return template.updateMulti(updateQuery, update, RouteInstanceDo.class)
         .map(UpdateResult::getModifiedCount);
   }
 
@@ -199,5 +206,20 @@ public class MongoRouteInstanceStorage implements RouteInstanceStorage {
     int status = RouteInstance.STATUS_SUCCESS;
     long minId = SnowFlake.calculateMinId(time);
     return repository.deleteAllByStatusAndInstanceIdLessThan(status, minId);
+  }
+
+  @Nonnull
+  @Override
+  public Mono<Long> updateRunningToDelaying(long maxRunningStatusTime, long nextPushTime) {
+    Criteria criteria = Criteria.where("statusTime").lt(maxRunningStatusTime)
+        .and("status").is(RouteInstance.STATUS_RUNNING);
+    Query updateQuery = Query.query(criteria);
+    Update update = new Update();
+    update.set("nextPushTime", nextPushTime);
+    update.set("status", RouteInstance.STATUS_DELAYING);
+    update.set("message", "running to delaying");
+    update.set("statusTime", System.currentTimeMillis());
+    return template.updateMulti(updateQuery, update, RouteInstanceDo.class)
+        .map(UpdateResult::getModifiedCount);
   }
 }

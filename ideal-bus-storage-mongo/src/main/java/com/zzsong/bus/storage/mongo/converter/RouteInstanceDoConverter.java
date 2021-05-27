@@ -1,6 +1,5 @@
 package com.zzsong.bus.storage.mongo.converter;
 
-import com.zzsong.bus.abs.constants.DBDefaults;
 import com.zzsong.bus.abs.domain.RouteInstance;
 import com.zzsong.bus.abs.generator.SnowFlake;
 import com.zzsong.bus.storage.mongo.document.RouteInstanceDo;
@@ -47,6 +46,7 @@ public final class RouteInstanceDoConverter {
       routeInstanceDo.setNextPushTime(nextPushTime);
     }
     routeInstanceDo.setStatus(routeInstance.getStatus());
+    routeInstanceDo.setStatusTime(routeInstance.getStatusTime());
     routeInstanceDo.setRetryCount(routeInstance.getRetryCount());
     routeInstanceDo.setRetryLimit(routeInstance.getRetryLimit());
     routeInstanceDo.setMessage(routeInstance.getMessage());
@@ -65,6 +65,7 @@ public final class RouteInstanceDoConverter {
     long nextPushTime = routeInstanceDo.getNextPushTime();
     routeInstance.setNextPushTime(nextPushTime);
     routeInstance.setStatus(routeInstanceDo.getStatus());
+    routeInstance.setStatusTime(routeInstanceDo.getStatusTime());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
     routeInstance.setRetryLimit(routeInstanceDo.getRetryLimit());
     routeInstance.setMessage(routeInstanceDo.getMessage());

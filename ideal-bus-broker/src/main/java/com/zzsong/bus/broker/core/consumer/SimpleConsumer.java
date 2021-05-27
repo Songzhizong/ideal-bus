@@ -84,9 +84,10 @@ public class SimpleConsumer implements Consumer {
             markChannelBusy(channelId);
             return Mono.just(status);
           } else {
-            routeInstance.setStatus(RouteInstance.STATUS_RUNNING);
-            routeInstance.setMessage("running");
-            return routeInstanceStorage.save(routeInstance).map(r -> status);
+            Long instanceId = routeInstance.getInstanceId();
+            int statusRunning = RouteInstance.STATUS_RUNNING;
+            String message = "running";
+            return routeInstanceStorage.updateStatus(instanceId, statusRunning, message).map(r -> status);
           }
         });
   }

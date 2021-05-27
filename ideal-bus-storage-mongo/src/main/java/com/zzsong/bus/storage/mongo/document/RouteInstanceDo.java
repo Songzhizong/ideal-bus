@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -95,12 +94,15 @@ public class RouteInstanceDo {
   private boolean broadcast = false;
 
   /** 下次推送时间 */
-  @Indexed(direction = IndexDirection.ASCENDING, background = true)
+  @Indexed(background = true)
   private long nextPushTime = -1;
 
   /** 状态 */
   @Indexed(background = true)
   private int status = RouteInstance.STATUS_QUEUING;
+
+  @Indexed(background = true, sparse = true)
+  private long statusTime;
 
   /** 已重试次数 */
   private int retryCount = -1;
