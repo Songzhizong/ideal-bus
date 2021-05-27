@@ -2,6 +2,7 @@ package com.zzsong.bus.broker.port.scheduling;
 
 import com.zzsong.bus.abs.generator.SnowFlake;
 import com.zzsong.bus.abs.storage.EventInstanceStorage;
+import com.zzsong.bus.abs.storage.RouteInstanceStorage;
 import com.zzsong.bus.broker.admin.service.RouteInstanceService;
 import com.zzsong.bus.broker.config.BusProperties;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,10 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AutoDeleteScheduler {
+public class BrokerScheduler {
   private final BusProperties properties;
   private final EventInstanceStorage eventInstanceStorage;
+  private final RouteInstanceStorage routeInstanceStorage;
   private final RouteInstanceService routeInstanceService;
 
   /**
@@ -75,6 +77,27 @@ public class AutoDeleteScheduler {
           if (count > 0) {
             log.info("移除 {} 条过期路由实例, 过期天数为: {}, 执行耗时: {}",
                 count, routeInstanceExpire.toDays(), System.currentTimeMillis() - currentTimeMillis);
+          }
+        });
+  }
+
+
+  /**
+   * 定期将长时间处在running状态的消息修改为等待状态以尝试重新推送
+   */
+  @Scheduled(initialDelay = 10_000, fixedDelay = 10_000)
+  public void updateRunningToDelaying() {
+    boolean enableExpireScheduler = properties.isEnableExpireScheduler();
+    if (!enableExpireScheduler) {
+      return;
+    }
+    long currentTimeMillis = System.currentTimeMillis();
+    long maxRunningStatusTime = currentTimeMillis - 60_000;
+    long nextPushTime = currentTimeMillis + 10_000;
+    routeInstanceStorage.updateRunningToDelaying(maxRunningStatusTime, nextPushTime)
+        .subscribe(count -> {
+          if (count > 0) {
+            log.info("更新 {} 条running 消息状态为 delaying", count);
           }
         });
   }

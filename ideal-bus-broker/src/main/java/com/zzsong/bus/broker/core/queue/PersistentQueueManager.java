@@ -9,13 +9,16 @@ import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,8 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton {
+public class PersistentQueueManager implements QueueManager, SmartInitializingSingleton, DisposableBean {
   private static final long RETRY_INTERVAL = 10_000L;
+  private static final Duration FIXED_DELAY = Duration.ofMillis(40);
   private final Map<Long, EventQueue> queueMap = new ConcurrentHashMap<>();
 
   private final BusProperties properties;
@@ -52,7 +56,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             Long applicationId = routeInstance.getApplicationId();
             Long subscriptionId = routeInstance.getSubscriptionId();
             EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
-            boolean offer = eventQueue.offer(routeInstance);
+            boolean offer = eventQueue.test();
             if (offer) {
               routeInstance.setStatus(RouteInstance.STATUS_QUEUING);
               routeInstance.setMessage("be queuing");
@@ -62,14 +66,35 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             }
           }
         });
-    return routeInstanceStorage.saveAll(flux).map(r -> true);
+    return routeInstanceStorage.saveAll(flux)
+        .doOnNext(routeInstanceList -> {
+          for (RouteInstance routeInstance : routeInstanceList) {
+            int status = routeInstance.getStatus();
+            if (status == RouteInstance.STATUS_QUEUING) {
+              Long applicationId = routeInstance.getApplicationId();
+              Long subscriptionId = routeInstance.getSubscriptionId();
+              EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
+              eventQueue.offer(routeInstance);
+            }
+          }
+        })
+        .map(r -> true);
   }
 
   @Override
   public Mono<Boolean> ack(long routeInstanceId) {
     int success = RouteInstance.STATUS_SUCCESS;
     log.debug("message: {} ack", routeInstanceId);
-    return routeInstanceStorage.updateStatus(routeInstanceId, success, "success").map(l -> true);
+    return routeInstanceStorage
+        .updateStatus(routeInstanceId, success, "success")
+        .flatMap(l -> {
+          if (l < 1) {
+            return Mono.error(new IllegalArgumentException("update count = " + l));
+          }
+          return Mono.just(true);
+        })
+        .retryWhen(Retry.fixedDelay(3, FIXED_DELAY))
+        .onErrorReturn(true);
   }
 
   @Override
@@ -83,6 +108,7 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
             int retryCount = routeInstance.getRetryCount() + 1;
 
             routeInstance.setRetryCount(retryCount);
+            routeInstance.setStatusTime(System.currentTimeMillis());
             if (retryCount < retryLimit) {
               routeInstance.setStatus(RouteInstance.STATUS_DELAYING);
               routeInstance.setMessage(saveMessage);
@@ -119,6 +145,13 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
       long applicationId = subscription.getApplicationId();
       Long subscriptionId = subscription.getSubscriptionId();
       loadQueue(applicationId, subscriptionId, true);
+    }
+  }
+
+  @Override
+  public void destroy() {
+    for (EventQueue value : queueMap.values()) {
+      value.destroy();
     }
   }
 }

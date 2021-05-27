@@ -68,9 +68,16 @@ public class PersistentExchanger implements Exchanger {
   @Nonnull
   private Mono<List<RouteInstance>> route(@Nonnull EventInstance event) {
     return subscriptionManager.getSubscriptions(event)
-        .map(list -> list.stream()
-            .map(d -> createRouteInstance(event, d))
-            .collect(Collectors.toList()))
+        .flatMap(list -> {
+          try {
+            List<RouteInstance> collect = list.stream()
+                .map(d -> createRouteInstance(event, d))
+                .collect(Collectors.toList());
+            return Mono.just(collect);
+          } catch (Exception e) {
+            return Mono.error(e);
+          }
+        })
         .doOnNext(list -> {
           int size = list.size();
           if (size == 0) {
@@ -99,6 +106,7 @@ public class PersistentExchanger implements Exchanger {
     instance.setApplicationId(details.getApplicationId());
     instance.setBroadcast(details.isBroadcast());
     instance.setStatus(RouteInstance.STATUS_QUEUING);
+    instance.setStatusTime(System.currentTimeMillis());
     instance.setMessage("init");
     instance.setRetryLimit(details.getRetryCount());
 

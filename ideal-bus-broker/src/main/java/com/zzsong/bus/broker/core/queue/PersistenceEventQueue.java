@@ -29,23 +29,17 @@ public class PersistenceEventQueue implements EventQueue {
   private static final int EXPECT_SIZE = 1_000;
   private static final int OFFLINE_SUSPEND_SECONDS = 10;
   private static final int UNREACHABLE_SUSPEND_SECONDS = 1;
-  private final BlockingDeque<RouteInstance> queue
-      = new LinkedBlockingDeque<>(EXPECT_SIZE << 2);
+  private final BlockingDeque<RouteInstance> queue = new LinkedBlockingDeque<>(EXPECT_SIZE << 2);
   private final AtomicInteger size = new AtomicInteger(0);
+  private final AtomicBoolean hasWaiting = new AtomicBoolean(false);
+  private final AtomicBoolean suspended = new AtomicBoolean(false);
+  private final AtomicInteger suspendSeconds = new AtomicInteger(1);
 
   private final boolean init;
   private final int shardId;
   private final long subscriptionId;
   private final Consumer consumer;
   private final RouteInstanceStorage routeInstanceStorage;
-  /**
-   * 用于控制投递过来的消息是否直接入队, true 代表前面还有消息为入列
-   * 默认为true, 假定存储库中存在未入列的消息.
-   * 当暂存队列写满时
-   */
-  private final AtomicBoolean hasWaiting = new AtomicBoolean(false);
-  private final AtomicBoolean suspended = new AtomicBoolean(false);
-  private final AtomicInteger suspendSeconds = new AtomicInteger(1);
   private volatile boolean started = false;
 
   public PersistenceEventQueue(boolean init, int shardId, long subscriptionId,
@@ -63,7 +57,7 @@ public class PersistenceEventQueue implements EventQueue {
   }
 
   @Override
-  public boolean offer(@Nonnull RouteInstance routeInstance) {
+  public boolean test() {
     if (hasWaiting.get()) {
       return false;
     }
@@ -71,8 +65,13 @@ public class PersistenceEventQueue implements EventQueue {
       hasWaiting.set(true);
       return false;
     }
-    offerLast(routeInstance);
     return true;
+  }
+
+  @Override
+  public void offer(@Nonnull RouteInstance routeInstance) {
+    size.incrementAndGet();
+    queue.offerLast(routeInstance);
   }
 
   @Override
@@ -80,12 +79,7 @@ public class PersistenceEventQueue implements EventQueue {
     this.started = false;
   }
 
-  private void offerLast(@Nonnull RouteInstance routeInstance) {
-    size.incrementAndGet();
-    queue.offerLast(routeInstance);
-  }
-
-  private void offerFirst(@Nonnull RouteInstance routeInstance) {
+  private void giveBack(@Nonnull RouteInstance routeInstance) {
     size.incrementAndGet();
     queue.offerFirst(routeInstance);
   }
@@ -118,20 +112,21 @@ public class PersistenceEventQueue implements EventQueue {
                   if (status == DeliverStatus.SUCCESS) {
                     this.suspended.set(false);
                   } else if (status == DeliverStatus.CHANNEL_BUSY) {
-                    offerFirst(routeInstance);
+                    giveBack(routeInstance);
                   } else if (status == DeliverStatus.UNREACHABLE) {
-                    offerFirst(routeInstance);
+                    giveBack(routeInstance);
                     this.suspended.set(true);
                     this.suspendSeconds.set(UNREACHABLE_SUSPEND_SECONDS);
                     long applicationId = consumer.getApplicationId();
                     log.debug("应用: {} 没有可用连接", applicationId);
                   } else if (status == DeliverStatus.OFFLINE) {
-                    offerFirst(routeInstance);
+                    giveBack(routeInstance);
                     this.suspended.set(true);
                     this.suspendSeconds.set(OFFLINE_SUSPEND_SECONDS);
                     long applicationId = consumer.getApplicationId();
                     log.info("应用: {} 当前处于离线状态", applicationId);
                   } else {
+                    giveBack(routeInstance);
                     log.error("Unknown DeliverStatus: {}", status);
                   }
                 }).subscribe();
@@ -144,6 +139,10 @@ public class PersistenceEventQueue implements EventQueue {
               }
             }
           } else {
+            int set = size.getAndSet(0);
+            if (set != 0) {
+              log.warn("size.getAndSet(0) result is " + set);
+            }
             // 队列中没有消息执行的操作
             if (this.hasWaiting.get()) {
               log.info("Has waiting, loading...");
@@ -186,7 +185,7 @@ public class PersistenceEventQueue implements EventQueue {
         offerTempingList(is).block();
       } else {
         for (RouteInstance instance : is) {
-          offerLast(instance);
+          offer(instance);
         }
       }
     });
@@ -203,7 +202,7 @@ public class PersistenceEventQueue implements EventQueue {
     return routeInstanceStorage.updateStatus(instanceIdList, status, message)
         .doOnNext(l -> {
           for (RouteInstance instance : instanceList) {
-            offerLast(instance);
+            offer(instance);
           }
         });
   }

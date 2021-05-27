@@ -53,6 +53,8 @@ public class RouteInstance extends EventInstance {
   /** 状态: -1 丢弃, 0 等待执行, 1 执行中, 2 完成, 3 失败 */
   private int status = STATUS_QUEUING;
 
+  private long statusTime;
+
   /** 已重试次数 */
   private int retryCount = -1;
 

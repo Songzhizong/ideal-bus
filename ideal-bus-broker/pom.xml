@@ -21,7 +21,10 @@
       <artifactId>ideal-bus-storage-mongo</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+    </dependency>
     <!-- reactor-netty -->
     <dependency>
       <groupId>io.projectreactor.netty</groupId>

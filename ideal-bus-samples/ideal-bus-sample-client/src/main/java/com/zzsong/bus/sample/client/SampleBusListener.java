@@ -37,11 +37,11 @@ public class SampleBusListener {
   )
   @SuppressWarnings("DefaultAnnotationParam")
   public void testAutoAck(@Nonnull EventContext<List<String>> context) {
-    try {
-      TimeUnit.SECONDS.sleep(1);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      TimeUnit.SECONDS.sleep(1);
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
     log.info("testAutoAck接收到消息: {}, 序号: {}",
         String.join(", ", context.getPayload()), counter.incrementAndGet());
   }
