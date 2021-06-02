@@ -26,34 +26,24 @@ public class SampleBusListener {
     TimeUnit.SECONDS.sleep(5);
     log.info("testUnAck 接收到消息: {}, 序号: {}",
         JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
+    context.reject("reject");
   }
 
   @EventListener(
       name = "testAutoAck",
       topic = "example_topic",
-      condition = "age>10",
+      condition = "age>10|tenant=20",
       delayExp = "-1",
       autoAck = true
   )
   @SuppressWarnings("DefaultAnnotationParam")
   public void testAutoAck(@Nonnull EventContext<List<String>> context) {
-//    try {
-//      TimeUnit.SECONDS.sleep(1);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
-    log.info("testAutoAck接收到消息: {}, 序号: {}",
-        String.join(", ", context.getPayload()), counter.incrementAndGet());
-  }
-
-  @EventListener(name = "broadcast", topic = "broadcast")
-  public void broadcast(@Nonnull EventContext<List<String>> context) {
     try {
       TimeUnit.SECONDS.sleep(1);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    log.info("broadcast 接收到消息: {}, 序号: {}",
-        JsonUtils.toJsonString(context.getPayload()), counter.incrementAndGet());
+    log.info("testAutoAck接收到消息: {}, 序号: {}",
+        String.join(", ", context.getPayload()), counter.incrementAndGet());
   }
 }

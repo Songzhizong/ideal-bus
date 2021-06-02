@@ -23,3 +23,27 @@ Content-Type: application/json
     "timestamp": 1614671679179
   }
 ]
+
+### 单条发布
+POST http://localhost:13256/publish/single
+Content-Type: application/json
+
+{
+  "transactionId": "123456",
+  "aggregate": "key",
+  "externalApp": "externalApp",
+  "topic": "example_topic",
+  "tag": null,
+  "headers": {
+    "age": [
+      "20"
+    ]
+  },
+  "payload": [
+    "1",
+    "2",
+    "3"
+  ],
+  "timestamp": 1606567813035,
+  "eventId": null
+}
