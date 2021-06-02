@@ -1,35 +1,43 @@
-### custom ###
-**/target/
+# Maven
 target/
-*.DS_Store
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
+
+# NetBeans
+nb-configuration.xml
+
+# Visual Studio Code
+.vscode
+.factorypath
+
+# OSX
 .DS_Store
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Vim
+*.swp
+*.swo
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# patch
+*.orig
+*.rej
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
+# Local environment
+.env
 
-### VS Code ###
-.vscode/
-
-### JRebel ###
+# JRebel
 rebel*.xml
 .rebel*.xml.bak
