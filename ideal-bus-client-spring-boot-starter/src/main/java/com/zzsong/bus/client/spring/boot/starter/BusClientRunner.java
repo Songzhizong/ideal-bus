@@ -60,7 +60,11 @@ public class BusClientRunner implements ApplicationRunner, DisposableBean {
         subscriptionArgsList.add(subscriptionArgs);
       }));
       resubscribeArgs.setSubscriptionArgsList(subscriptionArgsList);
-      admin.resubscribe(resubscribeArgs);
+      try {
+        admin.resubscribe(resubscribeArgs);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     // 3. 建立消费通道
