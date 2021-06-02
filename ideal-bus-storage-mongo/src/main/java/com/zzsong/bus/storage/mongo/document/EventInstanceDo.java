@@ -35,6 +35,8 @@ public class EventInstanceDo {
   @Indexed(background = true, sparse = true)
   private String transactionId;
 
+  private String uuid;
+
   /** 实体类型 */
   @Nullable
   private String entity;

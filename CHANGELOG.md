@@ -10,7 +10,8 @@
 
 ### 🔨 Dependency Upgrades
 
-- spring boot 2.4.6
+- spring boot 2.5.0
+- spring cloud 2020.0.3
 - project reactor 2020.0.7
 
 # 1.1.0

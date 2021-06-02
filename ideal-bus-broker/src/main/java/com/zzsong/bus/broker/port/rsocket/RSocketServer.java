@@ -8,10 +8,7 @@ import com.zzsong.bus.broker.core.consumer.Consumer;
 import com.zzsong.bus.broker.core.consumer.ConsumerManager;
 import com.zzsong.bus.broker.core.queue.QueueManager;
 import com.zzsong.bus.common.constants.RSocketRoute;
-import com.zzsong.bus.common.transfer.AckArgs;
-import com.zzsong.bus.common.transfer.ChannelArgs;
-import com.zzsong.bus.common.transfer.LoginArgs;
-import com.zzsong.bus.common.transfer.RejectArgs;
+import com.zzsong.bus.common.transfer.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +74,11 @@ public class RSocketServer {
                   .retrieveMono(String.class)
                   .doOnNext(log::info)
                   .subscribe();
+            } else {
+              requester.route(RSocketRoute.CONNECTED)
+                  .data("connected")
+                  .retrieveMono(String.class)
+                  .subscribe();
             }
           })
           .doOnError(error -> {
@@ -133,6 +135,14 @@ public class RSocketServer {
     long routeInstanceId = args.getRouteInstanceId();
     String message = args.getMessage();
     return queueManager.reject(routeInstanceId, message);
+  }
+
+  @MessageMapping(RSocketRoute.HEARTBEAT)
+  public Mono<Boolean> heartbeat(@Nonnull HeartbeatArgs args) {
+    long applicationId = args.getApplicationId();
+    String instanceId = args.getInstanceId();
+    log.debug("客户端: {}-{} 发送心跳", applicationId, instanceId);
+    return Mono.just(true);
   }
 
   @Nonnull

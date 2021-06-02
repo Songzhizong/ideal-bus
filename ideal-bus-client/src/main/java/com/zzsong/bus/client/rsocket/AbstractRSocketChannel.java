@@ -1,6 +1,7 @@
 package com.zzsong.bus.client.rsocket;
 
 import com.zzsong.bus.common.constants.RSocketRoute;
+import com.zzsong.bus.common.transfer.HeartbeatArgs;
 import com.zzsong.bus.common.transfer.LoginArgs;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
@@ -17,6 +18,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author 宋志宗 on 2021/4/28
@@ -36,10 +38,13 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   private final String accessToken;
   @Nonnull
   protected final String brokerAddress;
+  private final HeartbeatArgs heartbeatArgs;
 
+  private final AtomicInteger heartbeatFailureCounter = new AtomicInteger(0);
   protected volatile boolean destroyed = false;
   @Nullable
   protected RSocketRequester socketRequester = null;
+  private volatile boolean connected = false;
 
   protected AbstractRSocketChannel(@Nonnull String brokerIp,
                                    int brokerPort,
@@ -52,6 +57,10 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     this.clientIpPort = clientIpPort;
     this.accessToken = accessToken;
     this.brokerAddress = brokerIp + ":" + brokerPort;
+    this.heartbeatArgs = HeartbeatArgs.builder()
+        .applicationId(applicationId)
+        .instanceId(clientIpPort)
+        .build();
     this.setName(brokerAddress);
   }
 
@@ -59,6 +68,13 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
   public Mono<String> interrupt(String status) {
     restartSocket("Broker: " + brokerAddress + " 服务中断: " + status + ", " + RESTART_DELAY + " 秒后尝试重连...");
     return Mono.just("received...");
+  }
+
+  @MessageMapping({RSocketRoute.CONNECTED})
+  public Mono<String> connected(String status) {
+    log.info(brokerAddress + " connect succeed: " + status);
+    this.connected = true;
+    return Mono.just("success");
   }
 
   @Override
@@ -145,7 +161,29 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
         .subscribe();
   }
 
+  private void heartbeat() {
+    if (socketRequester == null) {
+      restartSocket("socketRequester is null");
+      return;
+    }
+    if (!this.connected) {
+      return;
+    }
+    socketRequester.route(RSocketRoute.HEARTBEAT)
+        .data(heartbeatArgs)
+        .retrieveMono(Boolean.class)
+        .onErrorResume(throwable -> {
+          log.info("heartbeat failure: " + throwable.getMessage());
+          int incrementAndGet = heartbeatFailureCounter.incrementAndGet();
+          if (incrementAndGet >= 3) {
+            restartSocket("heartbeat failure");
+          }
+          return Mono.just(false);
+        }).block();
+  }
+
   protected void restartSocket(@Nullable String message) {
+    this.connected = false;
     if (!destroyed) {
       if (message != null) {
         log.info(message);
@@ -160,11 +198,13 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     while (!destroyed) {
       Boolean poll;
       try {
-        poll = restartNoticeQueue.poll(5, TimeUnit.SECONDS);
+        poll = restartNoticeQueue.poll(10, TimeUnit.SECONDS);
         if (poll != null) {
           TimeUnit.SECONDS.sleep(RESTART_DELAY);
           log.info("Restart socket, broker address: " + brokerAddress);
           doConnect();
+        } else {
+          heartbeat();
         }
       } catch (InterruptedException e) {
         log.info("restartNoticeQueue.poll interrupted");

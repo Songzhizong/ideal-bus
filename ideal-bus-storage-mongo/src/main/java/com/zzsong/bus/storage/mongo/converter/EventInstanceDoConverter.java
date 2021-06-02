@@ -18,6 +18,7 @@ public final class EventInstanceDoConverter {
   public static EventInstanceDo fromEventInstance(@Nonnull EventInstance eventInstance) {
     EventInstanceDo eventInstanceDo = new EventInstanceDo();
     eventInstanceDo.setEventId(eventInstance.getEventId());
+    eventInstanceDo.setUuid(eventInstance.getUuid());
     String transactionId = eventInstance.getTransactionId();
     if (StringUtils.isBlank(transactionId)) {
       eventInstanceDo.setTransactionId(null);
@@ -41,6 +42,7 @@ public final class EventInstanceDoConverter {
   public static EventInstance toEventInstance(@Nonnull EventInstanceDo eventInstanceDo) {
     EventInstance eventInstance = new EventInstance();
     eventInstance.setEventId(eventInstanceDo.getEventId());
+    eventInstance.setUuid(eventInstanceDo.getUuid());
     eventInstance.setTransactionId(eventInstanceDo.getTransactionId());
     eventInstance.setEntity(eventInstanceDo.getEntity());
     eventInstance.setAggregate(eventInstanceDo.getAggregate());
