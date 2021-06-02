@@ -13,6 +13,14 @@ public interface RSocketRoute {
    */
   String INTERRUPT = "interrupt";
   /**
+   * 连接成功
+   */
+  String CONNECTED = "connected";
+  /**
+   * 心跳
+   */
+  String HEARTBEAT = "heartbeat";
+  /**
    * channel状态变更
    */
   String CHANNEL_CHANGE_STATUS = "channel-change-status";
