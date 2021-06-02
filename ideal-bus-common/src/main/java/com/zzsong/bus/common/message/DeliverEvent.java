@@ -24,6 +24,16 @@ public class DeliverEvent {
    * 事件唯一id
    */
   private long eventId;
+
+  /** 唯一编号 */
+  private String uuid;
+
+  /** 实体类型 */
+  private String entity;
+
+  /** 聚合id */
+  private String aggregate;
+
   /**
    * 业务方唯一id
    */

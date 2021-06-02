@@ -57,6 +57,9 @@ public class RSocketChannel implements Channel {
     deliveredEvent.setRouteInstanceId(instance.getInstanceId());
     deliveredEvent.setSubscriptionId(instance.getSubscriptionId());
     deliveredEvent.setEventId(instance.getEventId());
+    deliveredEvent.setUuid(instance.getUuid());
+    deliveredEvent.setEntity(instance.getEntity());
+    deliveredEvent.setAggregate(instance.getAggregate());
     deliveredEvent.setTransactionId(instance.getTransactionId());
     deliveredEvent.setTopic(instance.getTopic());
     deliveredEvent.setHeaders(instance.getHeaders());
