@@ -20,6 +20,7 @@ public final class RouteInstanceDoConverter {
     RouteInstanceDo routeInstanceDo = new RouteInstanceDo();
     routeInstanceDo.setInstanceId(routeInstance.getInstanceId());
     routeInstanceDo.setEventId(routeInstance.getEventId());
+    routeInstanceDo.setUuid(routeInstance.getUuid());
     String transactionId = routeInstance.getTransactionId();
     if (StringUtils.isBlank(transactionId)) {
       routeInstanceDo.setTransactionId(null);
@@ -34,6 +35,7 @@ public final class RouteInstanceDoConverter {
       routeInstanceDo.setExternalApp(externalApp);
     }
     routeInstanceDo.setTopic(routeInstance.getTopic());
+    routeInstanceDo.setTag(routeInstance.getTag());
     routeInstanceDo.setHeaders(routeInstance.getHeaders());
     routeInstanceDo.setPayload(routeInstance.getPayload());
     routeInstanceDo.setTimestamp(routeInstance.getTimestamp());
@@ -62,8 +64,7 @@ public final class RouteInstanceDoConverter {
     routeInstance.setSubscriptionId(routeInstanceDo.getSubscriptionId());
     routeInstance.setApplicationId(routeInstanceDo.getApplicationId());
     routeInstance.setBroadcast(routeInstanceDo.isBroadcast());
-    long nextPushTime = routeInstanceDo.getNextPushTime();
-    routeInstance.setNextPushTime(nextPushTime);
+    routeInstance.setNextPushTime(routeInstanceDo.getNextPushTime());
     routeInstance.setStatus(routeInstanceDo.getStatus());
     routeInstance.setStatusTime(routeInstanceDo.getStatusTime());
     routeInstance.setRetryCount(routeInstanceDo.getRetryCount());
@@ -71,11 +72,13 @@ public final class RouteInstanceDoConverter {
     routeInstance.setMessage(routeInstanceDo.getMessage());
     routeInstance.setListener(routeInstanceDo.getListener());
     routeInstance.setEventId(routeInstanceDo.getEventId());
+    routeInstance.setUuid(routeInstanceDo.getUuid());
     routeInstance.setTransactionId(routeInstanceDo.getTransactionId());
     routeInstance.setEntity(routeInstanceDo.getEntity());
     routeInstance.setAggregate(routeInstanceDo.getAggregate());
     routeInstance.setExternalApp(routeInstanceDo.getExternalApp());
     routeInstance.setTopic(routeInstanceDo.getTopic());
+    routeInstance.setTag(routeInstanceDo.getTag());
     routeInstance.setHeaders(routeInstanceDo.getHeaders());
     routeInstance.setPayload(routeInstanceDo.getPayload());
     routeInstance.setTimestamp(routeInstanceDo.getTimestamp());

@@ -40,6 +40,8 @@ public class RouteInstanceDo {
   /** 事件唯一id */
   private long eventId;
 
+  private String uuid;
+
   /** 业务方唯一id, 通常为业务方的事务编号 */
   @Nullable
   private String transactionId;
@@ -61,7 +63,7 @@ public class RouteInstanceDo {
   private String topic;
 
   /** 事件标签, 一个事件应该只有一个标签 */
-  @Nonnull
+  @Nullable
   private String tag;
 
   /** 消息头,可用于条件匹配 */

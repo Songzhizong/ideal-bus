@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * 推送实例
@@ -65,6 +66,6 @@ public class RouteInstance extends EventInstance {
   private String message = DBDefaults.STRING_VALUE;
 
   /** 消费该事件的监听器名称列表 */
-  @Nonnull
+  @Nullable
   private String listener = "";
 }
