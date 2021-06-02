@@ -16,12 +16,13 @@ public class BusClientProperties {
   /** 应用id */
   private long applicationId;
 
+  /** 服务端http基础访问地址 */
   private String brokerHttpBaseUrl;
 
   private String accessToken = "";
 
-  /** 启动自动订阅 */
-  private boolean autoSubscribe = true;
+  /** 是否开启自动刷新订阅关系 */
+  private boolean autoSubscribe = false;
 
   /** 发布配置 */
   @NestedConfigurationProperty

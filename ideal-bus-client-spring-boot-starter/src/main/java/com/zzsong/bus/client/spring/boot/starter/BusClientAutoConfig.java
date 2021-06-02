@@ -60,7 +60,7 @@ public class BusClientAutoConfig {
     return new BusAdminImpl(brokerHttpBaseUrl, busClientWebClient);
   }
 
-  @Bean
+  @Bean("busEventPublisher")
   public EventPublisher eventPublisher(@Nonnull WebClient busClientWebClient) {
     BusPublishProperties publish = properties.getPublish();
     String brokerHttpBaseUrl = properties.getBrokerHttpBaseUrl();
@@ -103,7 +103,7 @@ public class BusClientAutoConfig {
     String ip = IpUtil.getIp();
     long applicationId = properties.getApplicationId();
     String accessToken = properties.getAccessToken();
-    String brokerAddresses = consumer.getBrokerAddresses();
+    String brokerAddresses = consumer.getBrokerRsocketAddresses();
     String[] addresses = StringUtils.split(brokerAddresses, ",");
     List<ReceiveRSocketChannel> channels = new ArrayList<>();
     for (String address : addresses) {

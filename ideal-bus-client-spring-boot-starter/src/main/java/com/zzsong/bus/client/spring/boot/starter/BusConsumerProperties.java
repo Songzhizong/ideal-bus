@@ -14,7 +14,10 @@ public class BusConsumerProperties {
    */
   private boolean enabled = false;
 
-  private String brokerAddresses = "";
+  /**
+   * 服务端rsocket访问地址
+   */
+  private String brokerRsocketAddresses = "";
 
   /**
    * 核心线程数
