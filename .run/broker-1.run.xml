@@ -2,8 +2,8 @@
   <configuration default="false" name="broker-1" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="ideal-bus-broker-server" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.bus.broker.server.BrokerApplication" />
-    <option name="PROGRAM_PARAMETERS" value="--server.port=13256  --spring.rsocket.server.port=13266 --ideal.bus.node-id=1" />
     <option name="ALTERNATIVE_JRE_PATH" />
+    <option name="SHORTEN_COMMAND_LINE" value="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

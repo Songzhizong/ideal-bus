@@ -1,6 +1,12 @@
 logging:
   config: classpath:logback-spring-dev.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://admin:123456@192.168.1.181:10001/eureka/
 spring:
+  application:
+    name: IDEAL-BUS-ZZSONG
   data:
     mongodb:
       auto-index-creation: true
