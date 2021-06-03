@@ -74,7 +74,11 @@ public class PersistentQueueManager implements QueueManager, SmartInitializingSi
               Long applicationId = routeInstance.getApplicationId();
               Long subscriptionId = routeInstance.getSubscriptionId();
               EventQueue eventQueue = loadQueue(applicationId, subscriptionId, false);
-              eventQueue.offer(routeInstance);
+              try {
+                eventQueue.offer(routeInstance);
+              } catch (Exception e) {
+                log.info("offer message ex: {}", e.getMessage());
+              }
             }
           }
         })

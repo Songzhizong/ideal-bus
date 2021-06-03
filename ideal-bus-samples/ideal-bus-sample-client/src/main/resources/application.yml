@@ -26,7 +26,7 @@ ideal:
     # 应用id
     application-id: 93437173700755456
     # 服务端http基础访问地址
-    broker-http-base-url: lb://IDEAL-BUS-ZZSONG
+    broker-http-base-url: http://127.0.0.1:13256
     publish:
       # 是否开启事件发布, 默认true
       enabled: true

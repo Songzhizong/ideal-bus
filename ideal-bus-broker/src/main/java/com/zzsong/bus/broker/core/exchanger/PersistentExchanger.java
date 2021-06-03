@@ -54,6 +54,7 @@ public class PersistentExchanger implements Exchanger {
     return listMono.flatMap(queueManager::submit)
         .map(b -> ExchangeResult.builder().success(true).message("success").build())
         .onErrorResume(throwable -> {
+          log.info("exchange ex: ", throwable);
           ExchangeResult result = ExchangeResult.builder()
               .success(false)
               .message(throwable.getMessage())
@@ -75,6 +76,7 @@ public class PersistentExchanger implements Exchanger {
                 .collect(Collectors.toList());
             return Mono.just(collect);
           } catch (Exception e) {
+            log.error("createRouteInstance ex: ", e);
             return Mono.error(e);
           }
         })

@@ -149,8 +149,8 @@ public class PersistenceEventQueue implements EventQueue {
               loadWaiting();
             }
           }
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+        } catch (Exception e) {
+          log.warn("{} pool ex:", subscriptionId, e);
           try {
             TimeUnit.SECONDS.sleep(1);
           } catch (InterruptedException interruptedException) {
@@ -165,30 +165,34 @@ public class PersistenceEventQueue implements EventQueue {
   }
 
   private void loadWaiting() {
-    List<RouteInstance> waitingList = routeInstanceStorage
-        .loadWaiting(EXPECT_SIZE, shardId, subscriptionId).block();
-    if (waitingList == null) {
-      return;
-    }
-    int size = waitingList.size();
-    if (size == 0) {
-      this.hasWaiting.set(false);
-      return;
-    }
-    this.hasWaiting.set(size >= EXPECT_SIZE);
-
-    log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
-    Map<Integer, List<RouteInstance>> collect = waitingList.stream()
-        .collect(Collectors.groupingBy(RouteInstance::getStatus));
-    collect.forEach((s, is) -> {
-      if (s == RouteInstance.STATUS_TEMPING) {
-        offerTempingList(is).block();
-      } else {
-        for (RouteInstance instance : is) {
-          offer(instance);
-        }
+    try {
+      List<RouteInstance> waitingList = routeInstanceStorage
+          .loadWaiting(EXPECT_SIZE, shardId, subscriptionId).block();
+      if (waitingList == null) {
+        return;
       }
-    });
+      int size = waitingList.size();
+      if (size == 0) {
+        this.hasWaiting.set(false);
+        return;
+      }
+      this.hasWaiting.set(size >= EXPECT_SIZE);
+
+      log.info("从存储库读取 {} 条等待中的消息入列: {}", size, subscriptionId);
+      Map<Integer, List<RouteInstance>> collect = waitingList.stream()
+          .collect(Collectors.groupingBy(RouteInstance::getStatus));
+      collect.forEach((s, is) -> {
+        if (s == RouteInstance.STATUS_TEMPING) {
+          offerTempingList(is).block();
+        } else {
+          for (RouteInstance instance : is) {
+            offer(instance);
+          }
+        }
+      });
+    } catch (Exception e) {
+      log.warn("loadWaiting ex: ", e);
+    }
   }
 
 

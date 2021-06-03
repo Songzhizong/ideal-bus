@@ -3,8 +3,8 @@ POST http://127.0.0.1:13256/application/create
 Content-Type: application/json
 
 {
-  "title": "设备管理模块",
-  "desc": "设备管理模块",
+  "title": "社区模块",
+  "desc": "社区模块",
   "applicationType": "INTERNAL",
   "appName": "",
   "application": "",
