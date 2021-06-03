@@ -7,6 +7,10 @@ spring:
     name: IDEAL-BUS-CLIENT
   banner:
     location: banner.txt
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
   jackson:
     locale: zh_CN
     time-zone: 'GMT+8'
@@ -22,7 +26,7 @@ ideal:
     # 应用id
     application-id: 93437173700755456
     # 服务端http基础访问地址
-    broker-http-base-url: lb://IDEAL-BUS
+    broker-http-base-url: lb://IDEAL-BUS-ZZSONG
     publish:
       # 是否开启事件发布, 默认true
       enabled: true

@@ -5,7 +5,6 @@ import com.zzsong.bus.common.transfer.HeartbeatArgs;
 import com.zzsong.bus.common.transfer.LoginArgs;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
-import io.rsocket.core.RSocketClient;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -91,11 +90,7 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     destroyed = true;
     if (socketRequester != null) {
       RSocket rsocket = socketRequester.rsocket();
-      if (rsocket != null) {
-        rsocket.dispose();
-      }
-      RSocketClient rSocketClient = socketRequester.rsocketClient();
-      rSocketClient.dispose();
+      rsocket.dispose();
     }
     this.interrupt();
     log.info("RSocketBusChannel destroy, broker address: " + brokerAddress);
@@ -112,14 +107,17 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
     message.setInstanceId(clientIpPort);
     message.setAccessToken(accessToken);
     final String messageString = message.toMessageString();
-    if (socketRequester != null && !socketRequester.rsocketClient().isDisposed()) {
-      socketRequester.rsocketClient().dispose();
+    if (socketRequester != null && !socketRequester.rsocket().isDisposed()) {
+      socketRequester.rsocket().dispose();
       try {
         socketRequester = requesterBuilder
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .tcp(brokerIp, brokerPort);
+            .connectTcp(brokerIp, brokerPort)
+            .doOnError(e -> log.warn("Broker " + brokerAddress + " Login fail: ", e))
+            .doOnNext(r -> log.info("Broker " + brokerAddress + " login success."))
+            .block();
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
         restartSocket(null);
@@ -131,32 +129,31 @@ public abstract class AbstractRSocketChannel extends Thread implements RSocketCh
             .setupRoute(RSocketRoute.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
-            .tcp(brokerIp, brokerPort);
+            .connectTcp(brokerIp, brokerPort)
+            .doOnError(e -> log.warn("Broker " + brokerAddress + " Login fail: ", e))
+            .doOnNext(r -> log.info("Broker " + brokerAddress + " login success."))
+            .block();
       } catch (Exception e) {
         log.info("e: " + e.getMessage());
         restartSocket(null);
         return;
       }
     }
-    socketRequester.rsocketClient().source()
-        .doOnNext(rSocket -> rSocket.onClose()
-            .doOnError(error -> {
-              String errMessage = error.getClass().getSimpleName() +
-                  ": " + error.getMessage();
-              log.info("Broker socket error: " + errMessage);
-            })
-            .doFinally(consumer -> {
-              String msg = "Broker " + brokerAddress + " 连接断开: "
-                  + consumer + ", " + RESTART_DELAY + " 秒后尝试重连...";
-              restartSocket(msg);
-            })
-            .subscribe())
-        .map(r -> true)
-        .onErrorResume(error -> {
+    if (socketRequester == null) {
+      restartSocket("socketRequester is null");
+      return;
+    }
+    socketRequester.rsocket()
+        .onClose()
+        .doOnError(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
-          restartSocket("Broker socket connect failure: " + errMessage);
-          return Mono.just(true);
+          log.info("Broker socket error: " + errMessage);
+        })
+        .doFinally(consumer -> {
+          String msg = "Broker " + brokerAddress + " 连接断开: "
+              + consumer + ", " + RESTART_DELAY + " 秒后尝试重连...";
+          restartSocket(msg);
         })
         .subscribe();
   }
